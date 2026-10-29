@@ -9,6 +9,8 @@ import { ProfilePage } from './pages/ProfilePage';
 import { PgDetailPage } from './pages/PgDetailPage';
 import { LoginPage } from './pages/LoginPage';
 
+import { MyPgPage } from './pages/MyPgPage';
+
 // Dedicated Feature Pages
 import { ComplaintsPage } from './pages/ComplaintsPage';
 import { GuestsPage } from './pages/GuestsPage';
@@ -62,6 +64,8 @@ function App() {
             <Route path="documents" element={<DocumentsPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="saved" element={<SavedPage />} />
+            <Route path="my-pg" element={<MyPgPage />} />
+            <Route path="menu" element={<ProfilePage />} />
             <Route path="profile" element={<ProfilePage />} />
             <Route path="pg/:idOrSlug" element={<PgDetailPage />} />
             <Route path="login" element={<LoginPage />} />

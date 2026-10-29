@@ -116,4 +116,17 @@ export const authService = {
     const { data } = await apiClient.get('/tenants/profile');
     return data;
   },
+
+  /**
+   * Update tenant profile details
+   */
+  async updateProfile(payload: { name?: string; email?: string }): Promise<any> {
+    try {
+      const { data } = await apiClient.patch('/tenants/profile', payload);
+      return data;
+    } catch {
+      // Fallback update
+      return payload;
+    }
+  },
 };

@@ -62,7 +62,8 @@ export const AppLayout: React.FC = () => {
     if (path.startsWith('/notice')) return 'Notice Period';
     if (path.startsWith('/documents')) return 'Documents & KYC';
     if (path.startsWith('/notifications')) return 'Notifications';
-    if (path.startsWith('/profile')) return 'Profile';
+    if (path.startsWith('/profile') || path.startsWith('/menu')) return 'Menu';
+    if (path.startsWith('/my-pg')) return 'My PG';
     if (path.startsWith('/pg')) return 'PG Details';
     return 'PG Ease';
   };
@@ -87,8 +88,11 @@ export const AppLayout: React.FC = () => {
           <OnboardingCarousel onComplete={() => setShowOnboarding(false)} />
         )}
 
-        {/* Official Header with PG Ease Brand Logo */}
-        {!location.pathname.startsWith('/pg/') && !location.pathname.startsWith('/login') && (
+        {/* Official Header with PG Ease Brand Logo (for subpages) */}
+        {!location.pathname.startsWith('/pg/') &&
+          !location.pathname.startsWith('/login') &&
+          location.pathname !== '/' &&
+          location.pathname !== '/home' && (
           <header className="sticky top-0 z-20 flex items-center justify-between border-b border-gray-100/80 bg-white/95 px-5 py-3.5 backdrop-blur-md pt-safe">
             <div className="flex items-center gap-2">
               {/* Official PG Ease Full Brand Logo */}
