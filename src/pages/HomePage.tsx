@@ -28,7 +28,6 @@ export const HomePage: React.FC = () => {
     propertyDetails,
     checkTenancy,
     tenant,
-    login,
   } = useAuth();
   const navigate = useNavigate();
 
@@ -111,10 +110,8 @@ export const HomePage: React.FC = () => {
     if (!nameInput.trim()) return;
     setSavingName(true);
     try {
-      const updatedTenant = await authService.updateProfile({ name: nameInput.trim() });
-      const currentToken = localStorage.getItem('pgease_tenant_token') || '';
-      const currentRefresh = localStorage.getItem('pgease_tenant_refresh') || '';
-      await login(currentToken, currentRefresh, updatedTenant);
+      await authService.updateProfile({ name: nameInput.trim() });
+      await checkTenancy();
       setShowEditNameModal(false);
     } catch (err) {
       console.error('Failed to update name:', err);

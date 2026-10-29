@@ -30,6 +30,23 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
+/**
+ * Instantly wipe all auth tokens/data and redirect to /login
+ */
+export const handleUnauthorizedRedirect = () => {
+  localStorage.removeItem('pgease_tenant_token');
+  localStorage.removeItem('pgease_tenant_refresh_token');
+  localStorage.removeItem('pgease_tenant_data');
+  sessionStorage.removeItem('pgease_guest_mode');
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('pgease:unauthorized'));
+    if (!window.location.pathname.startsWith('/login')) {
+      window.location.href = '/login';
+    }
+  }
+};
+
 // Request interceptor to attach JWT token
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
@@ -42,20 +59,23 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor to automatically handle 401 with refresh-token
+// Response interceptor to handle 401 with token refresh, or force redirect to /login
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Do not intercept login or OTP verification errors as session expirations
+    const isAuthRoute =
+      originalRequest?.url?.includes('/tenants/otp/verify') ||
+      originalRequest?.url?.includes('/tenants/otp/request');
+
+    if (error.response?.status === 401 && !isAuthRoute) {
       const refreshToken = localStorage.getItem('pgease_tenant_refresh_token');
 
-      // If no refresh token or already retried, wipe auth state
-      if (!refreshToken || originalRequest.url?.includes('/tenants/refresh-token')) {
-        localStorage.removeItem('pgease_tenant_token');
-        localStorage.removeItem('pgease_tenant_refresh_token');
-        localStorage.removeItem('pgease_tenant_data');
+      // If no refresh token, already retried, or refresh token endpoint itself returned 401
+      if (!refreshToken || originalRequest?._retry || originalRequest?.url?.includes('/tenants/refresh-token')) {
+        handleUnauthorizedRedirect();
         return Promise.reject(error);
       }
 
@@ -64,15 +84,20 @@ apiClient.interceptors.response.use(
           failedQueue.push({ resolve, reject });
         })
           .then((token) => {
-            if (originalRequest.headers) {
+            if (originalRequest?.headers) {
               originalRequest.headers.Authorization = `Bearer ${token}`;
             }
-            return apiClient(originalRequest);
+            return apiClient(originalRequest!);
           })
-          .catch((err) => Promise.reject(err));
+          .catch((err) => {
+            handleUnauthorizedRedirect();
+            return Promise.reject(err);
+          });
       }
 
-      originalRequest._retry = true;
+      if (originalRequest) {
+        originalRequest._retry = true;
+      }
       isRefreshing = true;
 
       try {
@@ -90,15 +115,13 @@ apiClient.interceptors.response.use(
         apiClient.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
         processQueue(null, newAccessToken);
 
-        if (originalRequest.headers) {
+        if (originalRequest?.headers) {
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         }
-        return apiClient(originalRequest);
+        return apiClient(originalRequest!);
       } catch (refreshErr) {
         processQueue(refreshErr, null);
-        localStorage.removeItem('pgease_tenant_token');
-        localStorage.removeItem('pgease_tenant_refresh_token');
-        localStorage.removeItem('pgease_tenant_data');
+        handleUnauthorizedRedirect();
         return Promise.reject(refreshErr);
       } finally {
         isRefreshing = false;
