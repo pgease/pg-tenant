@@ -6,13 +6,25 @@ import {
   ArrowLeft,
   ArrowRight,
   Shield,
-  MessageSquare,
   Smartphone,
   RotateCcw,
   AlertCircle,
   Loader2,
   CheckCircle2,
 } from 'lucide-react';
+
+const WhatsAppIcon = ({ className = 'h-4 w-4' }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+    <path
+      fill="#25D366"
+      d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2Z"
+    />
+    <path
+      fill="#FFFFFF"
+      d="M17.53 14.39C17.23 14.24 15.77 13.52 15.5 13.42C15.23 13.32 15.03 13.27 14.83 13.57C14.63 13.87 14.06 14.54 13.89 14.74C13.72 14.94 13.54 14.96 13.25 14.81C12.95 14.66 12 14.35 10.86 13.34C9.98 12.55 9.38 11.58 9.21 11.28C9.03 10.98 9.19 10.82 9.34 10.67C9.47 10.54 9.64 10.33 9.79 10.15C9.93 9.98 9.98 9.85 10.08 9.66C10.18 9.46 10.13 9.28 10.06 9.14C9.98 8.99 9.38 7.53 9.14 6.93C8.89 6.35 8.65 6.43 8.47 6.42C8.3 6.41 8.1 6.41 7.9 6.41C7.7 6.41 7.38 6.48 7.11 6.78C6.83 7.08 6.06 7.8 6.06 9.26C6.06 10.72 7.13 12.13 7.27 12.33C7.42 12.53 9.37 15.53 12.35 16.82C13.06 17.13 13.61 17.31 14.04 17.45C14.75 17.67 15.4 17.64 15.91 17.57C16.48 17.48 17.67 16.85 17.92 16.15C18.16 15.46 18.16 14.86 18.09 14.74C18.02 14.61 17.82 14.54 17.53 14.39Z"
+    />
+  </svg>
+);
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -76,8 +88,8 @@ export const LoginPage: React.FC = () => {
     return typeof rawMsg === 'string' ? rawMsg : fallback;
   };
 
-  // Handle phone submission
-  const handleRequestOtp = async (selectedChannel = channel) => {
+  // Handle phone submission - First time strictly defaults to WhatsApp
+  const handleRequestOtp = async (selectedChannel: 'whatsapp' | 'sms' = 'whatsapp') => {
     setError(null);
     setSuccessMessage(null);
 
@@ -100,7 +112,11 @@ export const LoginPage: React.FC = () => {
       setTimer(30);
       setCanResend(false);
       setOtp(['', '', '', '']);
-      setSuccessMessage(`OTP sent via ${selectedChannel === 'whatsapp' ? 'WhatsApp' : 'SMS'} to +91 ${cleanPhone}`);
+      setSuccessMessage(
+        selectedChannel === 'whatsapp'
+          ? `OTP sent via WhatsApp to +91 ${cleanPhone}`
+          : `OTP sent via SMS to +91 ${cleanPhone}`
+      );
 
       // Auto focus first OTP input safely
       setTimeout(() => {
@@ -315,35 +331,11 @@ export const LoginPage: React.FC = () => {
                 />
               </div>
 
-              {/* Channel Selector Pills */}
-              <div className="flex items-center justify-between text-xs pt-0.5 px-0.5">
-                <span className="text-gray-400 font-medium">Receive OTP via:</span>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => setChannel('whatsapp')}
-                    className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all ${
-                      channel === 'whatsapp'
-                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-300 font-bold'
-                        : 'text-gray-500 hover:bg-gray-100'
-                    }`}
-                  >
-                    <MessageSquare className="h-3 w-3 text-emerald-600" />
-                    <span>WhatsApp</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setChannel('sms')}
-                    className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all ${
-                      channel === 'sms'
-                        ? 'bg-teal-50 text-teal-700 border border-teal-300 font-bold'
-                        : 'text-gray-500 hover:bg-gray-100'
-                    }`}
-                  >
-                    <Smartphone className="h-3 w-3 text-[#008080]" />
-                    <span>SMS</span>
-                  </button>
+              {/* WhatsApp OTP Delivery Notice Banner */}
+              <div className="flex items-center gap-2.5 rounded-2xl bg-[#E8FAF0] border border-[#B8EBD0] p-3 text-emerald-950 shadow-xs">
+                <WhatsAppIcon className="h-5 w-5 flex-shrink-0" />
+                <div className="text-xs font-semibold leading-tight">
+                  Verification code will be sent to your <span className="text-[#0E7A4A] font-extrabold">WhatsApp</span>
                 </div>
               </div>
 
@@ -356,11 +348,12 @@ export const LoginPage: React.FC = () => {
                 {loading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin text-white" />
-                    <span>Sending code...</span>
+                    <span>Sending code to WhatsApp...</span>
                   </>
                 ) : (
                   <>
-                    <span>Get Verification Code</span>
+                    <WhatsAppIcon className="h-4 w-4" />
+                    <span>Get OTP on WhatsApp</span>
                     <ArrowRight className="h-4 w-4" />
                   </>
                 )}
@@ -446,6 +439,37 @@ export const LoginPage: React.FC = () => {
                   </>
                 )}
               </button>
+
+              {/* On-Demand Channel Switch: Resend via SMS */}
+              <div className="pt-2.5 border-t border-gray-100 text-center">
+                {channel === 'whatsapp' ? (
+                  <button
+                    type="button"
+                    onClick={() => handleRequestOtp('sms')}
+                    disabled={loading}
+                    className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-900 font-medium transition-colors"
+                  >
+                    <span>Didn't receive code on WhatsApp?</span>
+                    <span className="font-bold text-[#008080] underline flex items-center gap-1">
+                      <Smartphone className="h-3.5 w-3.5" />
+                      Get OTP via SMS
+                    </span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => handleRequestOtp('whatsapp')}
+                    disabled={loading}
+                    className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-900 font-medium transition-colors"
+                  >
+                    <span>Prefer WhatsApp instead?</span>
+                    <span className="font-bold text-[#0E7A4A] underline flex items-center gap-1">
+                      <WhatsAppIcon className="h-3.5 w-3.5" />
+                      Get OTP on WhatsApp
+                    </span>
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </div>
