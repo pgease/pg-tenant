@@ -1,6 +1,10 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const DEFAULT_API_URL = 'https://am4eey3lmk.execute-api.ap-south-1.amazonaws.com/api';
+
+const BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.DEV ? '/api' : DEFAULT_API_URL);
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,
