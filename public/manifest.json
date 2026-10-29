@@ -8,7 +8,7 @@
   "description": "Tenant portal for PG Ease - PG & Hostel management",
   "icons": [
     {
-      "src": "/favicon.png",
+      "src": "/favicon.png?v=3",
       "sizes": "192x192 512x512",
       "type": "image/png",
       "purpose": "any maskable"
