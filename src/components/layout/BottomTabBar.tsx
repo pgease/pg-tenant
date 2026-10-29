@@ -1,25 +1,16 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutGrid, Home, Building2, Menu, LogIn } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { LayoutGrid, Home, Building2, Menu } from 'lucide-react';
 
 export const BottomTabBar: React.FC = () => {
-  const { isAuthenticated } = useAuth();
-
-  // Tabs matching Screenshot 2 & 3: Dashboard | PG Search | My PG | Menu
-  const tabs = isAuthenticated
-    ? [
-        { path: '/', label: 'Dashboard', icon: LayoutGrid, end: true },
-        { path: '/search', label: 'PG Search', icon: Home },
-        { path: '/my-pg', label: 'My PG', icon: Building2 },
-        { path: '/profile', label: 'Menu', icon: Menu },
-      ]
-    : [
-        { path: '/search', label: 'PG Search', icon: Home, end: true },
-        { path: '/login', label: 'Sign In', icon: LogIn },
-        { path: '/my-pg', label: 'My PG', icon: Building2 },
-        { path: '/profile', label: 'Menu', icon: Menu },
-      ];
+  // Always the consistent 4 tabs matching Screenshot 2 & 3:
+  // Dashboard | PG Search | My PG | Menu
+  const tabs = [
+    { path: '/', label: 'Dashboard', icon: LayoutGrid, end: true },
+    { path: '/search', label: 'PG Search', icon: Home },
+    { path: '/my-pg', label: 'My PG', icon: Building2 },
+    { path: '/profile', label: 'Menu', icon: Menu },
+  ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-30 mx-auto max-w-md border-t border-gray-100 bg-white/95 backdrop-blur-md pb-safe shadow-tab-bar">

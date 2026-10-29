@@ -49,8 +49,10 @@ export const HomePage: React.FC = () => {
   const [nameInput, setNameInput] = useState<string>(tenant?.name || '');
   const [savingName, setSavingName] = useState<boolean>(false);
 
-  // Unauthenticated visitor -> first page is always Login
-  if (!isAuthenticated) {
+  const isGuestMode = sessionStorage.getItem('pgease_guest_mode') === 'true';
+
+  // First time visitor without guest mode -> redirect to /login
+  if (!isAuthenticated && !isGuestMode) {
     return <Navigate to="/login" replace />;
   }
 
@@ -319,7 +321,13 @@ export const HomePage: React.FC = () => {
         {/* Scan QR Primary Button */}
         <button
           type="button"
-          onClick={() => setShowInviteModal(true)}
+          onClick={() => {
+            if (!isAuthenticated) {
+              navigate('/login', { state: { from: { pathname: '/' } } });
+            } else {
+              setShowInviteModal(true);
+            }
+          }}
           className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#008080] py-3.5 text-xs font-bold text-white shadow-md shadow-[#008080]/20 hover:bg-[#006b6b] active:scale-[0.98] transition-all tap-target"
         >
           <QrCode className="h-4 w-4" />
@@ -329,7 +337,13 @@ export const HomePage: React.FC = () => {
         {/* Enter Invite Code / Link Manually Action */}
         <button
           type="button"
-          onClick={() => setShowInviteModal(true)}
+          onClick={() => {
+            if (!isAuthenticated) {
+              navigate('/login', { state: { from: { pathname: '/' } } });
+            } else {
+              setShowInviteModal(true);
+            }
+          }}
           className="inline-flex items-center gap-1.5 text-xs font-bold text-[#008080] hover:underline"
         >
           <Keyboard className="h-3.5 w-3.5" />

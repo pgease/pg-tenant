@@ -291,7 +291,13 @@ export const MyPgPage: React.FC = () => {
               {/* Primary Button: Scan Property QR Code */}
               <button
                 type="button"
-                onClick={() => setShowInviteModal(true)}
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    navigate('/login', { state: { from: { pathname: '/my-pg' } } });
+                  } else {
+                    setShowInviteModal(true);
+                  }
+                }}
                 className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#008080] py-3.5 text-xs font-bold text-white shadow-md shadow-[#008080]/20 hover:bg-[#006b6b] active:scale-[0.98] transition-all tap-target"
               >
                 <QrCode className="h-4 w-4" />

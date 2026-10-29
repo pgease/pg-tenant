@@ -27,7 +27,8 @@ export const LoginPage: React.FC = () => {
   }, [isAuthenticated, navigate]);
 
   const handleSkipLogin = () => {
-    navigate('/search');
+    sessionStorage.setItem('pgease_guest_mode', 'true');
+    navigate('/');
   };
 
   // Step 1: phone entry, Step 2: 4-digit OTP

@@ -25,6 +25,7 @@ import { Loader2 } from 'lucide-react';
 
 const RootRoute: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
+  const isGuestMode = sessionStorage.getItem('pgease_guest_mode') === 'true';
 
   if (isLoading) {
     return (
@@ -35,12 +36,12 @@ const RootRoute: React.FC = () => {
     );
   }
 
-  // 1. Unauthenticated visitor -> First page is always Login
-  if (!isAuthenticated) {
+  // 1. First-time unauthenticated visitor who hasn't chosen to skip -> First page is Login
+  if (!isAuthenticated && !isGuestMode) {
     return <Navigate to="/login" replace />;
   }
 
-  // 2. Authenticated tenant -> show personalized Home Dashboard
+  // 2. Authenticated resident or guest explorer -> show Dashboard
   return <HomePage />;
 };
 
