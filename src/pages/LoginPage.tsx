@@ -58,6 +58,24 @@ export const LoginPage: React.FC = () => {
     return () => clearInterval(interval);
   }, [step, timer]);
 
+  // Safe error extraction to prevent React object-as-child crash
+  const getErrorMessage = (err: any, fallback: string): string => {
+    if (!err) return fallback;
+    const data = err.response?.data;
+    if (typeof data === 'string') {
+      if (data.includes('404')) return 'Service temporarily unavailable. Please try again.';
+      return data;
+    }
+    const rawMsg = data?.message || data?.error || err.message;
+    if (Array.isArray(rawMsg)) {
+      return typeof rawMsg[0] === 'string' ? rawMsg[0] : JSON.stringify(rawMsg[0]);
+    }
+    if (typeof rawMsg === 'object' && rawMsg !== null) {
+      return rawMsg.message || rawMsg.error || JSON.stringify(rawMsg);
+    }
+    return typeof rawMsg === 'string' ? rawMsg : fallback;
+  };
+
   // Handle phone submission
   const handleRequestOtp = async (selectedChannel = channel) => {
     setError(null);
@@ -84,27 +102,49 @@ export const LoginPage: React.FC = () => {
       setOtp(['', '', '', '']);
       setSuccessMessage(`OTP sent via ${selectedChannel === 'whatsapp' ? 'WhatsApp' : 'SMS'} to +91 ${cleanPhone}`);
 
-      // Auto focus first OTP input
+      // Auto focus first OTP input safely
       setTimeout(() => {
-        otpInputsRef.current[0]?.focus();
+        try {
+          otpInputsRef.current[0]?.focus();
+        } catch {}
       }, 150);
     } catch (err: any) {
-      const msg = err.response?.data?.message || 'Failed to send OTP. Please check your number and try again.';
-      setError(Array.isArray(msg) ? msg[0] : msg);
+      setError(getErrorMessage(err, 'Failed to send OTP. Please check your number and try again.'));
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle OTP digit change
+  // Handle OTP digit change & auto-fill
   const handleOtpChange = (index: number, value: string) => {
-    const digit = value.replace(/\D/g, '').slice(-1);
+    const clean = value.replace(/\D/g, '');
+
+    // Handle full paste or autofill in any box
+    if (clean.length > 1) {
+      const newOtp = ['', '', '', ''];
+      for (let i = 0; i < Math.min(clean.length, 4); i++) {
+        newOtp[i] = clean[i];
+      }
+      setOtp(newOtp);
+      const nextIndex = Math.min(clean.length, 3);
+      try {
+        otpInputsRef.current[nextIndex]?.focus();
+      } catch {}
+      if (clean.length >= 4) {
+        handleVerifyOtp(clean.slice(0, 4));
+      }
+      return;
+    }
+
+    const digit = clean.slice(-1);
     const newOtp = [...otp];
     newOtp[index] = digit;
     setOtp(newOtp);
 
     if (digit && index < 3) {
-      otpInputsRef.current[index + 1]?.focus();
+      try {
+        otpInputsRef.current[index + 1]?.focus();
+      } catch {}
     }
 
     if (digit && index === 3 && newOtp.every((d) => d !== '')) {
@@ -114,7 +154,9 @@ export const LoginPage: React.FC = () => {
 
   const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      otpInputsRef.current[index - 1]?.focus();
+      try {
+        otpInputsRef.current[index - 1]?.focus();
+      } catch {}
     }
   };
 
@@ -130,7 +172,9 @@ export const LoginPage: React.FC = () => {
     setOtp(newOtp);
 
     const nextIndex = Math.min(pasted.length, 3);
-    otpInputsRef.current[nextIndex]?.focus();
+    try {
+      otpInputsRef.current[nextIndex]?.focus();
+    } catch {}
 
     if (pasted.length === 4) {
       handleVerifyOtp(pasted);
@@ -156,16 +200,15 @@ export const LoginPage: React.FC = () => {
       const destination = (location.state as any)?.from?.pathname || '/';
       navigate(destination, { replace: true });
     } catch (err: any) {
-      const msg = err.response?.data?.message || 'Invalid or expired OTP. Please try again.';
-      setError(Array.isArray(msg) ? msg[0] : msg);
+      setError(getErrorMessage(err, 'Invalid or expired OTP. Please try again.'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="relative min-h-[100dvh] bg-[#F8FAFC] flex flex-col justify-between overflow-x-hidden -mx-5 -my-4">
-      {/* Top Background Gradient Header with Circles (Matches Screenshot 1) */}
+    <div className="relative min-h-[100dvh] bg-[#F8FAFC] flex flex-col justify-between overflow-x-hidden">
+      {/* Top Background Gradient Header with Circles */}
       <div className="relative bg-gradient-to-b from-[#004D4D] via-[#006060] to-[#008080] pt-7 pb-20 px-6 text-white overflow-hidden">
         {/* Soft Decorative Ambient Circles */}
         <div className="absolute -top-12 -right-12 h-44 w-44 rounded-full bg-white/10 blur-xl pointer-events-none" />
@@ -191,7 +234,7 @@ export const LoginPage: React.FC = () => {
           </button>
         </div>
 
-        {/* Brand App Icon & Title (Matches Screenshot 1) */}
+        {/* Brand App Icon & Title */}
         <div className="relative z-10 flex flex-col items-center text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#008080] border-2 border-white/20 shadow-lg p-2.5 mb-2.5">
             <img
@@ -208,7 +251,7 @@ export const LoginPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Floating White Login Card (Overlaps Top Header - Matches Screenshot 1) */}
+      {/* Floating White Login Card */}
       <div className="relative z-20 -mt-10 px-5 flex-1 flex flex-col justify-between">
         <div className="rounded-3xl bg-white p-6 shadow-xl border border-gray-100/80 space-y-5 animate-fade-in">
           {/* Card Title */}
@@ -248,7 +291,7 @@ export const LoginPage: React.FC = () => {
               }}
               className="space-y-4"
             >
-              {/* Phone Input Box matching Screenshot 1 */}
+              {/* Phone Input Box */}
               <div className="flex items-center rounded-2xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus-within:border-[#008080] focus-within:ring-2 focus-within:ring-[#008080]/10 transition-all">
                 {/* Flag + Country Code Pill */}
                 <div className="flex items-center gap-1.5 rounded-xl bg-gray-50 border border-gray-200/80 px-2.5 py-1.5 text-xs font-bold text-gray-800 mr-2.5 flex-shrink-0">
@@ -304,7 +347,7 @@ export const LoginPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Submit Button (Matches Screenshot 1) */}
+              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={loading || phone.replace(/\D/g, '').length !== 10}
@@ -323,7 +366,7 @@ export const LoginPage: React.FC = () => {
                 )}
               </button>
 
-              {/* Security Guarantee Note (Matches Screenshot 1) */}
+              {/* Security Guarantee Note */}
               <div className="flex items-center justify-center gap-1.5 text-[11px] text-gray-500 pt-1">
                 <Shield className="h-3.5 w-3.5 text-gray-400" />
                 <span>Your information is strictly protected</span>
@@ -334,8 +377,8 @@ export const LoginPage: React.FC = () => {
           {/* STEP 2: 4-Digit OTP Form */}
           {step === 'otp' && (
             <div className="space-y-4">
-              {/* 4 Digit Boxes */}
-              <div className="flex justify-center gap-3 py-1">
+              {/* 4 Digit Boxes (Equal width, responsive, no layout overflow) */}
+              <div className="flex justify-center items-center gap-2.5 sm:gap-3 py-1">
                 {otp.map((digit, index) => (
                   <input
                     key={index}
@@ -349,7 +392,7 @@ export const LoginPage: React.FC = () => {
                     onChange={(e) => handleOtpChange(index, e.target.value)}
                     onKeyDown={(e) => handleOtpKeyDown(index, e)}
                     onPaste={handleOtpPaste}
-                    className="h-14 w-13 rounded-2xl border-2 border-gray-200 bg-gray-50/50 text-center text-xl font-black text-gray-900 focus:border-[#008080] focus:bg-white focus:outline-none transition-all shadow-sm"
+                    className="h-14 w-12 sm:w-14 rounded-2xl border-2 border-gray-200 bg-gray-50/50 text-center text-xl font-black text-gray-900 focus:border-[#008080] focus:bg-white focus:outline-none transition-all shadow-sm"
                   />
                 ))}
               </div>
@@ -407,7 +450,7 @@ export const LoginPage: React.FC = () => {
           )}
         </div>
 
-        {/* Footer Terms & Conditions (Matches Screenshot 1) */}
+        {/* Footer Terms & Conditions */}
         <div className="py-6 text-center space-y-3">
           <p className="text-[11px] text-gray-400 leading-relaxed px-4">
             By signing in, you agree to our{' '}

@@ -127,7 +127,11 @@ export const AppLayout: React.FC = () => {
         )}
 
         {/* Main Content Area */}
-        <main className={`flex-1 overflow-y-auto px-5 py-4 ${!hideTabBar ? 'pb-24' : 'pb-safe'}`}>
+        <main
+          className={`flex-1 overflow-y-auto ${
+            !location.pathname.startsWith('/login') ? 'px-5 py-4' : ''
+          } ${!hideTabBar ? 'pb-24' : 'pb-safe'}`}
+        >
           <Outlet context={{ inAppMode }} />
         </main>
 

@@ -1,25 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
-  QrCode,
-  Keyboard,
   Search,
   SlidersHorizontal,
-  Bookmark,
   Bell,
   Pencil,
-  Plus,
   Loader2,
   X,
   Building2,
   ChevronRight,
   ArrowRight,
+  ShieldCheck,
+  Utensils,
+  CreditCard,
+  Wifi,
+  Sparkles,
 } from 'lucide-react';
-import { useNavigate, Navigate } from 'react-router-dom';
-import { searchService, type PropertyListItem } from '../services/searchService';
+import { useNavigate } from 'react-router-dom';
+import { searchService, type PropertyListItem, type SearchFilters } from '../services/searchService';
 import { PropertyCard } from '../components/search/PropertyCard';
 import { FilterDrawer } from '../components/search/FilterDrawer';
 import { authService } from '../services/authService';
+
+const CITIES = ['All', 'Delhi NCR', 'Noida', 'Bangalore', 'Kolkata', 'Lucknow', 'Kota'];
 
 export const HomePage: React.FC = () => {
   const {
@@ -31,80 +34,59 @@ export const HomePage: React.FC = () => {
   } = useAuth();
   const navigate = useNavigate();
 
-  // Search & Nearby PGs state
-  const [nearbyPgs, setNearbyPgs] = useState<PropertyListItem[]>([]);
-  const [loadingNearby, setLoadingNearby] = useState<boolean>(true);
+  // Search & Filter state
+  const [properties, setProperties] = useState<PropertyListItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedCity, setSelectedCity] = useState<string>('All');
   const [showFilters, setShowFilters] = useState<boolean>(false);
 
-  // Manual Invite / QR modal state
-  const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
-  const [inviteCode, setInviteCode] = useState<string>('');
-  const [linking, setLinking] = useState<boolean>(false);
-  const [linkError, setLinkError] = useState<string | null>(null);
+  // Quick Filter Chips
+  const [genderFilter, setGenderFilter] = useState<string | undefined>(undefined);
+  const [withFood, setWithFood] = useState<boolean>(false);
+  const [acRooms, setAcRooms] = useState<boolean>(false);
+  const [under10k, setUnder10k] = useState<boolean>(false);
+
+  // Full Filters Object for Filter Drawer
+  const [filters, setFilters] = useState<SearchFilters>({});
 
   // Edit Name Modal State
   const [showEditNameModal, setShowEditNameModal] = useState<boolean>(false);
   const [nameInput, setNameInput] = useState<string>(tenant?.name || '');
   const [savingName, setSavingName] = useState<boolean>(false);
 
-  const isGuestMode = sessionStorage.getItem('pgease_guest_mode') === 'true';
+  const loadProperties = useCallback(async () => {
+    setLoading(true);
+    try {
+      const activeFilters: SearchFilters = {
+        city: selectedCity === 'All' ? undefined : selectedCity,
+        search: searchQuery.trim() || undefined,
+        gender: genderFilter,
+        foodAvailable: withFood ? true : undefined,
+        acAvailable: acRooms ? true : undefined,
+        maxPrice: under10k ? 10000 : filters.maxPrice,
+        sharingType: filters.sharingType,
+        amenities: filters.amenities,
+      };
 
-  // First time visitor without guest mode -> redirect to /login
-  if (!isAuthenticated && !isGuestMode) {
-    return <Navigate to="/login" replace />;
-  }
+      const res = await searchService.searchPgs(activeFilters);
+      setProperties(res.properties);
+    } catch (err) {
+      console.error('Error loading properties:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedCity, searchQuery, genderFilter, withFood, acRooms, under10k, filters]);
 
   useEffect(() => {
-    let isMounted = true;
-    setLoadingNearby(true);
-    searchService
-      .searchPgs({ limit: 10 })
-      .then((res) => {
-        if (isMounted) {
-          setNearbyPgs(res.properties);
-        }
-      })
-      .catch((err) => console.error('Error loading nearby PGs:', err))
-      .finally(() => {
-        if (isMounted) setLoadingNearby(false);
-      });
+    loadProperties();
+  }, [loadProperties]);
 
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  // Handle Search Submission
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-    } else {
-      navigate('/search');
-    }
+    loadProperties();
   };
 
-  // Handle Manual Code / QR Verification
-  const handleManualLink = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inviteCode.trim()) {
-      setLinkError('Please enter a valid property invite code');
-      return;
-    }
-    setLinking(true);
-    setLinkError(null);
-    try {
-      await checkTenancy();
-      setShowInviteModal(false);
-    } catch {
-      setLinkError('Invalid invite code or property not found. Please contact PG owner.');
-    } finally {
-      setLinking(false);
-    }
-  };
-
-  // Handle Name Update
   const handleSaveName = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nameInput.trim()) return;
@@ -120,7 +102,7 @@ export const HomePage: React.FC = () => {
     }
   };
 
-  const displayName = tenant?.name || 'Add your name';
+  const displayName = tenant?.name || (isAuthenticated ? 'Resident' : 'Explore PGs');
 
   return (
     <div className="space-y-5 pt-1 pb-6 animate-fade-in">
@@ -128,9 +110,10 @@ export const HomePage: React.FC = () => {
       <FilterDrawer
         isOpen={showFilters}
         onClose={() => setShowFilters(false)}
-        filters={{}}
-        onApply={() => {
-          navigate('/search');
+        filters={filters}
+        onApply={(newFilters) => {
+          setFilters(newFilters);
+          loadProperties();
         }}
       />
 
@@ -177,88 +160,36 @@ export const HomePage: React.FC = () => {
         </div>
       )}
 
-      {/* Manual Invite / QR Modal */}
-      {showInviteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <QrCode className="h-5 w-5 text-[#008080]" />
-                <h3 className="text-sm font-bold text-gray-900">Join PG Stay</h3>
-              </div>
-              <button
-                onClick={() => setShowInviteModal(false)}
-                className="rounded-full p-1 text-gray-400 hover:bg-gray-100"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <p className="text-xs text-gray-500 leading-relaxed">
-              Enter the 6-character PG property code or invite code provided by your PG manager.
-            </p>
-
-            <form onSubmit={handleManualLink} className="space-y-3">
-              <input
-                type="text"
-                placeholder="e.g. PG-8821"
-                value={inviteCode}
-                onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-                autoFocus
-                className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:border-[#008080] focus:outline-none uppercase tracking-widest text-center"
-              />
-
-              {linkError && (
-                <p className="text-xs font-semibold text-red-500 text-center">{linkError}</p>
-              )}
-
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowInviteModal(false)}
-                  className="flex-1 rounded-xl border border-gray-200 bg-white py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={linking || !inviteCode.trim()}
-                  className="flex-1 rounded-xl bg-[#008080] py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#006b6b] disabled:opacity-50"
-                >
-                  {linking ? 'Checking...' : 'Link Property'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* 1. Top Header Row (Matches Screenshot 2) */}
+      {/* 1. Top Header Row */}
       <div className="flex items-center justify-between pt-1">
         <div>
-          <p className="text-xs font-medium text-gray-500">Welcome to PGs,</p>
+          <p className="text-xs font-medium text-gray-500">
+            {isAuthenticated ? 'Welcome back,' : 'Welcome to PG Ease,'}
+          </p>
           <button
             type="button"
             onClick={() => {
-              setNameInput(tenant?.name || '');
-              setShowEditNameModal(true);
+              if (isAuthenticated) {
+                setNameInput(tenant?.name || '');
+                setShowEditNameModal(true);
+              } else {
+                navigate('/login');
+              }
             }}
             className="flex items-center gap-1.5 text-base font-black text-[#008080] tracking-tight hover:underline text-left mt-0.5"
           >
             <span>{displayName}</span>
-            <Pencil className="h-3.5 w-3.5 text-[#008080]" />
+            {isAuthenticated && <Pencil className="h-3.5 w-3.5 text-[#008080]" />}
           </button>
         </div>
 
-        {/* Right Actions: Avatar Story Ring + Notification Bell with Red Dot */}
+        {/* Right Actions: Avatar + Notification Bell */}
         <div className="flex items-center gap-2.5">
           <div
-            onClick={() => navigate('/profile')}
-            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-2 border-primary/40 bg-teal-50 text-xs font-bold text-primary shadow-sm hover:opacity-90 active:scale-95 transition-all"
+            onClick={() => navigate(isAuthenticated ? '/profile' : '/login')}
+            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-2 border-primary/40 bg-teal-50 text-xs font-bold text-[#008080] shadow-sm hover:opacity-90 active:scale-95 transition-all"
           >
-            {tenant?.name
-              ? tenant.name.slice(0, 2).toUpperCase()
-              : 'PG'}
+            {tenant?.name ? tenant.name.slice(0, 2).toUpperCase() : 'PG'}
           </div>
 
           <button
@@ -285,13 +216,13 @@ export const HomePage: React.FC = () => {
             </div>
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-teal-200">
-                Your Active PG
+                Your Active PG Stay
               </span>
               <h4 className="text-sm font-bold text-white truncate max-w-[200px]">
                 {propertyDetails?.property?.name || 'Linked PG Stay'}
               </h4>
               <p className="text-[11px] text-white/80">
-                {propertyDetails?.room?.roomNumber ? `Room ${propertyDetails.room.roomNumber}` : 'Room Assigned'}
+                {propertyDetails?.room?.roomNumber ? `Room ${propertyDetails.room.roomNumber}` : 'Room Assigned'} • Tap to view details
               </p>
             </div>
           </div>
@@ -299,62 +230,53 @@ export const HomePage: React.FC = () => {
         </div>
       )}
 
-      {/* 2. "Join your PG" Card (Matches Screenshot 2) */}
-      <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm text-center space-y-4">
-        {/* Teal Square with White Plus Icon */}
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#008080] text-white shadow-md shadow-[#008080]/20">
-          <Plus className="h-7 w-7 stroke-[2.5]" />
+      {/* 2. Attractive Hero Mascot Banner */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#008080] via-[#006666] to-[#004D4D] p-5 text-white shadow-xl shadow-[#008080]/20">
+        {/* Soft Background Glows */}
+        <div className="absolute -right-6 -bottom-6 h-36 w-36 rounded-full bg-white/10 blur-xl pointer-events-none" />
+
+        <div className="relative z-10 flex items-center justify-between gap-3">
+          <div className="flex-1 space-y-2">
+            <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-bold text-teal-100 backdrop-blur-md">
+              <Sparkles className="h-3 w-3" />
+              <span>Zero Brokerage Stays</span>
+            </span>
+
+            <h2 className="text-lg font-black tracking-tight leading-snug">
+              Find Your Perfect PG & Hostel
+            </h2>
+
+            <p className="text-xs text-white/80 leading-relaxed line-clamp-2">
+              Verified amenities, daily meals, fast Wi-Fi, and instant owner connect across India.
+            </p>
+
+            <button
+              onClick={() => navigate('/search')}
+              className="inline-flex items-center gap-1 rounded-xl bg-white px-3.5 py-1.5 text-xs font-bold text-[#008080] shadow-md hover:bg-gray-50 active:scale-95 transition-all"
+            >
+              <span>Explore Verified PGs</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
+          {/* Official PG Ease 3D Mascot Character */}
+          <div className="flex-shrink-0 w-24 h-28 relative">
+            <img
+              src="/assets/mascot.jpg"
+              alt="PG Ease Mascot"
+              className="w-full h-full object-contain rounded-2xl filter drop-shadow-md"
+            />
+          </div>
         </div>
-
-        <div>
-          <h2 className="text-lg font-bold tracking-tight text-gray-900">
-            Join your PG
-          </h2>
-          <p className="mt-1 text-xs text-gray-500 leading-relaxed max-w-xs mx-auto">
-            Scan the QR code provided by your PG owner to join your PG
-          </p>
-        </div>
-
-        {/* Scan QR Primary Button */}
-        <button
-          type="button"
-          onClick={() => {
-            if (!isAuthenticated) {
-              navigate('/login', { state: { from: { pathname: '/' } } });
-            } else {
-              setShowInviteModal(true);
-            }
-          }}
-          className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#008080] py-3.5 text-xs font-bold text-white shadow-md shadow-[#008080]/20 hover:bg-[#006b6b] active:scale-[0.98] transition-all tap-target"
-        >
-          <QrCode className="h-4 w-4" />
-          <span>Scan QR</span>
-        </button>
-
-        {/* Enter Invite Code / Link Manually Action */}
-        <button
-          type="button"
-          onClick={() => {
-            if (!isAuthenticated) {
-              navigate('/login', { state: { from: { pathname: '/' } } });
-            } else {
-              setShowInviteModal(true);
-            }
-          }}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#008080] hover:underline"
-        >
-          <Keyboard className="h-3.5 w-3.5" />
-          <span>Enter Invite Code / Link Manually</span>
-        </button>
       </div>
 
-      {/* 3. Search Bar with Filter Button (Matches Screenshot 2) */}
+      {/* 3. Search Bar with Sliders Filter Button */}
       <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#008080]" />
           <input
             type="text"
-            placeholder="Search location (e.g. Indirapuram, Delhi) or..."
+            placeholder="Search by city, locality, or PG name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full rounded-2xl border border-gray-200 bg-white pl-11 pr-4 py-3 text-xs font-semibold text-gray-800 placeholder:text-gray-400 focus:border-[#008080] focus:outline-none transition-all shadow-sm"
@@ -371,31 +293,171 @@ export const HomePage: React.FC = () => {
         </button>
       </form>
 
-      {/* 4. "Recent Saved" Section (Matches Screenshot 2) */}
-      <div className="space-y-3">
-        <h3 className="text-sm font-bold text-gray-900 tracking-tight">
-          Recent Saved
-        </h3>
+      {/* 4. Quick Category Filter Chips */}
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+        {/* Boys PG */}
+        <button
+          type="button"
+          onClick={() => setGenderFilter(genderFilter === 'boys' ? undefined : 'boys')}
+          className={`flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all tap-target ${
+            genderFilter === 'boys'
+              ? 'bg-[#008080] text-white shadow-sm'
+              : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          👦 Boys PG
+        </button>
 
-        <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm flex items-center gap-3.5">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-50 text-[#008080] flex-shrink-0">
-            <Bookmark className="h-5 w-5" />
+        {/* Girls PG */}
+        <button
+          type="button"
+          onClick={() => setGenderFilter(genderFilter === 'girls' ? undefined : 'girls')}
+          className={`flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all tap-target ${
+            genderFilter === 'girls'
+              ? 'bg-[#008080] text-white shadow-sm'
+              : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          👧 Girls PG
+        </button>
+
+        {/* Co-ed */}
+        <button
+          type="button"
+          onClick={() => setGenderFilter(genderFilter === 'co-ed' ? undefined : 'co-ed')}
+          className={`flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all tap-target ${
+            genderFilter === 'co-ed'
+              ? 'bg-[#008080] text-white shadow-sm'
+              : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          👫 Co-ed
+        </button>
+
+        {/* With Food */}
+        <button
+          type="button"
+          onClick={() => setWithFood(!withFood)}
+          className={`flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all tap-target ${
+            withFood
+              ? 'bg-[#008080] text-white shadow-sm'
+              : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          🍽️ With Food
+        </button>
+
+        {/* AC Rooms */}
+        <button
+          type="button"
+          onClick={() => setAcRooms(!acRooms)}
+          className={`flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all tap-target ${
+            acRooms
+              ? 'bg-[#008080] text-white shadow-sm'
+              : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          ❄️ AC Rooms
+        </button>
+
+        {/* Under ₹10k */}
+        <button
+          type="button"
+          onClick={() => setUnder10k(!under10k)}
+          className={`flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all tap-target ${
+            under10k
+              ? 'bg-[#008080] text-white shadow-sm'
+              : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          💰 Under ₹10k
+        </button>
+      </div>
+
+      {/* 5. City Selector Pills */}
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+        {CITIES.map((city) => {
+          const isSelected = selectedCity === city;
+          return (
+            <button
+              key={city}
+              type="button"
+              onClick={() => setSelectedCity(city)}
+              className={`flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all tap-target ${
+                isSelected
+                  ? 'bg-teal-900 text-white shadow-sm'
+                  : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              {city}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 6. Why PG Ease? Trust Badges */}
+      <div className="grid grid-cols-2 gap-2.5">
+        <div className="rounded-2xl border border-gray-100 bg-white p-3.5 shadow-sm flex items-start gap-2.5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-[#008080] flex-shrink-0">
+            <ShieldCheck className="h-5 w-5" />
           </div>
           <div>
-            <h4 className="text-xs font-bold text-gray-900">No Saved PGs yet</h4>
-            <p className="text-[11px] text-gray-400 mt-0.5">
-              Tap the bookmark icon on any PG to view it here
+            <h4 className="text-xs font-bold text-gray-900">Zero Brokerage</h4>
+            <p className="text-[10px] text-gray-500 mt-0.5 leading-snug">
+              Direct connection with verified owners
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-gray-100 bg-white p-3.5 shadow-sm flex items-start gap-2.5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-[#008080] flex-shrink-0">
+            <Utensils className="h-5 w-5" />
+          </div>
+          <div>
+            <h4 className="text-xs font-bold text-gray-900">Meal Schedules</h4>
+            <p className="text-[10px] text-gray-500 mt-0.5 leading-snug">
+              Live daily breakfast, lunch & dinner timings
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-gray-100 bg-white p-3.5 shadow-sm flex items-start gap-2.5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-[#008080] flex-shrink-0">
+            <CreditCard className="h-5 w-5" />
+          </div>
+          <div>
+            <h4 className="text-xs font-bold text-gray-900">Digital Rent</h4>
+            <p className="text-[10px] text-gray-500 mt-0.5 leading-snug">
+              Zero hassle UPI settlements & rent receipts
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-gray-100 bg-white p-3.5 shadow-sm flex items-start gap-2.5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-[#008080] flex-shrink-0">
+            <Wifi className="h-5 w-5" />
+          </div>
+          <div>
+            <h4 className="text-xs font-bold text-gray-900">High-Speed Wi-Fi</h4>
+            <p className="text-[10px] text-gray-500 mt-0.5 leading-snug">
+              One-tap access to hostel Wi-Fi pass
             </p>
           </div>
         </div>
       </div>
 
-      {/* 5. "Nearby PGs" Section (Matches Screenshot 2) */}
+      {/* 7. Verified & Nearby PGs Feed */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-gray-900 tracking-tight">
-            Nearby PGs
-          </h3>
+          <div>
+            <h3 className="text-sm font-bold text-gray-900 tracking-tight">
+              {selectedCity === 'All' ? 'Nearby & Featured PGs' : `PGs in ${selectedCity}`}
+            </h3>
+            <p className="text-[11px] text-gray-400">
+              {loading ? 'Searching...' : `${properties.length} verified stays available`}
+            </p>
+          </div>
+
           <button
             onClick={() => navigate('/search')}
             className="text-xs font-bold text-[#008080] hover:underline flex items-center gap-0.5"
@@ -405,27 +467,37 @@ export const HomePage: React.FC = () => {
           </button>
         </div>
 
-        {loadingNearby ? (
-          <div className="flex flex-col items-center justify-center py-12">
-            <Loader2 className="h-7 w-7 animate-spin text-[#008080] mb-2" />
-            <p className="text-xs font-semibold text-gray-400">Loading nearby properties...</p>
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-16">
+            <Loader2 className="h-8 w-8 animate-spin text-[#008080] mb-2" />
+            <p className="text-xs font-semibold text-gray-400">Loading verified properties...</p>
           </div>
-        ) : nearbyPgs.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 p-6 text-center space-y-2">
-            <Building2 className="mx-auto h-8 w-8 text-gray-300" />
-            <p className="text-xs font-semibold text-gray-500">
-              No verified PGs found in immediate area.
-            </p>
+        ) : properties.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 p-8 text-center space-y-3">
+            <Building2 className="mx-auto h-9 w-9 text-gray-300" />
+            <div>
+              <p className="text-xs font-bold text-gray-700">No PGs found in {selectedCity}</p>
+              <p className="text-[11px] text-gray-400 mt-1 max-w-xs mx-auto">
+                Try selecting 'All' or clearing filters to view properties in other cities.
+              </p>
+            </div>
             <button
-              onClick={() => navigate('/search')}
-              className="text-xs font-bold text-[#008080] hover:underline"
+              onClick={() => {
+                setSelectedCity('All');
+                setGenderFilter(undefined);
+                setWithFood(false);
+                setAcRooms(false);
+                setUnder10k(false);
+                setSearchQuery('');
+              }}
+              className="rounded-xl bg-[#008080] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#006b6b]"
             >
-              Explore all locations
+              Show All Cities
             </button>
           </div>
         ) : (
           <div className="space-y-3">
-            {nearbyPgs.slice(0, 5).map((property) => (
+            {properties.map((property) => (
               <PropertyCard key={property.id} property={property} />
             ))}
           </div>
