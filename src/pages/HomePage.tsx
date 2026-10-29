@@ -31,7 +31,17 @@ export const HomePage: React.FC = () => {
   const [showSecurityModal, setShowSecurityModal] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated && isLinkedTenant) {
+    if (!isAuthenticated) {
+      const hasSkipped = sessionStorage.getItem('pgease_guest_mode') === 'true';
+      if (hasSkipped) {
+        navigate('/search', { replace: true });
+      } else {
+        navigate('/login', { replace: true });
+      }
+      return;
+    }
+
+    if (isLinkedTenant) {
       tenantService
         .getRentDues()
         .then((res) => setDuesData(res))
@@ -45,7 +55,7 @@ export const HomePage: React.FC = () => {
         })
         .catch(() => {});
     }
-  }, [isAuthenticated, isLinkedTenant]);
+  }, [isAuthenticated, isLinkedTenant, navigate]);
 
   // Derived Dynamic Data
   const propertyName = propertyDetails?.property?.name || 'Active PG Stay';

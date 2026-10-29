@@ -18,6 +18,35 @@ import { WifiPage } from './pages/WifiPage';
 import { NoticePage } from './pages/NoticePage';
 import { DocumentsPage } from './pages/DocumentsPage';
 import { NotificationsPage } from './pages/NotificationsPage';
+import { useAuth } from './context/AuthContext';
+import { Loader2 } from 'lucide-react';
+
+const RootRoute: React.FC = () => {
+  const { isAuthenticated, isLoading } = useAuth();
+  const hasSkipped = sessionStorage.getItem('pgease_guest_mode') === 'true';
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-32 text-gray-400">
+        <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+        <span className="text-xs font-semibold">Loading PG Ease...</span>
+      </div>
+    );
+  }
+
+  // 1. First time visitor who has not authenticated and has not clicked skip -> land on Login
+  if (!isAuthenticated && !hasSkipped) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // 2. Unauthenticated user who explicitly chose "Skip" -> land on PG Search / Discovery
+  if (!isAuthenticated && hasSkipped) {
+    return <Navigate to="/search" replace />;
+  }
+
+  // 3. Authenticated tenant -> show personalized Home Dashboard
+  return <HomePage />;
+};
 
 function App() {
   return (
@@ -25,7 +54,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<AppLayout />}>
-            <Route index element={<HomePage />} />
+            <Route index element={<RootRoute />} />
             <Route path="search" element={<SearchPage />} />
             <Route path="payments" element={<PaymentsPage />} />
             <Route path="payments/history" element={<TransactionHistoryPage />} />

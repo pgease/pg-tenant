@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
 import {
   ArrowLeft,
+  ArrowRight,
+  Search,
   MessageSquare,
   Smartphone,
   ShieldCheck,
@@ -16,7 +18,19 @@ import {
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  const handleSkipLogin = () => {
+    sessionStorage.setItem('pgease_guest_mode', 'true');
+    navigate('/search');
+  };
 
   // Step 1: phone entry, Step 2: 4-digit OTP
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
@@ -145,6 +159,7 @@ export const LoginPage: React.FC = () => {
       });
 
       // Update auth state (triggers automatic tenancy resolution)
+      sessionStorage.removeItem('pgease_guest_mode');
       await login(res.accessToken, res.refreshToken, res.tenant);
 
       // Redirect to home or return path
@@ -161,21 +176,37 @@ export const LoginPage: React.FC = () => {
   return (
     <div className="flex flex-col min-h-[calc(100dvh-120px)] justify-between pt-2 animate-fade-in">
       <div className="space-y-6">
-        {/* Back Button */}
-        <button
-          onClick={() => {
-            if (step === 'otp') {
-              setStep('phone');
-              setError(null);
-              setSuccessMessage(null);
-            } else {
-              navigate(-1);
-            }
-          }}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-brandText hover:bg-gray-200 active:scale-95 transition-all tap-target"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
+        {/* Top Header Navigation */}
+        <div className="flex items-center justify-between">
+          {step === 'otp' ? (
+            <button
+              onClick={() => {
+                setStep('phone');
+                setError(null);
+                setSuccessMessage(null);
+              }}
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-brandText hover:bg-gray-200 active:scale-95 transition-all tap-target"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <img src="/favicon.png?v=3" alt="PG Ease" className="h-8 w-8 rounded-xl object-contain shadow-sm" />
+              <span className="text-base font-black text-brandText tracking-tight">PG Ease</span>
+            </div>
+          )}
+
+          {step === 'phone' && (
+            <button
+              type="button"
+              onClick={handleSkipLogin}
+              className="flex items-center gap-1 rounded-full bg-teal-50 px-3 py-1.5 text-xs font-bold text-primary hover:bg-teal-100 active:scale-95 transition-all tap-target shadow-sm"
+            >
+              <span>Skip for now</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
 
         {/* Header Title */}
         <div>
@@ -286,6 +317,24 @@ export const LoginPage: React.FC = () => {
                 'Get OTP'
               )}
             </button>
+
+            {/* Skip & Explore as Guest Button */}
+            <div className="pt-1">
+              <div className="relative flex py-2 items-center">
+                <div className="flex-grow border-t border-gray-200"></div>
+                <span className="flex-shrink mx-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider">or</span>
+                <div className="flex-grow border-t border-gray-200"></div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSkipLogin}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white py-3.5 text-xs font-bold text-brandText shadow-sm hover:border-primary hover:text-primary active:scale-[0.98] transition-all tap-target"
+              >
+                <Search className="h-4 w-4 text-primary" />
+                <span>Explore & Search Verified PGs (Skip Login)</span>
+              </button>
+            </div>
 
             {/* Terms & Privacy Under Get OTP */}
             <p className="text-center text-[11px] text-brandText-muted leading-relaxed pt-1">
