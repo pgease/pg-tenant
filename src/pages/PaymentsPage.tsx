@@ -14,7 +14,7 @@ import { RentPaymentModal } from '../components/my-pg/RentPaymentModal';
 
 export const PaymentsPage: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, isLinkedTenant, propertyDetails } = useAuth();
+  const { isAuthenticated, isLinkedTenant, propertyDetails, checkTenancy, isCheckingTenancy } = useAuth();
 
   const [dues, setDues] = useState<RentCollectionDetails | null>(null);
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -77,6 +77,37 @@ export const PaymentsPage: React.FC = () => {
         >
           Sign In with Mobile OTP
         </button>
+      </div>
+    );
+  }
+
+  if (!isLinkedTenant) {
+    return (
+      <div className="pt-8 pb-12 text-center space-y-4 animate-fade-in">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-teal-50 text-primary shadow-sm">
+          <CreditCard className="h-7 w-7" />
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-brandText">No Active PG Stay Linked</h2>
+          <p className="text-xs text-gray-500 mt-1 max-w-xs mx-auto leading-relaxed">
+            Your monthly rent dues, online UPI settlements, and payment receipts will appear here once your PG manager adds your phone number to their property.
+          </p>
+        </div>
+        <div className="flex gap-2 justify-center max-w-xs mx-auto pt-2">
+          <button
+            onClick={() => checkTenancy()}
+            disabled={isCheckingTenancy}
+            className="flex-1 rounded-xl border border-teal-200 bg-white py-2.5 text-xs font-bold text-primary shadow-sm hover:bg-teal-50 active:scale-95 transition-all"
+          >
+            {isCheckingTenancy ? 'Syncing...' : 'Sync Status'}
+          </button>
+          <button
+            onClick={() => navigate('/search')}
+            className="flex-1 rounded-xl bg-primary py-2.5 text-xs font-bold text-white shadow-sm hover:bg-primary-dark active:scale-95 transition-all"
+          >
+            Find PGs
+          </button>
+        </div>
       </div>
     );
   }

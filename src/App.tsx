@@ -23,7 +23,6 @@ import { Loader2 } from 'lucide-react';
 
 const RootRoute: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
-  const hasSkipped = sessionStorage.getItem('pgease_guest_mode') === 'true';
 
   if (isLoading) {
     return (
@@ -34,17 +33,12 @@ const RootRoute: React.FC = () => {
     );
   }
 
-  // 1. First time visitor who has not authenticated and has not clicked skip -> land on Login
-  if (!isAuthenticated && !hasSkipped) {
+  // 1. Unauthenticated visitor -> First page is always Login
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // 2. Unauthenticated user who explicitly chose "Skip" -> land on PG Search / Discovery
-  if (!isAuthenticated && hasSkipped) {
-    return <Navigate to="/search" replace />;
-  }
-
-  // 3. Authenticated tenant -> show personalized Home Dashboard
+  // 2. Authenticated tenant -> show personalized Home Dashboard
   return <HomePage />;
 };
 
