@@ -35,6 +35,16 @@
 }
 
 @layer utilities {
+  /* Hide scrollbar for Chrome, Safari, Edge, Firefox */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+  }
   .pb-safe {
     padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
   }
@@ -51,6 +61,17 @@
   .min-h-dvh {
     min-height: 100dvh;
   }
+}
+
+/* Global fallback for no-scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }
 
 /* Custom scrollbars for clean mobile & desktop feel */

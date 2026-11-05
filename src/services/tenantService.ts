@@ -48,10 +48,20 @@ export interface Complaint {
   resolutionRemarks?: string;
 }
 
+export interface IndividualGuestItem {
+  name: string;
+  phone?: string;
+  gender?: string;
+  relationship?: string;
+}
+
 export interface GuestRequest {
   id: string;
   guestName?: string;
   guestPhone?: string;
+  guestGender?: string;
+  relationship?: string;
+  guests?: IndividualGuestItem[];
   expectedArrival: string;
   expectedDeparture?: string;
   numberOfGuests?: number;

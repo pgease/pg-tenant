@@ -20,6 +20,7 @@ import { WifiPage } from './pages/WifiPage';
 import { NoticePage } from './pages/NoticePage';
 import { DocumentsPage } from './pages/DocumentsPage';
 import { NotificationsPage } from './pages/NotificationsPage';
+import { WhatsAppRedirectPage } from './pages/WhatsAppRedirectPage';
 import { useAuth } from './context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
@@ -70,6 +71,7 @@ function App() {
             <Route path="profile" element={<ProfilePage />} />
             <Route path="pg/:idOrSlug" element={<PgDetailPage />} />
             <Route path="login" element={<LoginPage />} />
+            <Route path="wa/*" element={<WhatsAppRedirectPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>

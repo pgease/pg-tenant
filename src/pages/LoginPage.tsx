@@ -34,9 +34,14 @@ export const LoginPage: React.FC = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/', { replace: true });
+      const redirect =
+        new URLSearchParams(location.search).get('redirect') ||
+        sessionStorage.getItem('pgease_post_login_redirect') ||
+        '/';
+      sessionStorage.removeItem('pgease_post_login_redirect');
+      navigate(redirect, { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, location.search, navigate]);
 
   const handleSkipLogin = () => {
     sessionStorage.setItem('pgease_guest_mode', 'true');
@@ -89,7 +94,7 @@ export const LoginPage: React.FC = () => {
   };
 
   // Handle phone submission - First time strictly defaults to WhatsApp
-  const handleRequestOtp = async (selectedChannel: 'whatsapp' | 'sms' = 'whatsapp') => {
+  const handleRequestOtp = async (selectedChannel: 'whatsapp' | 'sms' = channel) => {
     setError(null);
     setSuccessMessage(null);
 
@@ -213,7 +218,12 @@ export const LoginPage: React.FC = () => {
       });
 
       await login(res.accessToken, res.refreshToken, res.tenant);
-      const destination = (location.state as any)?.from?.pathname || '/';
+      const destination =
+        new URLSearchParams(location.search).get('redirect') ||
+        sessionStorage.getItem('pgease_post_login_redirect') ||
+        (location.state as any)?.from?.pathname ||
+        '/';
+      sessionStorage.removeItem('pgease_post_login_redirect');
       navigate(destination, { replace: true });
     } catch (err: any) {
       setError(getErrorMessage(err, 'Invalid or expired OTP. Please try again.'));
@@ -331,11 +341,35 @@ export const LoginPage: React.FC = () => {
                 />
               </div>
 
-              {/* WhatsApp OTP Delivery Notice Banner */}
-              <div className="flex items-center gap-2.5 rounded-2xl bg-[#E8FAF0] border border-[#B8EBD0] p-3 text-emerald-950 shadow-xs">
-                <WhatsAppIcon className="h-5 w-5 flex-shrink-0" />
-                <div className="text-xs font-semibold leading-tight">
-                  Verification code will be sent to your <span className="text-[#0E7A4A] font-extrabold">WhatsApp</span>
+              {/* Channel Selector with Official WhatsApp Logo */}
+              <div className="flex items-center justify-between text-xs pt-0.5 px-0.5">
+                <span className="text-gray-400 font-medium">Receive OTP via:</span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setChannel('whatsapp')}
+                    className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all ${
+                      channel === 'whatsapp'
+                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-400 font-bold shadow-xs'
+                        : 'text-gray-500 hover:bg-gray-100 border border-transparent'
+                    }`}
+                  >
+                    <WhatsAppIcon className="h-3.5 w-3.5" />
+                    <span>WhatsApp</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setChannel('sms')}
+                    className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all ${
+                      channel === 'sms'
+                        ? 'bg-teal-50 text-teal-800 border border-teal-400 font-bold shadow-xs'
+                        : 'text-gray-500 hover:bg-gray-100 border border-transparent'
+                    }`}
+                  >
+                    <Smartphone className="h-3.5 w-3.5 text-[#008080]" />
+                    <span>SMS</span>
+                  </button>
                 </div>
               </div>
 
@@ -348,12 +382,22 @@ export const LoginPage: React.FC = () => {
                 {loading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin text-white" />
-                    <span>Sending code to WhatsApp...</span>
+                    <span>
+                      {channel === 'whatsapp' ? 'Sending code to WhatsApp...' : 'Sending code via SMS...'}
+                    </span>
                   </>
                 ) : (
                   <>
-                    <WhatsAppIcon className="h-4 w-4" />
-                    <span>Get OTP on WhatsApp</span>
+                    {channel === 'whatsapp' ? (
+                      <WhatsAppIcon className="h-4 w-4" />
+                    ) : (
+                      <Smartphone className="h-4 w-4 text-white" />
+                    )}
+                    <span>
+                      {channel === 'whatsapp'
+                        ? 'Get Verification Code on WhatsApp'
+                        : 'Get Verification Code on SMS'}
+                    </span>
                     <ArrowRight className="h-4 w-4" />
                   </>
                 )}

@@ -141,12 +141,12 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
       </div>
 
       {/* 2. Filter Pills Row */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
         {/* Filters button */}
         <button
           type="button"
           onClick={() => setShowFilters(true)}
-          className="flex-shrink-0 flex items-center gap-1 rounded-full border border-teal-200 bg-teal-50/70 px-3 py-1.5 text-xs font-bold text-teal-800 transition-all tap-target"
+          className="flex-shrink-0 flex items-center gap-1 rounded-full border border-teal-200 bg-teal-50/70 px-3 py-1.5 text-xs font-bold text-teal-800 transition-all active:scale-95 whitespace-nowrap"
         >
           <Filter className="h-3 w-3 text-primary" />
           <span>Filters</span>
@@ -156,7 +156,7 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
         <button
           type="button"
           onClick={handleNearMeToggle}
-          className={`flex-shrink-0 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold transition-all tap-target ${
+          className={`flex-shrink-0 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 whitespace-nowrap ${
             isNearMe
               ? 'bg-primary text-white shadow-sm'
               : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
@@ -170,7 +170,7 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
         <button
           type="button"
           onClick={() => setUnder10k(!under10k)}
-          className={`flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all tap-target ${
+          className={`flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 whitespace-nowrap ${
             under10k
               ? 'bg-primary text-white shadow-sm'
               : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
@@ -183,7 +183,7 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
         <button
           type="button"
           onClick={() => setWithFood(!withFood)}
-          className={`flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all tap-target ${
+          className={`flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 whitespace-nowrap ${
             withFood
               ? 'bg-primary text-white shadow-sm'
               : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
@@ -196,7 +196,7 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
         <button
           type="button"
           onClick={() => setAcRooms(!acRooms)}
-          className={`flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all tap-target ${
+          className={`flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 whitespace-nowrap ${
             acRooms
               ? 'bg-primary text-white shadow-sm'
               : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
@@ -213,7 +213,7 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
               key={city}
               type="button"
               onClick={() => setSelectedCity(city)}
-              className={`flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all tap-target ${
+              className={`flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 whitespace-nowrap ${
                 isSelected
                   ? 'bg-teal-700 text-white shadow-sm'
                   : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'

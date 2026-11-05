@@ -78,8 +78,53 @@ export const DiningModal: React.FC<DiningModalProps> = ({ isOpen, onClose }) => 
 
   if (!isOpen) return null;
 
-  const currentMenu =
-    menuData && menuData[selectedDay] ? menuData[selectedDay] : DEFAULT_MENU[selectedDay];
+  const dayIndexInWeek = DAYS.indexOf(selectedDay);
+  const targetDayOfWeek = selectedDay === 'Sunday' ? 0 : dayIndexInWeek + 1;
+
+  const dayRecord = Array.isArray(menuData)
+    ? menuData.find(
+        (d: any) =>
+          String(d.dayName || '').toLowerCase() === selectedDay.toLowerCase() ||
+          Number(d.dayOfWeek) === targetDayOfWeek,
+      )
+    : menuData?.[selectedDay];
+
+  const fallback = DEFAULT_MENU[selectedDay] || DEFAULT_MENU.Monday;
+
+  const formatMealTime = (meal: any, defaultRange: string) => {
+    if (!meal || !meal.startTime || !meal.endTime) return defaultRange;
+    const format12h = (t: string) => {
+      const match = t.trim().match(/^(\d{1,2}):(\d{2})/);
+      if (!match) return t;
+      let h = parseInt(match[1], 10);
+      const m = match[2];
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      return `${h}:${m} ${ampm}`;
+    };
+    return `${format12h(meal.startTime)} – ${format12h(meal.endTime)}`;
+  };
+
+  const getMenuText = (meal: any, fallbackText: string) => {
+    if (!meal) return fallbackText;
+    if (typeof meal === 'string') return meal.trim() || fallbackText;
+    if (typeof meal === 'object') {
+      return (meal.menu || meal.name || '').trim() || fallbackText;
+    }
+    return fallbackText;
+  };
+
+  const breakfastText = getMenuText(dayRecord?.breakfast, fallback.breakfast);
+  const breakfastTime = formatMealTime(dayRecord?.breakfast, '7:30 AM – 10:00 AM');
+
+  const lunchText = getMenuText(dayRecord?.lunch, fallback.lunch);
+  const lunchTime = formatMealTime(dayRecord?.lunch, '12:30 PM – 2:30 PM');
+
+  const snacksText = getMenuText(dayRecord?.snacks, fallback.snacks);
+  const snacksTime = formatMealTime(dayRecord?.snacks, '5:00 PM – 6:30 PM');
+
+  const dinnerText = getMenuText(dayRecord?.dinner, fallback.dinner);
+  const dinnerTime = formatMealTime(dayRecord?.dinner, '8:00 PM – 10:30 PM');
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 animate-fade-in">
@@ -140,11 +185,11 @@ export const DiningModal: React.FC<DiningModalProps> = ({ isOpen, onClose }) => 
                   </div>
                   <span className="flex items-center gap-1 text-[11px] font-semibold text-brandText-muted">
                     <Clock className="h-3 w-3" />
-                    7:30 AM – 10:00 AM
+                    {breakfastTime}
                   </span>
                 </div>
                 <p className="text-xs font-medium text-brandText pl-6 pt-1">
-                  {currentMenu.breakfast}
+                  {breakfastText}
                 </p>
               </div>
 
@@ -157,11 +202,11 @@ export const DiningModal: React.FC<DiningModalProps> = ({ isOpen, onClose }) => 
                   </div>
                   <span className="flex items-center gap-1 text-[11px] font-semibold text-brandText-muted">
                     <Clock className="h-3 w-3" />
-                    12:30 PM – 2:30 PM
+                    {lunchTime}
                   </span>
                 </div>
                 <p className="text-xs font-medium text-brandText pl-6 pt-1">
-                  {currentMenu.lunch}
+                  {lunchText}
                 </p>
               </div>
 
@@ -174,11 +219,11 @@ export const DiningModal: React.FC<DiningModalProps> = ({ isOpen, onClose }) => 
                   </div>
                   <span className="flex items-center gap-1 text-[11px] font-semibold text-brandText-muted">
                     <Clock className="h-3 w-3" />
-                    5:00 PM – 6:30 PM
+                    {snacksTime}
                   </span>
                 </div>
                 <p className="text-xs font-medium text-brandText pl-6 pt-1">
-                  {currentMenu.snacks}
+                  {snacksText}
                 </p>
               </div>
 
@@ -191,11 +236,11 @@ export const DiningModal: React.FC<DiningModalProps> = ({ isOpen, onClose }) => 
                   </div>
                   <span className="flex items-center gap-1 text-[11px] font-semibold text-brandText-muted">
                     <Clock className="h-3 w-3" />
-                    8:00 PM – 10:30 PM
+                    {dinnerTime}
                   </span>
                 </div>
                 <p className="text-xs font-medium text-brandText pl-6 pt-1">
-                  {currentMenu.dinner}
+                  {dinnerText}
                 </p>
               </div>
             </>
