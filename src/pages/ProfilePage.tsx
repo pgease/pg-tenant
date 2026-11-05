@@ -58,9 +58,9 @@ export const ProfilePage: React.FC = () => {
     .toUpperCase() || 'GT';
 
   const handleShareReferral = () => {
-    const text = `Hey! Check out PG Ease to discover verified hostels and PGs with zero brokerage: https://tenant.pgease.in`;
+    const text = `Hey! Check out PG Ease to discover verified hostels and PGs with zero brokerage: https://tenant.pgease.com`;
     if (navigator.share) {
-      navigator.share({ title: 'PG Ease', text, url: 'https://tenant.pgease.in' }).catch(() => {});
+      navigator.share({ title: 'PG Ease', text, url: 'https://tenant.pgease.com' }).catch(() => {});
     } else {
       window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
     }

@@ -523,7 +523,7 @@ export const LoginPage: React.FC = () => {
           <p className="text-[11px] text-gray-400 leading-relaxed px-4">
             By signing in, you agree to our{' '}
             <a
-              href="https://pgease.in/terms"
+              href="https://pgease.com/terms"
               target="_blank"
               rel="noreferrer"
               className="text-[#008080] underline font-medium hover:text-[#006060]"
@@ -532,7 +532,7 @@ export const LoginPage: React.FC = () => {
             </a>{' '}
             and{' '}
             <a
-              href="https://pgease.in/privacy"
+              href="https://pgease.com/privacy"
               target="_blank"
               rel="noreferrer"
               className="text-[#008080] underline font-medium hover:text-[#006060]"
