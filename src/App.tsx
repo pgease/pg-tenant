@@ -14,10 +14,12 @@ import { MyPgPage } from './pages/MyPgPage';
 // Dedicated Feature Pages
 import { ComplaintsPage } from './pages/ComplaintsPage';
 import { GuestsPage } from './pages/GuestsPage';
+import { NightOutPage } from './pages/NightOutPage';
 import { DiningPage } from './pages/DiningPage';
 import { TransactionHistoryPage } from './pages/TransactionHistoryPage';
 import { WifiPage } from './pages/WifiPage';
 import { NoticePage } from './pages/NoticePage';
+import { AnnouncementsPage } from './pages/AnnouncementsPage';
 import { DocumentsPage } from './pages/DocumentsPage';
 import { NotificationsPage } from './pages/NotificationsPage';
 import { WhatsAppRedirectPage } from './pages/WhatsAppRedirectPage';
@@ -59,10 +61,15 @@ function App() {
             <Route path="transactions" element={<TransactionHistoryPage />} />
             <Route path="complaints" element={<ComplaintsPage />} />
             <Route path="guests" element={<GuestsPage />} />
+            <Route path="guest-entry" element={<GuestsPage />} />
+            <Route path="night-out" element={<NightOutPage />} />
             <Route path="food" element={<DiningPage />} />
             <Route path="dining" element={<DiningPage />} />
             <Route path="wifi" element={<WifiPage />} />
             <Route path="notice" element={<NoticePage />} />
+            <Route path="notice-period" element={<NoticePage />} />
+            <Route path="announcements" element={<AnnouncementsPage />} />
+            <Route path="notices" element={<AnnouncementsPage />} />
             <Route path="documents" element={<DocumentsPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="saved" element={<SavedPage />} />

@@ -58,12 +58,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       // Fetch both live tenancy details and profile directly from backend
       const [tenancyData, profileData] = await Promise.all([
-        authService.getTenancyDetails(),
+        authService.getTenancyDetails().catch(() => null),
         authService.getProfile().catch(() => null),
       ]);
 
-      if (profileData) {
-        setTenant(profileData);
+      const resolvedTenant = {
+        ...(tenancyData?.tenant || {}),
+        ...(profileData || {}),
+        email: profileData?.email || tenancyData?.tenant?.email || '',
+        name: profileData?.name || tenancyData?.tenant?.name || '',
+      };
+
+      if (profileData || tenancyData?.tenant) {
+        setTenant(resolvedTenant);
       }
 
       const isLinked = Boolean(tenancyData && tenancyData.isAddedToProperty);

@@ -172,7 +172,8 @@ export const tenantService = {
   // Guest Requests
   async getGuestRequests(): Promise<GuestRequest[]> {
     const { data } = await apiClient.get('/tenants/guest-requests');
-    return Array.isArray(data) ? data : data.requests || [];
+    const items = Array.isArray(data) ? data : data?.data || data?.requests || [];
+    return Array.isArray(items) ? items : [];
   },
 
   async createGuestRequest(dto: any): Promise<GuestRequest> {
@@ -183,7 +184,8 @@ export const tenantService = {
   // Night Out Requests
   async getNightOutRequests(): Promise<NightOutRequest[]> {
     const { data } = await apiClient.get('/tenants/night-out-requests');
-    return Array.isArray(data) ? data : data.requests || [];
+    const items = Array.isArray(data) ? data : data?.data || data?.requests || [];
+    return Array.isArray(items) ? items : [];
   },
 
   async createNightOutRequest(dto: any): Promise<NightOutRequest> {
@@ -194,11 +196,13 @@ export const tenantService = {
   // Agreements & Notices
   async getAgreements(): Promise<any[]> {
     const { data } = await apiClient.get('/tenants/agreements/my-agreements');
-    return Array.isArray(data) ? data : data.agreements || [];
+    const items = Array.isArray(data) ? data : data?.data || data?.agreements || [];
+    return Array.isArray(items) ? items : [];
   },
 
   async getNotices(): Promise<any[]> {
     const { data } = await apiClient.get('/tenants/notices');
-    return Array.isArray(data) ? data : data.notices || [];
+    const items = Array.isArray(data) ? data : data?.data || data?.notices || [];
+    return Array.isArray(items) ? items : [];
   },
 };

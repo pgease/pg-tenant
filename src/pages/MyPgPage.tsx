@@ -40,7 +40,12 @@ export const MyPgPage: React.FC = () => {
   const propertyName = propertyDetails?.property?.name || 'Active PG Stay';
   const propertyAddress = propertyDetails?.property?.address || propertyDetails?.property?.cityName || '';
   const roomNumber = propertyDetails?.room?.roomNumber ? `Room ${propertyDetails.room.roomNumber}` : '';
-  const monthlyRent = propertyDetails?.roomTenant?.monthlyRent ?? 0;
+  const monthlyRent = Number(
+    propertyDetails?.roomTenant?.rentAmount ??
+    (propertyDetails?.roomTenant as any)?.monthlyRent ??
+    propertyDetails?.room?.monthlyRent ??
+    0
+  );
 
   const handleManualLink = async (e: React.FormEvent) => {
     e.preventDefault();

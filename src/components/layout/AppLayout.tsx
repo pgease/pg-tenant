@@ -7,6 +7,7 @@ import { OfflineScreen } from '../common/OfflineScreen';
 import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 import { isAppMode, initAppBridge } from '../../utils/appBridge';
 import { useAuth } from '../../context/AuthContext';
+import { tenantService } from '../../services/tenantService';
 import { Bell } from 'lucide-react';
 
 export const AppLayout: React.FC = () => {
@@ -18,6 +19,16 @@ export const AppLayout: React.FC = () => {
   const [inAppMode, setInAppMode] = useState<boolean>(false);
   const [showSplash, setShowSplash] = useState<boolean>(false);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
+  const [hasUnread, setHasUnread] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      tenantService
+        .getNotices()
+        .then((data) => setHasUnread(Array.isArray(data) && data.length > 0))
+        .catch(() => setHasUnread(false));
+    }
+  }, [isAuthenticated, location.pathname]);
 
   useEffect(() => {
     const appModeActive = isAppMode();
@@ -56,10 +67,12 @@ export const AppLayout: React.FC = () => {
     if (path.startsWith('/payments/history') || path.startsWith('/transactions')) return 'Transactions';
     if (path.startsWith('/payments')) return 'Payments';
     if (path.startsWith('/complaints')) return 'Complaints';
-    if (path.startsWith('/guests')) return 'Guests & Passes';
+    if (path.startsWith('/night-out')) return 'Night Out';
+    if (path.startsWith('/guests') || path.startsWith('/guest-entry')) return 'Guest Pass';
     if (path.startsWith('/food')) return 'Food & Dining';
     if (path.startsWith('/wifi')) return 'WiFi Credentials';
-    if (path.startsWith('/notice')) return 'Notice Period';
+    if (path.startsWith('/announcements') || path.startsWith('/notices')) return 'Notice Board';
+    if (path.startsWith('/notice-period') || path.startsWith('/notice')) return 'Notice Period';
     if (path.startsWith('/documents')) return 'Documents & KYC';
     if (path.startsWith('/notifications')) return 'Notifications';
     if (path.startsWith('/profile') || path.startsWith('/menu')) return 'Menu';
@@ -114,14 +127,16 @@ export const AppLayout: React.FC = () => {
               )}
             </div>
 
-            {/* Notification Bell with Red Dot (Navigates to /notifications) */}
+            {/* Notification Bell (Navigates to /notifications) */}
             <button
               onClick={() => navigate('/notifications')}
               className="relative flex h-9 w-9 items-center justify-center rounded-full text-gray-500 hover:text-brandText hover:bg-gray-100 transition-all active:scale-95 tap-target"
               title="Notifications"
             >
               <Bell className="h-5 w-5" strokeWidth={1.8} />
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
+              {hasUnread && (
+                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
+              )}
             </button>
           </header>
         )}

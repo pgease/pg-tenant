@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { authService } from '../services/authService';
 import {
   User as UserIcon,
   LogOut,
@@ -16,17 +17,22 @@ import {
   Share2,
   CheckCircle,
   Wifi,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { StaffModal } from '../components/my-pg/StaffModal';
 import { AmenitiesModal } from '../components/my-pg/AmenitiesModal';
 
 export const ProfilePage: React.FC = () => {
-  const { isAuthenticated, isLinkedTenant, tenant, propertyDetails, logout } = useAuth();
+  const { isAuthenticated, isLinkedTenant, tenant, propertyDetails, logout, checkTenancy } = useAuth();
   const navigate = useNavigate();
 
   // Active Modals
   const [showEditModal, setShowEditModal] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [profileMsg, setProfileMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showRateModal, setShowRateModal] = useState(false);
   const [showReferModal, setShowReferModal] = useState(false);
   const [showStaffModal, setShowStaffModal] = useState(false);
@@ -37,6 +43,51 @@ export const ProfilePage: React.FC = () => {
   // Profile Form State
   const [name, setName] = useState(tenant?.name || '');
   const [email, setEmail] = useState(tenant?.email || '');
+
+  // Keep local fields in sync with auth context tenant data
+  useEffect(() => {
+    if (tenant) {
+      if (tenant.name) setName(tenant.name);
+      if (tenant.email) setEmail(tenant.email);
+    }
+  }, [tenant]);
+
+  const handleOpenEditModal = () => {
+    setName(tenant?.name || '');
+    setEmail(tenant?.email || '');
+    setProfileMsg(null);
+    setShowEditModal(true);
+  };
+
+  const handleSaveProfile = async () => {
+    setProfileMsg(null);
+    const trimmedEmail = email.trim();
+    if (trimmedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      setProfileMsg({ type: 'error', text: 'Please enter a valid email address.' });
+      return;
+    }
+
+    setIsSavingProfile(true);
+    try {
+      await authService.updateProfile({
+        name: name.trim() || undefined,
+        email: trimmedEmail || undefined,
+      });
+      await checkTenancy();
+      setProfileMsg({ type: 'success', text: 'Profile updated successfully!' });
+      setTimeout(() => {
+        setShowEditModal(false);
+        setProfileMsg(null);
+      }, 1000);
+    } catch (err: any) {
+      setProfileMsg({
+        type: 'error',
+        text: err?.response?.data?.message || 'Failed to update profile. Please try again.',
+      });
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
   const phone = tenant?.phone
     ? tenant.phone.startsWith('+91')
       ? tenant.phone
@@ -145,7 +196,7 @@ export const ProfilePage: React.FC = () => {
           {/* Edit Profile */}
           <button
             type="button"
-            onClick={() => (isAuthenticated ? setShowEditModal(true) : navigate('/login'))}
+            onClick={() => (isAuthenticated ? handleOpenEditModal() : navigate('/login'))}
             className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors tap-target"
           >
             <div className="flex items-center gap-3">
@@ -343,18 +394,46 @@ export const ProfilePage: React.FC = () => {
           <div className="w-full max-w-sm rounded-3xl bg-white p-5 shadow-xl space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-brandText">Edit Profile</h3>
-              <button onClick={() => setShowEditModal(false)} className="rounded-full p-1 text-gray-400 hover:bg-gray-100">
+              <button
+                onClick={() => {
+                  if (!isSavingProfile) {
+                    setShowEditModal(false);
+                    setProfileMsg(null);
+                  }
+                }}
+                className="rounded-full p-1 text-gray-400 hover:bg-gray-100"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
+
+            {profileMsg && (
+              <div
+                className={`rounded-2xl p-3 text-xs font-semibold flex items-center gap-2 ${
+                  profileMsg.type === 'success'
+                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                    : 'bg-rose-50 text-rose-800 border border-rose-200'
+                }`}
+              >
+                {profileMsg.type === 'success' ? (
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 text-rose-600 shrink-0" />
+                )}
+                <span>{profileMsg.text}</span>
+              </div>
+            )}
+
             <div className="space-y-3">
               <div>
                 <label className="text-xs font-semibold text-gray-600 block mb-1">Full Name</label>
                 <input
                   type="text"
                   value={name}
+                  disabled={isSavingProfile}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-brandText focus:border-primary focus:outline-none"
+                  placeholder="Your full name"
                 />
               </div>
               <div>
@@ -362,8 +441,10 @@ export const ProfilePage: React.FC = () => {
                 <input
                   type="email"
                   value={email}
+                  disabled={isSavingProfile}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-brandText focus:border-primary focus:outline-none"
+                  placeholder="e.g. resident@example.com"
                 />
               </div>
               <div>
@@ -374,22 +455,37 @@ export const ProfilePage: React.FC = () => {
                   value={phone}
                   className="w-full rounded-xl border border-gray-100 bg-gray-50 px-3 py-2 text-sm text-gray-500 cursor-not-allowed"
                 />
+                <span className="text-[10px] text-gray-400 block mt-1">
+                  Mobile number cannot be changed here. Contact your PG manager.
+                </span>
               </div>
             </div>
             <div className="pt-2 flex gap-2">
               <button
                 type="button"
-                onClick={() => setShowEditModal(false)}
-                className="flex-1 rounded-xl border border-gray-200 py-2.5 text-xs font-bold text-gray-600 hover:bg-gray-50"
+                disabled={isSavingProfile}
+                onClick={() => {
+                  setShowEditModal(false);
+                  setProfileMsg(null);
+                }}
+                className="flex-1 rounded-xl border border-gray-200 py-2.5 text-xs font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="button"
-                onClick={() => setShowEditModal(false)}
-                className="flex-1 rounded-xl bg-primary py-2.5 text-xs font-bold text-white shadow-sm hover:bg-primary-dark"
+                disabled={isSavingProfile}
+                onClick={handleSaveProfile}
+                className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-primary py-2.5 text-xs font-bold text-white shadow-sm hover:bg-primary-dark disabled:opacity-60"
               >
-                Save
+                {isSavingProfile ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <span>Save</span>
+                )}
               </button>
             </div>
           </div>

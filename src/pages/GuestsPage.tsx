@@ -192,7 +192,7 @@ export const GuestsPage: React.FC = () => {
         relationship: g.relationship.trim() || undefined,
       }));
 
-      await tenantService.createGuestRequest({
+      const created = await tenantService.createGuestRequest({
         guestName: primary.name.trim(),
         guestPhone: primary.phone.trim() || undefined,
         guestGender: primary.gender || undefined,
@@ -208,6 +208,9 @@ export const GuestsPage: React.FC = () => {
       setGuests([{ name: '', gender: 'Male', phone: '', relationship: 'Friend' }]);
       setPurpose('');
       setShowForm(false);
+      if (created) {
+        setGuestList((prev) => [created, ...prev]);
+      }
       loadData();
       setTimeout(() => setMsg(''), 4500);
     } catch (err: any) {

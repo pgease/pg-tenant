@@ -67,7 +67,28 @@ export const NoticePage: React.FC = () => {
     }
   };
 
-  const isUnderNotice = noticeData?.isUnderNotice || propertyDetails?.roomTenant?.status === 'UNDER_NOTICE';
+  const isUnderNotice = Boolean(
+    noticeData?.isUnderNotice ||
+    noticeData?.notice?.isOnNotice ||
+    propertyDetails?.roomTenant?.status === 'UNDER_NOTICE' ||
+    propertyDetails?.roomTenant?.isOnNotice
+  );
+
+  const noticeStartedDate =
+    noticeData?.notice?.noticeStartedAt ||
+    propertyDetails?.roomTenant?.noticeStartedAt ||
+    propertyDetails?.roomTenant?.startDate;
+
+  const vacateDateVal =
+    noticeData?.notice?.vacateOn ||
+    propertyDetails?.roomTenant?.vacateOn;
+
+  const daysLeft =
+    noticeData?.notice?.daysUntilVacate != null
+      ? noticeData.notice.daysUntilVacate
+      : vacateDateVal
+      ? Math.ceil((new Date(vacateDateVal).getTime() - new Date().setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24))
+      : null;
 
   return (
     <div className="space-y-4 pt-1 pb-6 animate-fade-in">
@@ -94,23 +115,50 @@ export const NoticePage: React.FC = () => {
 
       {isUnderNotice ? (
         /* Active Notice Status Card */
-        <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-5 shadow-sm space-y-3.5">
-          <div className="flex items-center gap-2 text-amber-800 font-bold text-sm">
-            <Clock className="h-5 w-5 text-amber-600" />
-            <span>Active Move-Out Notice</span>
+        <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-5 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-amber-900 font-bold text-sm">
+              <Clock className="h-5 w-5 text-amber-600" />
+              <span>Active Move-Out Notice</span>
+            </div>
+            <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-bold text-amber-800">
+              Under Notice
+            </span>
           </div>
 
-          <p className="text-xs text-amber-900 leading-relaxed">
-            Your checkout notice has been registered with the property manager. Please coordinate with the owner for room inspection and security deposit settlement.
+          <div className="grid grid-cols-2 gap-2 text-xs bg-white/90 p-3 rounded-xl border border-amber-200/60">
+            <div>
+              <span className="text-[10px] text-gray-500 block font-semibold">NOTICE SERVED</span>
+              <span className="font-bold text-gray-900">
+                {noticeStartedDate ? new Date(noticeStartedDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recently'}
+              </span>
+            </div>
+            <div>
+              <span className="text-[10px] text-gray-500 block font-semibold">SCHEDULED VACATE</span>
+              <span className="font-bold text-amber-900 underline">
+                {vacateDateVal ? new Date(vacateDateVal).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Scheduled'}
+              </span>
+            </div>
+          </div>
+
+          {daysLeft != null && (
+            <p className="text-xs font-semibold text-amber-800">
+              ⏳ {daysLeft > 0 ? `${daysLeft} days remaining until move-out` : daysLeft === 0 ? 'Vacating today' : 'Notice period completed'}
+            </p>
+          )}
+
+          <p className="text-xs text-amber-900/90 leading-relaxed">
+            Your checkout notice has been registered with the property manager. Please coordinate with the owner for room inspection, key handover, and security deposit settlement.
           </p>
 
           <button
             type="button"
             onClick={handleCancelNotice}
             disabled={submitting}
-            className="w-full rounded-xl border border-amber-300 bg-white py-2.5 text-xs font-bold text-amber-800 hover:bg-amber-100/50"
+            className="w-full flex items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-white py-2.5 text-xs font-bold text-amber-800 hover:bg-amber-100/50 disabled:opacity-50"
           >
-            Cancel Notice Request
+            {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+            <span>Cancel Notice Request</span>
           </button>
         </div>
       ) : (

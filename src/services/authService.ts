@@ -29,6 +29,13 @@ export interface AuthResponse {
 export interface TenancyDetailsResponse {
   isAddedToProperty: boolean;
   message?: string;
+  tenant?: {
+    id: string;
+    name?: string;
+    phone?: string;
+    email?: string;
+    [key: string]: any;
+  } | null;
   property?: {
     id: string;
     name: string;
@@ -45,6 +52,8 @@ export interface TenancyDetailsResponse {
     roomNumber: string;
     floorNumber?: number;
     sharingType?: string;
+    monthlyRent?: number;
+    [key: string]: any;
   } | null;
   bed?: {
     id: string;
@@ -54,9 +63,15 @@ export interface TenancyDetailsResponse {
   roomTenant?: {
     id: string;
     monthlyRent?: number;
+    rentAmount?: number;
     securityDeposit?: number;
     joiningDate?: string;
+    startDate?: string;
     status?: string;
+    isOnNotice?: boolean;
+    noticeStartedAt?: string;
+    vacateOn?: string;
+    [key: string]: any;
   } | null;
   notice?: any | null;
   wifi?: {
@@ -121,12 +136,7 @@ export const authService = {
    * Update tenant profile details
    */
   async updateProfile(payload: { name?: string; email?: string }): Promise<any> {
-    try {
-      const { data } = await apiClient.patch('/tenants/profile', payload);
-      return data;
-    } catch {
-      // Fallback update
-      return payload;
-    }
+    const { data } = await apiClient.patch('/tenants/profile', payload);
+    return data;
   },
 };

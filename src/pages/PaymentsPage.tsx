@@ -46,7 +46,14 @@ export const PaymentsPage: React.FC = () => {
     loadPaymentData();
   }, [isAuthenticated, isLinkedTenant]);
 
-  const amountDue = dues?.totalPayable ?? propertyDetails?.roomTenant?.monthlyRent ?? 0;
+  const monthlyRent = Number(
+    propertyDetails?.roomTenant?.rentAmount ??
+    (propertyDetails?.roomTenant as any)?.monthlyRent ??
+    propertyDetails?.room?.monthlyRent ??
+    dues?.lineItems?.rent?.amount ??
+    0
+  );
+  const amountDue = Number(dues?.totalPayable ?? dues?.summary?.balanceDue ?? monthlyRent);
   const isPaid = dues?.status === 'paid' || (amountDue === 0 && Boolean(propertyDetails));
 
   const formatDueDate = () => {
@@ -125,31 +132,32 @@ export const PaymentsPage: React.FC = () => {
       />
 
       {/* 1. Metric Cards (Dynamic from live backend data) */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-2.5">
+        {/* Monthly Rent */}
+        <div className="rounded-2xl border border-gray-100 bg-white p-3.5 shadow-sm">
+          <span className="text-[11px] font-semibold text-gray-500 block truncate">Monthly Rent</span>
+          <p className="text-base font-black text-brandText mt-0.5 truncate">
+            ₹{monthlyRent.toLocaleString('en-IN')}
+          </p>
+          <span className="text-[10px] text-gray-400 font-medium">Standard rent</span>
+        </div>
+
         {/* Due Card */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-50 text-red-500">
-            <Clock className="h-5 w-5" />
-          </div>
-          <div>
-            <span className="text-xs font-semibold text-gray-500">Due</span>
-            <p className="text-base font-black text-brandText">
-              ₹{isPaid ? '0' : amountDue.toLocaleString('en-IN')}
-            </p>
-          </div>
+        <div className="rounded-2xl border border-gray-100 bg-white p-3.5 shadow-sm">
+          <span className="text-[11px] font-semibold text-red-500 block truncate">Outstanding Due</span>
+          <p className="text-base font-black text-brandText mt-0.5 truncate">
+            ₹{isPaid ? '0' : amountDue.toLocaleString('en-IN')}
+          </p>
+          <span className="text-[10px] text-gray-400 font-medium">Total balance</span>
         </div>
 
         {/* Paid Card */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-            <CheckCircle2 className="h-5 w-5" />
-          </div>
-          <div>
-            <span className="text-xs font-semibold text-gray-500">Paid to Date</span>
-            <p className="text-base font-black text-brandText">
-              ₹{totalPaid.toLocaleString('en-IN')}
-            </p>
-          </div>
+        <div className="rounded-2xl border border-gray-100 bg-white p-3.5 shadow-sm">
+          <span className="text-[11px] font-semibold text-emerald-600 block truncate">Paid to Date</span>
+          <p className="text-base font-black text-brandText mt-0.5 truncate">
+            ₹{totalPaid.toLocaleString('en-IN')}
+          </p>
+          <span className="text-[10px] text-gray-400 font-medium">Total cleared</span>
         </div>
       </div>
 
@@ -158,13 +166,13 @@ export const PaymentsPage: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <span className="text-xs font-medium text-white/80">
-              {isPaid ? 'Current Month Status' : 'Amount Due'}
+              {isPaid ? 'Current Month Status' : 'Total Outstanding Balance'}
             </span>
             <h2 className="text-2xl font-black mt-0.5">
               ₹{amountDue.toLocaleString('en-IN')}
             </h2>
             <p className="text-xs text-white/80 mt-1">
-              {isPaid ? 'All rent dues cleared' : formatDueDate()}
+              Monthly Rent: ₹{monthlyRent.toLocaleString('en-IN')} • {isPaid ? 'All rent dues cleared' : formatDueDate()}
             </p>
           </div>
 
@@ -219,13 +227,14 @@ export const PaymentsPage: React.FC = () => {
       <div className="space-y-2.5">
         <div className="flex items-center justify-between px-1">
           <h3 className="text-xs font-bold text-brandText uppercase tracking-wider">
-            Transaction History
+            Transaction History ({transactions.length})
           </h3>
           <button
             onClick={() => navigate('/transactions')}
-            className="text-xs font-semibold text-primary hover:underline"
+            className="text-xs font-semibold text-primary hover:underline flex items-center gap-0.5"
           >
-            View All
+            <span>Full Ledger</span>
+            <ChevronRight className="h-3.5 w-3.5" />
           </button>
         </div>
 
@@ -243,7 +252,7 @@ export const PaymentsPage: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-2.5">
-            {transactions.slice(0, 4).map((tx) => {
+            {transactions.map((tx) => {
               const isSuccess = tx.status === 'SUCCESS' || tx.status === 'PAID' || tx.status === 'paid';
               return (
                 <div

@@ -19,6 +19,7 @@ import {
   MapPin,
   CheckCircle2,
   AlertCircle,
+  DoorOpen,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
@@ -50,6 +51,18 @@ export const HomePage: React.FC = () => {
   // Live resident widgets data
   const [todayDining, setTodayDining] = useState<any>(null);
   const [rentDues, setRentDues] = useState<RentCollectionDetails | null>(null);
+  const [hasUnreadNotices, setHasUnreadNotices] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      tenantService
+        .getNotices()
+        .then((list) => {
+          setHasUnreadNotices(Array.isArray(list) && list.length > 0);
+        })
+        .catch(() => setHasUnreadNotices(false));
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (isLinkedTenant) {
@@ -255,7 +268,9 @@ export const HomePage: React.FC = () => {
             title="Notifications"
           >
             <Bell className="h-4 w-4" />
-            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
+            {hasUnreadNotices && (
+              <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
+            )}
           </button>
         </div>
       </div>
@@ -353,26 +368,26 @@ export const HomePage: React.FC = () => {
 
           {/* 2. Night Out */}
           <button
-            onClick={() => navigate('/guests?tab=nightout')}
+            onClick={() => navigate('/night-out')}
             className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-3 text-center shadow-xs hover:border-indigo-200 hover:bg-indigo-50/20 active:scale-95 transition-all group tap-target"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 group-hover:scale-105 transition-transform">
               <Moon className="h-5 w-5" />
             </div>
             <span className="mt-2 text-xs font-bold text-gray-800">Night Out</span>
-            <span className="text-[10px] text-gray-400 mt-0.5">Leave Notice</span>
+            <span className="text-[10px] text-gray-400 mt-0.5">Overnight Leave</span>
           </button>
 
           {/* 3. Guest Entry */}
           <button
-            onClick={() => navigate('/guests?tab=guests')}
+            onClick={() => navigate('/guests')}
             className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-3 text-center shadow-xs hover:border-teal-200 hover:bg-teal-50/20 active:scale-95 transition-all group tap-target"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-600 group-hover:scale-105 transition-transform">
               <Users className="h-5 w-5" />
             </div>
             <span className="mt-2 text-xs font-bold text-gray-800">Guest Pass</span>
-            <span className="text-[10px] text-gray-400 mt-0.5">Visitor Entry</span>
+            <span className="text-[10px] text-gray-400 mt-0.5">Visitor Check-in</span>
           </button>
 
           {/* 4. Complaints */}
@@ -399,16 +414,28 @@ export const HomePage: React.FC = () => {
             <span className="text-[10px] text-gray-400 mt-0.5">Pass & Network</span>
           </button>
 
-          {/* 6. Notices */}
+          {/* 6. Notices / Announcements */}
           <button
-            onClick={() => navigate('/notice')}
+            onClick={() => navigate('/announcements')}
             className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-3 text-center shadow-xs hover:border-purple-200 hover:bg-purple-50/20 active:scale-95 transition-all group tap-target"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600 group-hover:scale-105 transition-transform">
               <BellRing className="h-5 w-5" />
             </div>
-            <span className="mt-2 text-xs font-bold text-gray-800">Notices</span>
+            <span className="mt-2 text-xs font-bold text-gray-800">Notice Board</span>
             <span className="text-[10px] text-gray-400 mt-0.5">Announcements</span>
+          </button>
+
+          {/* 7. Notice Period / Move Out */}
+          <button
+            onClick={() => navigate('/notice')}
+            className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-3 text-center shadow-xs hover:border-amber-200 hover:bg-amber-50/20 active:scale-95 transition-all group tap-target"
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-700 group-hover:scale-105 transition-transform">
+              <DoorOpen className="h-5 w-5" />
+            </div>
+            <span className="mt-2 text-xs font-bold text-gray-800">Notice Period</span>
+            <span className="text-[10px] text-gray-400 mt-0.5">I'm Leaving</span>
           </button>
         </div>
       </div>
