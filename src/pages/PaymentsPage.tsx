@@ -195,30 +195,30 @@ export const PaymentsPage: React.FC = () => {
         </h3>
 
         <div className="grid grid-cols-2 gap-3">
-          {/* UPI */}
+          {/* UPI Instant Gateway */}
           <button
             type="button"
             onClick={() => setShowPayModal(true)}
-            className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-4 shadow-sm hover:border-teal-200 active:scale-98 transition-all tap-target"
+            className="flex flex-col items-center justify-center rounded-2xl border border-teal-100 bg-white p-4 shadow-sm hover:border-teal-300 active:scale-98 transition-all tap-target text-center"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-50 text-primary mb-2">
               <Smartphone className="h-5 w-5" />
             </div>
-            <span className="text-xs font-bold text-brandText">UPI</span>
+            <span className="text-xs font-bold text-brandText">UPI Instant</span>
             <span className="text-[10px] text-gray-400 mt-0.5">GPay, PhonePe, Paytm</span>
           </button>
 
-          {/* Card / NetBanking */}
+          {/* Direct UPI / UTR */}
           <button
             type="button"
             onClick={() => setShowPayModal(true)}
-            className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-4 shadow-sm hover:border-teal-200 active:scale-98 transition-all tap-target"
+            className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-4 shadow-sm hover:border-teal-200 active:scale-98 transition-all tap-target text-center"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-50 text-primary mb-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 text-gray-700 mb-2">
               <CreditCard className="h-5 w-5" />
             </div>
-            <span className="text-xs font-bold text-brandText">Card</span>
-            <span className="text-[10px] text-gray-400 mt-0.5">Debit / Credit / NetBanking</span>
+            <span className="text-xs font-bold text-brandText">Direct UPI / UTR</span>
+            <span className="text-[10px] text-gray-400 mt-0.5">QR Code & Bank Transfer</span>
           </button>
         </div>
       </div>

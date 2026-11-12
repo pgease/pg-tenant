@@ -163,8 +163,10 @@ export const TransactionHistoryPage: React.FC = () => {
 
                 <div className="flex items-center justify-between border-t border-gray-50 pt-2 text-[11px] text-gray-500">
                   <div className="flex items-center gap-2">
-                    <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-600">
-                      {tx.paymentMethod || 'UPI'}
+                    <span className="rounded-md bg-teal-50 text-teal-800 px-1.5 py-0.5 text-[9px] font-bold">
+                      {tx.paymentMethod?.toLowerCase().includes('easebuzz') || tx.paymentMethod === 'online'
+                        ? 'UPI Auto-verified'
+                        : tx.paymentMethod || 'UPI'}
                     </span>
                     {tx.transactionId && (
                       <span className="text-[10px] text-gray-400 truncate max-w-[140px]">

@@ -17,6 +17,7 @@ import { GuestsPage } from './pages/GuestsPage';
 import { NightOutPage } from './pages/NightOutPage';
 import { DiningPage } from './pages/DiningPage';
 import { TransactionHistoryPage } from './pages/TransactionHistoryPage';
+import { PaymentResultPage } from './pages/PaymentResultPage';
 import { WifiPage } from './pages/WifiPage';
 import { NoticePage } from './pages/NoticePage';
 import { AnnouncementsPage } from './pages/AnnouncementsPage';
@@ -57,6 +58,7 @@ function App() {
             <Route index element={<RootRoute />} />
             <Route path="search" element={<SearchPage />} />
             <Route path="payments" element={<PaymentsPage />} />
+            <Route path="payments/result" element={<PaymentResultPage />} />
             <Route path="payments/history" element={<TransactionHistoryPage />} />
             <Route path="transactions" element={<TransactionHistoryPage />} />
             <Route path="complaints" element={<ComplaintsPage />} />

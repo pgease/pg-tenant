@@ -205,4 +205,52 @@ export const tenantService = {
     const items = Array.isArray(data) ? data : data?.data || data?.notices || [];
     return Array.isArray(items) ? items : [];
   },
+
+  // Easebuzz Gateway Integration
+  async getEasebuzzConfig(): Promise<{ available: boolean; checkoutMode: 'hosted' | 'seamless_upi'; reason?: string }> {
+    try {
+      const { data } = await apiClient.get('/tenants/payments/easebuzz/config');
+      return data;
+    } catch {
+      return { available: false, checkoutMode: 'hosted', reason: 'Service unavailable' };
+    }
+  },
+
+  async createEasebuzzPayment(dto: { dueIds?: string[]; checkoutMode?: 'hosted' | 'seamless_upi' } = {}): Promise<{
+    success: boolean;
+    txnid: string;
+    checkoutMode: 'hosted' | 'seamless_upi';
+    checkoutUrl?: string;
+    accessKey: string;
+    amount: string;
+    currency: string;
+  }> {
+    const { data } = await apiClient.post('/tenants/payments/easebuzz/create', dto);
+    return data;
+  },
+
+  async getEasebuzzPaymentStatus(txnid: string): Promise<{
+    txnid: string;
+    status: 'INITIATED' | 'PENDING' | 'SUCCESS' | 'FAILED' | 'CANCELLED';
+    settlementStatus?: string;
+    amount: string;
+    currency: string;
+    easepayid?: string;
+    bankRefNum?: string;
+    utr?: string;
+    mode?: string;
+    paidAt?: string;
+    createdAt?: string;
+  }> {
+    const { data } = await apiClient.get(`/tenants/payments/easebuzz/${encodeURIComponent(txnid)}/status`);
+    return data;
+  },
+
+  async initiateSeamlessUpi(
+    txnid: string,
+    body: { method: 'collect' | 'qr'; upiId?: string },
+  ): Promise<any> {
+    const { data } = await apiClient.post(`/tenants/payments/easebuzz/${encodeURIComponent(txnid)}/upi`, body);
+    return data;
+  },
 };

@@ -31,6 +31,14 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
   const [paymentMode, setPaymentMode] = useState<'gateway' | 'manual'>('gateway');
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
+  // Gateway state
+  const [gatewayConfig, setGatewayConfig] = useState<{
+    available: boolean;
+    checkoutMode: 'hosted' | 'seamless_upi';
+    reason?: string;
+  }>({ available: false, checkoutMode: 'hosted' });
+  const [isInitiatingGateway, setIsInitiatingGateway] = useState(false);
+
   // Manual payment submission state
   const [utrNumber, setUtrNumber] = useState('');
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
@@ -39,7 +47,56 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Check gateway availability on open
+  React.useEffect(() => {
+    if (!isOpen) return;
+    let isMounted = true;
+    tenantService
+      .getEasebuzzConfig()
+      .then((cfg) => {
+        if (!isMounted) return;
+        setGatewayConfig(cfg);
+        if (cfg.available) {
+          setPaymentMode('gateway');
+        } else {
+          setPaymentMode('manual');
+        }
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setGatewayConfig({ available: false, checkoutMode: 'hosted' });
+        setPaymentMode('manual');
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen]);
+
   if (!isOpen || !dues) return null;
+
+  const handleInitiateGateway = async () => {
+    if (dues.totalPayable <= 0) return;
+    setErrorMessage(null);
+    setIsInitiatingGateway(true);
+    try {
+      const res = await tenantService.createEasebuzzPayment({
+        checkoutMode: gatewayConfig.checkoutMode,
+      });
+
+      if (res.checkoutUrl) {
+        window.location.href = res.checkoutUrl;
+      } else {
+        throw new Error('Checkout URL not received from gateway. Please try direct UPI.');
+      }
+    } catch (err: any) {
+      setErrorMessage(
+        err?.response?.data?.message || err.message || 'Failed to initiate online UPI payment. Please try manual UPI.',
+      );
+    } finally {
+      setIsInitiatingGateway(false);
+    }
+  };
 
   const copyToClipboard = (text: string, fieldName: string) => {
     navigator.clipboard.writeText(text);
@@ -168,7 +225,10 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
               }`}
             >
               <CreditCard className="h-3.5 w-3.5" />
-              Online Gateway
+              <span>Instant UPI Pay</span>
+              {gatewayConfig.available && (
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              )}
             </button>
             <button
               type="button"
@@ -180,42 +240,85 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
               }`}
             >
               <QrCode className="h-3.5 w-3.5" />
-              UPI QR / Manual UTR
+              <span>Direct UPI / UTR</span>
             </button>
           </div>
 
           {/* MODE 1: ONLINE GATEWAY */}
           {paymentMode === 'gateway' && (
             <div className="space-y-4 animate-fade-in">
-              <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm space-y-3">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-brandText-muted">Payment Gateway</span>
-                  <span className="font-bold text-brandText">Razorpay Secure</span>
+              {errorMessage && (
+                <div className="flex items-center gap-2 rounded-xl bg-red-50 p-3 text-xs text-red-700 border border-red-200">
+                  <AlertCircle className="h-4 w-4 flex-shrink-0 text-red-500" />
+                  <span>{errorMessage}</span>
                 </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-brandText-muted">Supported Methods</span>
-                  <span className="font-medium text-brandText">UPI • Debit/Credit • NetBanking</span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-brandText-muted">Convenience Fee</span>
-                  <span className="font-bold text-emerald-600">₹0 (Zero Fee)</span>
-                </div>
-              </div>
+              )}
 
-              <a
-                href={dues.paymentLink || '#'}
-                target="_blank"
-                rel="noreferrer"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-4 text-sm font-bold text-white shadow-lg shadow-primary/25 hover:bg-primary-dark active:scale-[0.98] transition-all tap-target"
-              >
-                <span>Proceed to Pay ₹{dues.totalPayable.toLocaleString('en-IN')}</span>
-                <ArrowRight className="h-4 w-4" />
-              </a>
+              {gatewayConfig.available ? (
+                <>
+                  <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm space-y-3">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-brandText-muted">Payment Gateway</span>
+                      <span className="font-bold text-brandText">Easebuzz Instant UPI</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-brandText-muted">Supported Methods</span>
+                      <span className="font-medium text-brandText">GPay • PhonePe • Paytm • BHIM</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-brandText-muted">Settlement</span>
+                      <span className="font-medium text-brandText">Owner Registered Bank Account</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-brandText-muted">Convenience Fee</span>
+                      <span className="font-bold text-emerald-600">₹0 (Zero Fee)</span>
+                    </div>
+                  </div>
 
-              <p className="text-center text-[11px] text-brandText-muted flex items-center justify-center gap-1">
-                <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-                256-bit encrypted checkout with instant receipt generation
-              </p>
+                  <button
+                    type="button"
+                    onClick={handleInitiateGateway}
+                    disabled={isInitiatingGateway || dues.totalPayable <= 0}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-4 text-sm font-bold text-white shadow-lg shadow-primary/25 disabled:opacity-50 hover:bg-primary-dark active:scale-[0.98] transition-all tap-target"
+                  >
+                    {isInitiatingGateway ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Opening UPI Gateway...</span>
+                      </>
+                    ) : dues.totalPayable <= 0 ? (
+                      <span>No Dues Pending (₹0)</span>
+                    ) : (
+                      <>
+                        <span>Pay ₹{dues.totalPayable.toLocaleString('en-IN')} via UPI</span>
+                        <ArrowRight className="h-4 w-4" />
+                      </>
+                    )}
+                  </button>
+
+                  <p className="text-center text-[11px] text-brandText-muted flex items-center justify-center gap-1">
+                    <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                    256-bit encrypted Easebuzz checkout with instant receipt generation
+                  </p>
+                </>
+              ) : (
+                <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 space-y-3 text-center">
+                  <AlertCircle className="h-6 w-6 text-amber-600 mx-auto" />
+                  <div>
+                    <h3 className="text-xs font-bold text-brandText">Online Instant Gateway Inactive</h3>
+                    <p className="text-[11px] text-brandText-muted mt-0.5">
+                      Your PG property currently accepts direct UPI transfers. Please use the Direct UPI tab to pay and submit your reference.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMode('manual')}
+                    className="rounded-xl bg-amber-600 px-4 py-2 text-xs font-bold text-white hover:bg-amber-700 shadow-sm transition-all"
+                  >
+                    Switch to Direct UPI / UTR
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
