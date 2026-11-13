@@ -421,9 +421,9 @@ export const MyPgPage: React.FC = () => {
       <TenantInventoryModal
         open={showInventoryModal}
         onClose={() => setShowInventoryModal(false)}
-        tenantId={propertyDetails?.roomTenant?.id || 't1'}
-        roomNumber={String(propertyDetails?.room?.roomNumber || '301')}
-        bedNumber={String(propertyDetails?.roomTenant?.bedNumber || '1')}
+        tenantId={propertyDetails?.roomTenant?.id || propertyDetails?.tenant?.id || ''}
+        roomNumber={String(propertyDetails?.room?.roomNumber || '')}
+        bedNumber={String(propertyDetails?.roomTenant?.bedNumber || propertyDetails?.tenant?.bedNumber || '')}
       />
     </div>
   );

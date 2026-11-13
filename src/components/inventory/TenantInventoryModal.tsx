@@ -26,8 +26,8 @@ export const TenantInventoryModal: React.FC<TenantInventoryModalProps> = ({
   open,
   onClose,
   tenantId,
-  roomNumber = '301',
-  bedNumber = '1',
+  roomNumber = '',
+  bedNumber = '',
 }) => {
   const [loading, setLoading] = useState(true);
   const [snapshot, setSnapshot] = useState<TenantInventorySnapshot | null>(null);
@@ -125,42 +125,52 @@ export const TenantInventoryModal: React.FC<TenantInventoryModalProps> = ({
 
             {/* Items List */}
             <div className="space-y-2">
-              {(activeTab === 'bed' ? snapshot?.bedItems : snapshot?.roomItems)?.map(
-                (item, idx) => (
-                  <div
-                    key={idx}
-                    className="rounded-2xl border border-gray-100 bg-white p-3 shadow-xs hover:border-gray-200 transition-all flex items-center justify-between"
-                  >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-gray-900 text-xs">{item.name}</span>
-                        <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold text-gray-600">
-                          Qty: {item.qty}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2.5 text-[10px] text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <CheckCircle2 className="h-3 w-3 text-emerald-600" />
-                          Condition: <strong className="capitalize text-gray-700">{item.condition}</strong>
-                        </span>
-                        {item.serialOrTag && (
-                          <span className="flex items-center gap-1 text-gray-400">
-                            <Tag className="h-3 w-3" /> {item.serialOrTag}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <span
-                      className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
-                        item.condition === 'new'
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                          : 'bg-blue-50 text-blue-700 border border-blue-200'
-                      }`}
+              {((activeTab === 'bed' ? snapshot?.bedItems : snapshot?.roomItems) || []).length === 0 ? (
+                <div className="py-8 text-center border border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
+                  <Package className="h-7 w-7 mx-auto text-gray-300 mb-1.5" />
+                  <p className="text-xs font-semibold text-gray-600">No items registered</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">
+                    No items have been assigned to your {activeTab === 'bed' ? 'bed' : 'room'} yet.
+                  </p>
+                </div>
+              ) : (
+                (activeTab === 'bed' ? snapshot?.bedItems : snapshot?.roomItems)?.map(
+                  (item, idx) => (
+                    <div
+                      key={idx}
+                      className="rounded-2xl border border-gray-100 bg-white p-3 shadow-xs hover:border-gray-200 transition-all flex items-center justify-between"
                     >
-                      Verified
-                    </span>
-                  </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-gray-900 text-xs">{item.name}</span>
+                          <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold text-gray-600">
+                            Qty: {item.qty}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2.5 text-[10px] text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                            Condition: <strong className="capitalize text-gray-700">{item.condition}</strong>
+                          </span>
+                          {item.serialOrTag && (
+                            <span className="flex items-center gap-1 text-gray-400">
+                              <Tag className="h-3 w-3" /> {item.serialOrTag}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <span
+                        className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                          item.condition === 'new'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : 'bg-blue-50 text-blue-700 border border-blue-200'
+                        }`}
+                      >
+                        Verified
+                      </span>
+                    </div>
+                  )
                 )
               )}
             </div>

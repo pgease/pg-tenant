@@ -42,15 +42,18 @@ export const NoticePage: React.FC = () => {
       // Graceful fallback
     }
 
-    const tenantId = propertyDetails?.roomTenant?.id || 't1';
-    inventoryService
-      .getCheckoutSummary(tenantId)
-      .then((summary) => setCheckoutSummary(summary))
-      .catch(() => {});
+    const tenantId = propertyDetails?.roomTenant?.id || propertyDetails?.tenant?.id || '';
+    if (tenantId) {
+      inventoryService
+        .getCheckoutSummary(tenantId)
+        .then((summary) => setCheckoutSummary(summary))
+        .catch(() => {});
+    }
   };
 
   const handleAgree = async () => {
-    const tenantId = propertyDetails?.roomTenant?.id || 't1';
+    const tenantId = propertyDetails?.roomTenant?.id || propertyDetails?.tenant?.id || '';
+    if (!tenantId) return;
     setAcknowledging(true);
     try {
       await inventoryService.acknowledgeCheckout(tenantId, { agree: true });
@@ -67,7 +70,8 @@ export const NoticePage: React.FC = () => {
   const handleDispute = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!disputeText.trim()) return;
-    const tenantId = propertyDetails?.roomTenant?.id || 't1';
+    const tenantId = propertyDetails?.roomTenant?.id || propertyDetails?.tenant?.id || '';
+    if (!tenantId) return;
     setAcknowledging(true);
     try {
       await inventoryService.acknowledgeCheckout(tenantId, {
