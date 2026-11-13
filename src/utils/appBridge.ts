@@ -26,8 +26,12 @@ export function isAppMode(): boolean {
   const hasAppParam = urlParams.get('app') === '1';
   const hasUserAgent = window.navigator.userAgent.includes('PGEaseApp');
   const storedAppMode = localStorage.getItem(STORAGE_KEY) === 'true';
+  const isCapacitorNative = Boolean(
+    (window as any).Capacitor?.isNativePlatform?.() ||
+    ((window as any).Capacitor?.getPlatform?.() && (window as any).Capacitor?.getPlatform?.() !== 'web')
+  );
 
-  if (hasAppParam || hasUserAgent) {
+  if (hasAppParam || hasUserAgent || isCapacitorNative) {
     localStorage.setItem(STORAGE_KEY, 'true');
     return true;
   }

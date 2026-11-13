@@ -16,10 +16,13 @@ import {
   ShieldCheck,
   X,
   Keyboard,
+  Package,
+  ChevronRight,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { AmenitiesModal } from '../components/my-pg/AmenitiesModal';
+import { TenantInventoryModal } from '../components/inventory/TenantInventoryModal';
 
 export const MyPgPage: React.FC = () => {
   const navigate = useNavigate();
@@ -31,6 +34,7 @@ export const MyPgPage: React.FC = () => {
   } = useAuth();
 
   const [showSecurityModal, setShowSecurityModal] = useState(false);
+  const [showInventoryModal, setShowInventoryModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
   const [linking, setLinking] = useState(false);
@@ -180,6 +184,30 @@ export const MyPgPage: React.FC = () => {
                 Pay Dues
               </button>
             </div>
+          </div>
+
+          {/* Move-In Inventory Handover Banner Card */}
+          <div
+            onClick={() => setShowInventoryModal(true)}
+            className="rounded-3xl border border-teal-200/90 bg-gradient-to-r from-teal-50/90 via-emerald-50/50 to-teal-50/70 p-4 flex items-center justify-between cursor-pointer hover:border-teal-300 shadow-xs active:scale-[0.99] transition-all"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#008080] text-white shadow-md shadow-[#008080]/20">
+                <Package className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold text-xs text-gray-900">Items Given to Me</span>
+                  <span className="rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-bold text-teal-800">
+                    Annexure A
+                  </span>
+                </div>
+                <p className="text-[11px] text-gray-600 mt-0.5">
+                  View bed & room furniture, electronics, keys & move-in condition
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-teal-700 flex-shrink-0" />
           </div>
 
           {/* Quick Actions 4x2 Grid */}
@@ -388,6 +416,15 @@ export const MyPgPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Tenant Move-In Handover Inventory Modal */}
+      <TenantInventoryModal
+        open={showInventoryModal}
+        onClose={() => setShowInventoryModal(false)}
+        tenantId={propertyDetails?.roomTenant?.id || 't1'}
+        roomNumber={String(propertyDetails?.room?.roomNumber || '301')}
+        bedNumber={String(propertyDetails?.roomTenant?.bedNumber || '1')}
+      />
     </div>
   );
 };

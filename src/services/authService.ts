@@ -9,6 +9,8 @@ export interface OtpRequestPayload {
 export interface OtpVerifyPayload {
   mobileNumber: string;
   otp: string;
+  name?: string;
+  intent?: 'searching' | 'already_in_pg' | string;
 }
 
 export interface AuthResponse {
@@ -95,7 +97,7 @@ export const authService = {
   /**
    * Request OTP via WhatsApp or SMS
    */
-  async requestOtp(payload: OtpRequestPayload): Promise<{ success: boolean; message: string }> {
+  async requestOtp(payload: OtpRequestPayload): Promise<{ success?: boolean; message: string; isNewUser?: boolean }> {
     const { data } = await apiClient.post('/tenants/otp/request', {
       mobileNumber: payload.mobileNumber,
       countryCode: payload.countryCode || '+91',
@@ -112,6 +114,8 @@ export const authService = {
     const { data } = await apiClient.post<AuthResponse>('/tenants/otp/verify', {
       mobileNumber: payload.mobileNumber,
       otp: payload.otp,
+      name: payload.name,
+      intent: payload.intent,
     });
     return data;
   },
@@ -135,8 +139,22 @@ export const authService = {
   /**
    * Update tenant profile details
    */
-  async updateProfile(payload: { name?: string; email?: string }): Promise<any> {
+  async updateProfile(payload: { name?: string; email?: string; intent?: string }): Promise<any> {
     const { data } = await apiClient.patch('/tenants/profile', payload);
+    return data;
+  },
+
+  /**
+   * Upload / update tenant profile photo
+   */
+  async uploadProfilePhoto(file: File): Promise<any> {
+    const formData = new FormData();
+    formData.append('photo', file);
+    const { data } = await apiClient.post('/tenants/profile/photo', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return data;
   },
 };

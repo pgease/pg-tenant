@@ -11,6 +11,11 @@ import {
   AlertCircle,
   Loader2,
   CheckCircle2,
+  User,
+  Search,
+  Building2,
+  Sparkles,
+  Check,
 } from 'lucide-react';
 
 const WhatsAppIcon = ({ className = 'h-4 w-4' }: { className?: string }) => (
@@ -29,11 +34,31 @@ const WhatsAppIcon = ({ className = 'h-4 w-4' }: { className?: string }) => (
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, tenant, checkTenancy } = useAuth();
+
+  // Step 1: phone entry, Step 2: 4-digit OTP, Step 3: First-time profile & intent
+  const [step, setStep] = useState<'phone' | 'otp' | 'onboarding'>('phone');
+  const [phone, setPhone] = useState('');
+  const [channel, setChannel] = useState<'whatsapp' | 'sms'>('whatsapp');
+  const [otp, setOtp] = useState(['', '', '', '']);
+  const [timer, setTimer] = useState(30);
+  const [canResend, setCanResend] = useState(false);
+
+  // First-time onboarding states
+  const [fullName, setFullName] = useState('');
+  const [intent, setIntent] = useState<'searching' | 'already_in_pg' | null>(null);
+  const [pendingDestination, setPendingDestination] = useState<string>('/');
 
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
+      if (tenant && (!tenant.name || !tenant.name.trim())) {
+        setStep('onboarding');
+        return;
+      }
+      if (step === 'onboarding') {
+        return;
+      }
       const redirect =
         new URLSearchParams(location.search).get('redirect') ||
         sessionStorage.getItem('pgease_post_login_redirect') ||
@@ -41,20 +66,12 @@ export const LoginPage: React.FC = () => {
       sessionStorage.removeItem('pgease_post_login_redirect');
       navigate(redirect, { replace: true });
     }
-  }, [isAuthenticated, location.search, navigate]);
+  }, [isAuthenticated, tenant, step, location.search, navigate]);
 
   const handleSkipLogin = () => {
     sessionStorage.setItem('pgease_guest_mode', 'true');
     navigate('/');
   };
-
-  // Step 1: phone entry, Step 2: 4-digit OTP
-  const [step, setStep] = useState<'phone' | 'otp'>('phone');
-  const [phone, setPhone] = useState('');
-  const [channel, setChannel] = useState<'whatsapp' | 'sms'>('whatsapp');
-  const [otp, setOtp] = useState(['', '', '', '']);
-  const [timer, setTimer] = useState(30);
-  const [canResend, setCanResend] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -223,10 +240,60 @@ export const LoginPage: React.FC = () => {
         sessionStorage.getItem('pgease_post_login_redirect') ||
         (location.state as any)?.from?.pathname ||
         '/';
-      sessionStorage.removeItem('pgease_post_login_redirect');
-      navigate(destination, { replace: true });
+
+      const isFirstTime = Boolean(
+        res.isFirstTimeUser ||
+        !res.tenant?.name ||
+        !res.tenant?.name?.trim()
+      );
+
+      if (isFirstTime) {
+        setPendingDestination(destination);
+        setStep('onboarding');
+      } else {
+        sessionStorage.removeItem('pgease_post_login_redirect');
+        navigate(destination, { replace: true });
+      }
     } catch (err: any) {
       setError(getErrorMessage(err, 'Invalid or expired OTP. Please try again.'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCompleteOnboarding = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setError(null);
+
+    const trimmedName = fullName.trim();
+    if (!trimmedName) {
+      setError('Please enter your full name');
+      return;
+    }
+    if (!intent) {
+      setError('Please select whether you are searching for a PG or already living in a PG');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await authService.updateProfile({
+        name: trimmedName,
+        intent: intent,
+      });
+
+      await checkTenancy();
+      sessionStorage.removeItem('pgease_post_login_redirect');
+
+      if (pendingDestination && pendingDestination !== '/' && pendingDestination !== '/login') {
+        navigate(pendingDestination, { replace: true });
+      } else if (intent === 'already_in_pg') {
+        navigate('/my-pg', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
+    } catch (err: any) {
+      setError(getErrorMessage(err, 'Could not save profile details. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -244,7 +311,15 @@ export const LoginPage: React.FC = () => {
         <div className="relative z-10 flex items-center justify-between mb-4">
           <button
             type="button"
-            onClick={() => (step === 'otp' ? setStep('phone') : handleSkipLogin())}
+            onClick={() => {
+              if (step === 'onboarding') {
+                setStep('otp');
+              } else if (step === 'otp') {
+                setStep('phone');
+              } else {
+                handleSkipLogin();
+              }
+            }}
             className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md hover:bg-white/25 active:scale-95 transition-all tap-target"
             title="Go Back"
           >
@@ -283,12 +358,18 @@ export const LoginPage: React.FC = () => {
           {/* Card Title */}
           <div>
             <h2 className="text-lg font-bold tracking-tight text-gray-900">
-              {step === 'phone' ? 'Welcome to PG Ease' : 'Verify 4-Digit Code'}
+              {step === 'phone'
+                ? 'Welcome to PG Ease'
+                : step === 'otp'
+                ? 'Verify 4-Digit Code'
+                : 'Complete Your Profile 🎉'}
             </h2>
             <p className="mt-1 text-xs text-gray-500 leading-relaxed">
               {step === 'phone'
                 ? 'Enter your mobile number to sign in or get started.'
-                : `Enter the 4-digit verification code sent via ${channel === 'whatsapp' ? 'WhatsApp' : 'SMS'} to +91 ${phone}.`}
+                : step === 'otp'
+                ? `Enter the 4-digit verification code sent via ${channel === 'whatsapp' ? 'WhatsApp' : 'SMS'} to +91 ${phone}.`
+                : 'Tell us your name and how you plan to use PG Ease to personalize your experience.'}
             </p>
           </div>
 
@@ -515,6 +596,141 @@ export const LoginPage: React.FC = () => {
                 )}
               </div>
             </div>
+          )}
+
+          {/* STEP 3: First-Time Profile & Intent Form */}
+          {step === 'onboarding' && (
+            <form onSubmit={handleCompleteOnboarding} className="space-y-4">
+              {/* Full Name Input Box */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+                  <User className="h-3.5 w-3.5 text-[#008080]" />
+                  <span>Your Full Name</span>
+                  <span className="text-red-500">*</span>
+                </label>
+                <div className="flex items-center rounded-2xl border border-gray-200 bg-white px-3.5 py-2.5 shadow-sm focus-within:border-[#008080] focus-within:ring-2 focus-within:ring-[#008080]/10 transition-all">
+                  <input
+                    type="text"
+                    placeholder="Enter your full name (e.g. Rahul Sharma)"
+                    value={fullName}
+                    onChange={(e) => {
+                      setFullName(e.target.value);
+                      if (error) setError(null);
+                    }}
+                    autoFocus
+                    className="w-full bg-transparent text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:outline-none tracking-wide"
+                  />
+                </div>
+              </div>
+
+              {/* Purpose / Intent Selection */}
+              <div className="space-y-2 pt-1">
+                <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5 text-[#008080]" />
+                  <span>What brings you to PG Ease today?</span>
+                  <span className="text-red-500">*</span>
+                </label>
+
+                <div className="grid grid-cols-1 gap-2.5">
+                  {/* Option 1: Searching for a PG */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIntent('searching');
+                      if (error) setError(null);
+                    }}
+                    className={`flex items-start gap-3 rounded-2xl p-3.5 border-2 text-left transition-all ${
+                      intent === 'searching'
+                        ? 'border-[#008080] bg-teal-50/50 shadow-sm'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                  >
+                    <div
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors ${
+                        intent === 'searching'
+                          ? 'bg-[#008080] text-white shadow-xs'
+                          : 'bg-gray-100 text-gray-500'
+                      }`}
+                    >
+                      <Search className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-xs font-bold text-gray-900">
+                          Here for searching a PG
+                        </h3>
+                        {intent === 'searching' && (
+                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#008080] text-white">
+                            <Check className="h-3 w-3 stroke-[3]" />
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">
+                        I am looking to explore, compare & book a new room or bed.
+                      </p>
+                    </div>
+                  </button>
+
+                  {/* Option 2: Already living in a PG */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIntent('already_in_pg');
+                      if (error) setError(null);
+                    }}
+                    className={`flex items-start gap-3 rounded-2xl p-3.5 border-2 text-left transition-all ${
+                      intent === 'already_in_pg'
+                        ? 'border-[#008080] bg-teal-50/50 shadow-sm'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                  >
+                    <div
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors ${
+                        intent === 'already_in_pg'
+                          ? 'bg-[#008080] text-white shadow-xs'
+                          : 'bg-gray-100 text-gray-500'
+                      }`}
+                    >
+                      <Building2 className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-xs font-bold text-gray-900">
+                          Already living in a PG
+                        </h3>
+                        {intent === 'already_in_pg' && (
+                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#008080] text-white">
+                            <Check className="h-3 w-3 stroke-[3]" />
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">
+                        I already stay in a PG and want to pay rent, view dues & track complaints.
+                      </p>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loading || !fullName.trim() || !intent}
+                className="w-full mt-2 flex items-center justify-center gap-2 rounded-2xl bg-[#008080] py-3.5 text-sm font-bold text-white shadow-md shadow-[#008080]/25 hover:bg-[#006b6b] active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none tap-target"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin text-white" />
+                    <span>Saving your profile...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Get Started</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </button>
+            </form>
           )}
         </div>
 

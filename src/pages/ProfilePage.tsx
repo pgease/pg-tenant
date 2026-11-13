@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
 import {
@@ -20,6 +20,7 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
+  Camera,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { StaffModal } from '../components/my-pg/StaffModal';
@@ -43,14 +44,53 @@ export const ProfilePage: React.FC = () => {
   // Profile Form State
   const [name, setName] = useState(tenant?.name || '');
   const [email, setEmail] = useState(tenant?.email || '');
+  const [imgError, setImgError] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Keep local fields in sync with auth context tenant data
   useEffect(() => {
     if (tenant) {
       if (tenant.name) setName(tenant.name);
       if (tenant.email) setEmail(tenant.email);
+      setImgError(false);
     }
   }, [tenant]);
+
+  const rawPhoto =
+    tenant?.profilePhotoUrl ||
+    tenant?.photoUrl ||
+    tenant?.imageUrl ||
+    tenant?.selfieUrl ||
+    tenant?.avatarUrl ||
+    tenant?.kycInfo?.selfieUrl ||
+    tenant?.kycInfo?.photoUrl ||
+    tenant?.kycInfo?.verifiedDetails?.photo ||
+    propertyDetails?.tenant?.profilePhotoUrl ||
+    propertyDetails?.tenant?.photoUrl ||
+    '';
+  const tenantPhoto = !imgError && typeof rawPhoto === 'string' && rawPhoto.trim() ? rawPhoto.trim() : '';
+
+  const handlePhotoSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file (JPG, PNG, WebP).');
+      return;
+    }
+    setIsUploadingPhoto(true);
+    try {
+      await authService.uploadProfilePhoto(file);
+      setImgError(false);
+      await checkTenancy();
+    } catch (err: any) {
+      console.error('Failed to upload photo:', err);
+      alert(err?.response?.data?.message || 'Failed to upload photo. Please try again.');
+    } finally {
+      setIsUploadingPhoto(false);
+      if (e.target) e.target.value = '';
+    }
+  };
 
   const handleOpenEditModal = () => {
     setName(tenant?.name || '');
@@ -123,9 +163,42 @@ export const ProfilePage: React.FC = () => {
       <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3.5">
-            {/* Avatar Circle with Initials */}
-            <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-primary bg-teal-50 font-bold text-primary text-lg">
-              {initials}
+            {/* Avatar Circle with Photo or Initials */}
+            <div className="relative group">
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/*"
+                className="hidden"
+                onChange={handlePhotoSelected}
+              />
+              <div className="relative flex h-14 w-14 items-center justify-center rounded-full border-2 border-primary bg-teal-50 font-bold text-primary text-lg overflow-hidden shrink-0 shadow-sm">
+                {isUploadingPhoto ? (
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                ) : tenantPhoto ? (
+                  <img
+                    src={tenantPhoto}
+                    alt={name || 'Tenant'}
+                    className="h-full w-full object-cover"
+                    crossOrigin="anonymous"
+                    onError={() => setImgError(true)}
+                  />
+                ) : (
+                  initials
+                )}
+              </div>
+
+              {isAuthenticated && (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploadingPhoto}
+                  className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white shadow-md hover:bg-primary-dark transition-all active:scale-95 border-2 border-white tap-target"
+                  title="Upload profile photo"
+                >
+                  <Camera className="h-3 w-3" />
+                </button>
+              )}
             </div>
 
             <div>
@@ -425,6 +498,34 @@ export const ProfilePage: React.FC = () => {
             )}
 
             <div className="space-y-3">
+              {/* Photo Upload in Edit Modal */}
+              <div className="flex flex-col items-center justify-center py-1">
+                <div className="relative flex h-20 w-20 items-center justify-center rounded-full border-2 border-primary bg-teal-50 font-bold text-primary text-2xl overflow-hidden shadow-sm">
+                  {isUploadingPhoto ? (
+                    <Loader2 className="h-7 w-7 animate-spin text-primary" />
+                  ) : tenantPhoto ? (
+                    <img
+                      src={tenantPhoto}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      crossOrigin="anonymous"
+                      onError={() => setImgError(true)}
+                    />
+                  ) : (
+                    initials
+                  )}
+                </div>
+                <button
+                  type="button"
+                  disabled={isUploadingPhoto}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-teal-50/60 hover:bg-teal-100/70 px-3 py-1 text-xs font-bold text-primary transition-all active:scale-95"
+                >
+                  <Camera className="h-3.5 w-3.5" />
+                  <span>{tenantPhoto ? 'Change Photo' : 'Upload Photo'}</span>
+                </button>
+              </div>
+
               <div>
                 <label className="text-xs font-semibold text-gray-600 block mb-1">Full Name</label>
                 <input

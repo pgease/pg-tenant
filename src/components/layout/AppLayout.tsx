@@ -43,18 +43,7 @@ export const AppLayout: React.FC = () => {
       return false;
     });
 
-    if (appModeActive) {
-      const splashShown = sessionStorage.getItem('pgease_splash_shown');
-      if (!splashShown) {
-        setShowSplash(true);
-        sessionStorage.setItem('pgease_splash_shown', 'true');
-      }
-
-      const onboardingDone = localStorage.getItem('pgease_onboarding_completed') === 'true';
-      if (!isAuthenticated && !onboardingDone) {
-        setShowOnboarding(true);
-      }
-    }
+    // Native mobile app project handles splash and onboarding screens natively
 
     return () => cleanupBridge();
   }, [navigate, isAuthenticated]);
