@@ -33,6 +33,7 @@ export const NoticePage: React.FC = () => {
   const [disputeModalOpen, setDisputeModalOpen] = useState(false);
   const [disputeText, setDisputeText] = useState('');
   const [acknowledging, setAcknowledging] = useState(false);
+  const [showCancelConfirmModal, setShowCancelConfirmModal] = useState(false);
 
   const loadNotice = async () => {
     try {
@@ -119,11 +120,11 @@ export const NoticePage: React.FC = () => {
   };
 
   const handleCancelNotice = async () => {
-    if (!window.confirm('Are you sure you want to cancel your checkout notice?')) return;
     setSubmitting(true);
     try {
       await tenantService.cancelNotice();
-      setMsg('Notice cancelled successfully.');
+      setMsg('Notice request cancelled successfully. Your stay is now active.');
+      setShowCancelConfirmModal(false);
       loadNotice();
       checkTenancy();
     } catch (err: any) {
@@ -220,7 +221,10 @@ export const NoticePage: React.FC = () => {
 
           <button
             type="button"
-            onClick={handleCancelNotice}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowCancelConfirmModal(true);
+            }}
             disabled={submitting}
             className="w-full flex items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-white py-2.5 text-xs font-bold text-amber-800 hover:bg-amber-100/50 disabled:opacity-50"
           >
@@ -500,6 +504,53 @@ export const NoticePage: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Notice Cancel Confirmation Dialog (TW-18) */}
+      {showCancelConfirmModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!submitting) setShowCancelConfirmModal(false);
+          }}
+        >
+          <div
+            className="w-full max-w-sm rounded-3xl bg-white p-5 shadow-2xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-700 font-bold shrink-0">
+                <AlertCircle className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-gray-900">Cancel Notice Request?</h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Are you sure you want to cancel your checkout notice? Your active PG stay will continue normally.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowCancelConfirmModal(false)}
+                disabled={submitting}
+                className="flex-1 rounded-xl border border-gray-200 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                Keep Notice
+              </button>
+              <button
+                type="button"
+                onClick={handleCancelNotice}
+                disabled={submitting}
+                className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-amber-600 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-amber-700 disabled:opacity-50"
+              >
+                {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                <span>Yes, Cancel</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

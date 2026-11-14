@@ -13,7 +13,7 @@ export const BottomTabBar: React.FC = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 mx-auto max-w-md border-t border-gray-100 bg-white/95 backdrop-blur-md pb-safe shadow-tab-bar">
+    <nav className="fixed bottom-0 left-0 right-0 z-30 mx-auto max-w-md lg:hidden border-t border-gray-100 bg-white/95 backdrop-blur-md pb-safe shadow-tab-bar">
       <div className="flex items-center justify-around px-2 pt-2 pb-1.5">
         {tabs.map((tab) => {
           const Icon = tab.icon;

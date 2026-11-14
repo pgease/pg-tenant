@@ -338,7 +338,7 @@ export const DiningPage: React.FC = () => {
                   </p>
                 ) : (
                   <p className="text-[11px] text-gray-400 italic pt-1">
-                    No menu specified for this meal by PG manager.
+                    Menu not added yet for {currentDayOption.dayName} by PG manager.
                   </p>
                 )}
               </div>

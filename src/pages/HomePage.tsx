@@ -20,6 +20,7 @@ import {
   CheckCircle2,
   AlertCircle,
   DoorOpen,
+  FileText,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
@@ -40,6 +41,7 @@ export const HomePage: React.FC = () => {
     propertyDetails,
     checkTenancy,
     tenant,
+    logout,
   } = useAuth();
   const navigate = useNavigate();
 
@@ -52,6 +54,7 @@ export const HomePage: React.FC = () => {
   const [todayDining, setTodayDining] = useState<any>(null);
   const [rentDues, setRentDues] = useState<RentCollectionDetails | null>(null);
   const [hasUnreadNotices, setHasUnreadNotices] = useState<boolean>(false);
+  const [pendingAgreement, setPendingAgreement] = useState<any | null>(null);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -61,6 +64,17 @@ export const HomePage: React.FC = () => {
           setHasUnreadNotices(Array.isArray(list) && list.length > 0);
         })
         .catch(() => setHasUnreadNotices(false));
+
+      tenantService
+        .getAgreements()
+        .then((agrs) => {
+          const ready = (agrs || []).find((a: any) => {
+            const st = (a.status || '').toUpperCase();
+            return (st === 'SENT' || st === 'READY_TO_SIGN' || st === 'PENDING') && Boolean(a.signUrl || a.signingUrl);
+          });
+          if (ready) setPendingAgreement(ready);
+        })
+        .catch(() => {});
     }
   }, [isAuthenticated]);
 
@@ -109,7 +123,84 @@ export const HomePage: React.FC = () => {
   const displayName = tenant?.name || (isAuthenticated ? 'Resident' : 'Explore PGs');
   const greeting = getTimeGreeting();
 
-  // If user is NOT linked to an active PG stay -> Show the full PG Discovery & Search Portal
+  // Authenticated tenant who is NOT linked to an active PG property yet (TW-01)
+  if (isAuthenticated && !isLinkedTenant) {
+    const maskedMobile = tenant?.phone
+      ? `${tenant.phone.slice(0, 2)}XXXXX${tenant.phone.slice(-3)}`
+      : 'your registered number';
+
+    return (
+      <div className="space-y-4 pt-1 pb-6 animate-fade-in text-center">
+        {/* Top Header */}
+        <div className="flex items-center justify-between pt-1">
+          <div>
+            <p className="text-xs font-medium text-gray-500">Welcome to PG Ease,</p>
+            <p className="text-base font-black text-[#008080] tracking-tight text-left mt-0.5">
+              {displayName}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => {
+                logout();
+                navigate('/login');
+              }}
+              className="text-xs font-semibold text-rose-600 hover:underline"
+            >
+              Log out
+            </button>
+          </div>
+        </div>
+
+        {/* Unlinked Notice Card (TW-01) */}
+        <div className="rounded-3xl border border-amber-200/80 bg-amber-50/40 p-6 shadow-sm space-y-4">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
+            <Building2 className="h-8 w-8" />
+          </div>
+
+          <div className="space-y-1.5">
+            <h2 className="text-lg font-black text-gray-900">You're not linked to a PG yet</h2>
+            <p className="text-xs text-gray-600 leading-relaxed max-w-sm mx-auto">
+              If your PG owner added you, ask them to check your mobile number ({maskedMobile}). Once added by the manager, your room details and rent sheet will appear here automatically.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2 pt-2">
+            <button
+              type="button"
+              onClick={() => checkTenancy()}
+              className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[#008080] py-3 text-xs font-bold text-white shadow-sm hover:bg-[#006b6b] active:scale-95 transition-all"
+            >
+              <span>Refresh Stay Status</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                logout();
+                navigate('/login');
+              }}
+              className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white py-3 text-xs font-bold text-gray-700 hover:bg-gray-50"
+            >
+              <span>Log out</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="pt-2">
+          <button
+            type="button"
+            onClick={() => navigate('/search')}
+            className="text-xs font-bold text-[#008080] hover:underline"
+          >
+            Or browse available verified PGs & Hostels →
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // If visitor is NOT authenticated -> Show the full PG Discovery & Search Portal
   if (!isLinkedTenant) {
     return (
       <div className="space-y-4 pt-1 pb-6 animate-fade-in">
@@ -184,11 +275,22 @@ export const HomePage: React.FC = () => {
 
   // ACTIVE RESIDENT DASHBOARD (When linked to a PG like "Shivam 6 pg")
   const propertyName = propertyDetails?.property?.name || 'Active PG Stay';
-  const roomNumber = propertyDetails?.room?.roomNumber
-    ? `Room ${propertyDetails.room.roomNumber}`
+  const roomNum = propertyDetails?.room?.roomNumber || propertyDetails?.room?.name;
+  const bedNum =
+    propertyDetails?.bed?.bedNumber ||
+    (propertyDetails?.bed as any)?.label ||
+    propertyDetails?.roomTenant?.bedNumberOnAssignment ||
+    (propertyDetails as any)?.bedNumber;
+  const roomAndBedLabel = roomNum
+    ? `Room ${roomNum}${bedNum ? ` · Bed ${bedNum}` : ''}`
     : 'Room Assigned';
   const monthlyRent = propertyDetails?.roomTenant?.monthlyRent ?? 0;
-  const balanceDue = rentDues?.summary?.balanceDue ?? 0;
+  const totalPayable = rentDues?.totalPayable ?? (rentDues as any)?.payable ?? rentDues?.summary?.balanceDue ?? 0;
+  const duesStatus = (rentDues?.status || (totalPayable > 0 ? 'DUE' : 'UP_TO_DATE')).toUpperCase();
+  const nextDueDateVal = (rentDues as any)?.nextDueDate;
+  const nextDueText = nextDueDateVal
+    ? new Date(nextDueDateVal).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+    : '';
 
   return (
     <div className="space-y-4 pt-1 pb-6 animate-fade-in">
@@ -214,6 +316,7 @@ export const HomePage: React.FC = () => {
                 autoFocus
                 className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 focus:border-[#008080] focus:outline-none"
               />
+              <p className="text-[11px] text-gray-400">Your PG owner will see this change</p>
               <div className="flex gap-2 pt-2">
                 <button
                   type="button"
@@ -287,10 +390,15 @@ export const HomePage: React.FC = () => {
             Active Resident
           </span>
 
-          {balanceDue > 0 ? (
+          {duesStatus === 'OVERDUE' || (totalPayable > 0 && duesStatus !== 'ADVANCE') ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-amber-400/20 border border-amber-300/30 px-2 py-0.5 text-[10px] font-bold text-amber-200">
               <AlertCircle className="h-3 w-3" />
-              <span>₹{balanceDue.toLocaleString('en-IN')} Due</span>
+              <span>₹{totalPayable.toLocaleString('en-IN')} {duesStatus === 'OVERDUE' ? 'Overdue' : nextDueText ? `Due ${nextDueText}` : 'Due'}</span>
+            </span>
+          ) : duesStatus === 'ADVANCE' ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/20 border border-emerald-300/30 px-2 py-0.5 text-[10px] font-bold text-emerald-200">
+              <CheckCircle2 className="h-3 w-3 text-emerald-300" />
+              <span>Advance Credit</span>
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold text-teal-200">
@@ -317,7 +425,7 @@ export const HomePage: React.FC = () => {
         <div className="flex items-center gap-2 pt-3 flex-wrap">
           <div className="rounded-xl bg-white/10 backdrop-blur-md px-3 py-1.5 text-xs font-bold text-white border border-white/10 flex items-center gap-1.5">
             <Building2 className="h-3.5 w-3.5 text-teal-300" />
-            <span>{roomNumber}</span>
+            <span>{roomAndBedLabel}</span>
           </div>
 
           {monthlyRent > 0 && (
@@ -342,10 +450,31 @@ export const HomePage: React.FC = () => {
             onClick={() => navigate('/payments')}
             className="rounded-xl bg-white px-3.5 py-1.5 text-xs font-bold text-teal-900 shadow-sm hover:bg-teal-50 active:scale-95 transition-all"
           >
-            {balanceDue > 0 ? 'Pay Rent' : 'View Ledger'}
+            {totalPayable > 0 ? 'Pay Now' : 'View Ledger'}
           </button>
         </div>
       </div>
+
+      {/* Pending Agreement Action Banner (TW-14) */}
+      {pendingAgreement && (
+        <div
+          onClick={() => navigate('/documents')}
+          className="rounded-2xl border border-amber-300 bg-amber-50 p-3.5 flex items-center justify-between cursor-pointer hover:bg-amber-100/70 transition-all shadow-xs"
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold">
+              <FileText className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-amber-950">Rent Agreement Ready to Sign</p>
+              <p className="text-[11px] text-amber-800">Your PG owner generated your agreement. Review & e-Sign digitally.</p>
+            </div>
+          </div>
+          <span className="text-xs font-bold text-amber-900 bg-white/90 border border-amber-200 px-2.5 py-1 rounded-lg shrink-0">
+            Sign →
+          </span>
+        </div>
+      )}
 
       {/* 3. Daily Living Essentials (Clean 6-Grid Quick Action Tiles) */}
       <div className="space-y-2.5">

@@ -21,22 +21,41 @@ export const AgreementsKycModal: React.FC<AgreementsKycModalProps> = ({
   tenantData,
 }) => {
   const [agreements, setAgreements] = useState<any[]>([]);
+  const [kycData, setKycData] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setLoading(true);
-      tenantService
-        .getAgreements()
-        .then((res) => setAgreements(res))
-        .catch(() => {})
+      Promise.all([
+        tenantService.getAgreements().catch(() => []),
+        tenantService.getKycStatus().catch(() => null),
+      ])
+        .then(([agrs, kyc]) => {
+          setAgreements(Array.isArray(agrs) ? agrs : []);
+          setKycData(kyc);
+        })
         .finally(() => setLoading(false));
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const isKycVerified = Boolean(tenantData?.isKycVerified || tenantData?.kycStatus === 'verified');
+  const rawStatus = (kycData?.status || '').toUpperCase();
+  const isKycVerified = Boolean(
+    kycData?.isKycVerified ||
+    rawStatus === 'VERIFIED' ||
+    rawStatus === 'COMPLETED' ||
+    tenantData?.isKycVerified
+  );
+  const isRequested = rawStatus === 'REQUESTED' || rawStatus === 'ACTION_REQUIRED';
+  const isInProgress = rawStatus === 'IN_PROGRESS' || rawStatus === 'INITIATED';
+  const isFailed = rawStatus === 'FAILED' || rawStatus === 'REJECTED';
+
+  const aadhaarLast4 =
+    kycData?.verifiedDetails?.aadhaar?.last4 ||
+    kycData?.aadhaarLast4 ||
+    '';
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 animate-fade-in">
@@ -65,21 +84,62 @@ export const AgreementsKycModal: React.FC<AgreementsKycModalProps> = ({
           {/* KYC Status Card */}
           <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-brandText">Identity KYC Verification</span>
+              <span className="text-xs font-bold text-brandText">Aadhaar KYC (DigiLocker)</span>
               <span
                 className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                  isKycVerified ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
+                  isKycVerified
+                    ? 'bg-emerald-50 text-emerald-700'
+                    : isFailed
+                    ? 'bg-rose-50 text-rose-700'
+                    : isRequested
+                    ? 'bg-amber-50 text-amber-700'
+                    : 'bg-gray-100 text-gray-700'
                 }`}
               >
-                {isKycVerified ? <CheckCircle2 className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
-                {isKycVerified ? 'VERIFIED' : 'PENDING REVIEW'}
+                {isKycVerified ? (
+                  <>
+                    <CheckCircle2 className="h-3 w-3" />
+                    VERIFIED
+                  </>
+                ) : isRequested ? (
+                  <>
+                    <Clock className="h-3 w-3" />
+                    ACTION REQUIRED
+                  </>
+                ) : isInProgress ? (
+                  <>
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    IN PROGRESS
+                  </>
+                ) : isFailed ? (
+                  <>FAILED</>
+                ) : (
+                  <>NOT REQUESTED YET</>
+                )}
               </span>
             </div>
             <p className="text-xs text-brandText-muted leading-relaxed">
               {isKycVerified
-                ? 'Your Aadhaar and government identity documents have been verified and registered with PG Ease.'
-                : 'Aadhaar / PAN KYC is in review by your property administration.'}
+                ? `Aadhaar verified via DigiLocker${aadhaarLast4 ? ` (•••• •••• ${aadhaarLast4})` : ''}.`
+                : isRequested
+                ? 'Your PG owner has requested digital Aadhaar verification via DigiLocker.'
+                : isInProgress
+                ? 'Verification in progress.'
+                : isFailed
+                ? 'Aadhaar verification failed. Please try again.'
+                : 'Your PG owner has not requested DigiLocker KYC yet.'}
             </p>
+            {isRequested && kycData?.directLink && (
+              <a
+                href={kycData.directLink}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-2 inline-flex items-center justify-center gap-1.5 w-full rounded-xl bg-amber-600 py-2 text-xs font-bold text-white shadow-sm hover:bg-amber-700"
+              >
+                <span>Complete DigiLocker KYC</span>
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            )}
           </div>
 
           {/* Rental Agreements Section */}

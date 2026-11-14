@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Wifi, Copy, Check, Shield } from 'lucide-react';
+import { X, Wifi, Copy, Check, Shield, Eye, EyeOff } from 'lucide-react';
 
 interface WifiModalProps {
   isOpen: boolean;
@@ -13,13 +13,15 @@ interface WifiModalProps {
 
 export const WifiModal: React.FC<WifiModalProps> = ({ isOpen, onClose, wifiData }) => {
   const [copied, setCopied] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   if (!isOpen) return null;
 
-  const ssid = wifiData?.ssid || 'PG-EASE-HIGH-SPEED';
-  const password = wifiData?.password || 'StaySafe@2026';
+  const ssid = wifiData?.ssid || null;
+  const password = wifiData?.password || null;
 
   const copyPassword = () => {
+    if (!password) return;
     navigator.clipboard.writeText(password);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -35,7 +37,7 @@ export const WifiModal: React.FC<WifiModalProps> = ({ isOpen, onClose, wifiData 
               <Wifi className="h-4 w-4" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-brandText">Floor WiFi Credentials</h2>
+              <h2 className="text-base font-bold text-brandText">Floor Wi-Fi Credentials</h2>
               <p className="text-[11px] text-brandText-muted">High-Speed Resident Internet</p>
             </div>
           </div>
@@ -49,43 +51,69 @@ export const WifiModal: React.FC<WifiModalProps> = ({ isOpen, onClose, wifiData 
 
         {/* Content */}
         <div className="p-6 space-y-5">
-          <div className="flex flex-col items-center justify-center p-6 rounded-2xl bg-gradient-to-br from-primary-50 to-teal-50/50 border border-teal-100 text-center">
-            <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center text-primary shadow-sm mb-3">
-              <Wifi className="h-8 w-8" />
-            </div>
-            <span className="text-xs font-semibold text-brandText-muted">Network Name (SSID)</span>
-            <p className="text-lg font-black text-brandText tracking-tight">{ssid}</p>
-          </div>
-
-          <div className="rounded-2xl border border-gray-200 bg-gray-50/50 p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-bold text-brandText-muted uppercase tracking-wider block">
-                  WiFi Password
-                </span>
-                <span className="text-base font-mono font-bold text-brandText">{password}</span>
+          {ssid ? (
+            <>
+              <div className="flex flex-col items-center justify-center p-6 rounded-2xl bg-gradient-to-br from-primary-50 to-teal-50/50 border border-teal-100 text-center">
+                <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center text-primary shadow-sm mb-3">
+                  <Wifi className="h-8 w-8" />
+                </div>
+                <span className="text-xs font-semibold text-brandText-muted">Network Name (SSID)</span>
+                <p className="text-lg font-black text-brandText tracking-tight">{ssid}</p>
               </div>
 
-              <button
-                onClick={copyPassword}
-                className="flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 text-xs font-bold text-white shadow-md shadow-primary/20 hover:bg-primary-dark active:scale-95 transition-all tap-target"
-              >
-                {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                {copied ? 'Copied' : 'Copy Password'}
-              </button>
-            </div>
+              <div className="rounded-2xl border border-gray-200 bg-gray-50/50 p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold text-brandText-muted uppercase tracking-wider block">
+                      Wi-Fi Password
+                    </span>
+                    <span className="text-base font-mono font-bold text-brandText">
+                      {password ? (showPassword ? password : '••••••••••••') : 'Open Network'}
+                    </span>
+                  </div>
 
-            {wifiData?.details && (
-              <p className="text-[11px] text-brandText-muted border-t border-gray-200/60 pt-2">
-                {wifiData.details}
+                  {password && (
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="rounded-lg bg-white p-2 text-gray-500 border border-gray-200 hover:bg-gray-100"
+                        title={showPassword ? 'Hide Password' : 'Show Password'}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                      <button
+                        onClick={copyPassword}
+                        className="flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-bold text-white shadow-md shadow-primary/20 hover:bg-primary-dark active:scale-95 transition-all tap-target"
+                      >
+                        {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                        {copied ? 'Copied' : 'Copy'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {wifiData?.details && (
+                  <p className="text-[11px] text-brandText-muted border-t border-gray-200/60 pt-2">
+                    {wifiData.details}
+                  </p>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="p-6 text-center space-y-2 rounded-2xl bg-gray-50 border border-dashed border-gray-200">
+              <Wifi className="h-10 w-10 text-gray-300 mx-auto" />
+              <p className="text-xs font-bold text-brandText">Your PG hasn't added Wi-Fi details yet</p>
+              <p className="text-[11px] text-gray-400">
+                Contact your property caretaker to obtain the network name and access key.
               </p>
-            )}
-          </div>
+            </div>
+          )}
 
           <div className="rounded-xl bg-teal-50/50 p-3 flex items-center gap-2 border border-teal-100/60">
             <Shield className="h-4 w-4 text-primary flex-shrink-0" />
             <p className="text-[11px] text-brandText-muted leading-tight">
-              Please do not share resident WiFi with outside visitors to keep network speeds optimal.
+              Please do not share resident Wi-Fi with outside visitors to keep network speeds optimal.
             </p>
           </div>
         </div>

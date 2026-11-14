@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Wifi, Copy, Check, ArrowLeft, Shield } from 'lucide-react';
+import { Wifi, Copy, Check, ArrowLeft, Shield, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -7,6 +7,7 @@ export const WifiPage: React.FC = () => {
   const navigate = useNavigate();
   const { propertyDetails } = useAuth();
   const [copied, setCopied] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const wifi = propertyDetails?.wifi || null;
   const ssid = wifi?.ssid || null;
@@ -37,25 +38,35 @@ export const WifiPage: React.FC = () => {
 
       {/* Main WiFi Card */}
       {ssid ? (
-        <div className="rounded-2xl border border-teal-100 bg-white p-5 shadow-sm space-y-4 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-primary">
-            <Wifi className="h-7 w-7" />
+        <div className="rounded-3xl border border-teal-100 bg-white p-6 shadow-sm space-y-4 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-teal-50 text-primary">
+            <Wifi className="h-8 w-8" />
           </div>
 
           <div>
             <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Network Name (SSID)</span>
-            <h2 className="text-lg font-black text-brandText mt-0.5">{ssid}</h2>
+            <h2 className="text-xl font-black text-brandText mt-0.5">{ssid}</h2>
           </div>
 
           {password ? (
-            <div className="rounded-2xl border border-dashed border-teal-200 bg-teal-50/40 p-3.5 space-y-1">
+            <div className="rounded-2xl border border-dashed border-teal-200 bg-teal-50/40 p-4 space-y-2">
               <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800">Password</span>
               <div className="flex items-center justify-center gap-2">
-                <span className="font-mono text-base font-bold text-brandText">{password}</span>
+                <span className="font-mono text-base font-bold text-brandText">
+                  {showPassword ? password : '••••••••••••'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-white transition-colors"
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
                 <button
                   type="button"
                   onClick={copyPassword}
-                  className="rounded-lg bg-white px-2 py-1 text-xs font-semibold text-primary shadow-sm hover:bg-gray-50 active:scale-95 transition-all flex items-center gap-1"
+                  className="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-primary shadow-xs hover:bg-gray-50 active:scale-95 transition-all flex items-center gap-1"
                 >
                   {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
                   <span>{copied ? 'Copied' : 'Copy'}</span>
@@ -63,7 +74,9 @@ export const WifiPage: React.FC = () => {
               </div>
             </div>
           ) : (
-            <p className="text-xs text-gray-400">Open Network (No password required)</p>
+            <div className="rounded-xl bg-teal-50/60 p-3 text-xs font-semibold text-teal-800">
+              Open Network (No password required)
+            </div>
           )}
         </div>
       ) : (
@@ -72,7 +85,7 @@ export const WifiPage: React.FC = () => {
             <Wifi className="h-7 w-7" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-brandText">Wi-Fi Credentials Not Configured</h3>
+            <h3 className="text-sm font-bold text-brandText">Your PG hasn't added Wi-Fi details yet</h3>
             <p className="text-xs text-gray-400 mt-1 max-w-xs mx-auto leading-relaxed">
               The property manager has not yet published the Wi-Fi router network and password for this PG. Please ask your caretaker.
             </p>

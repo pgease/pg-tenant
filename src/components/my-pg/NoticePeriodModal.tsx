@@ -24,6 +24,7 @@ export const NoticePeriodModal: React.FC<NoticePeriodModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [showCancelConfirmModal, setShowCancelConfirmModal] = useState(false);
 
   // Form fields
   const [reason, setReason] = useState('Job relocation');
@@ -70,19 +71,16 @@ export const NoticePeriodModal: React.FC<NoticePeriodModalProps> = ({
   };
 
   const handleCancelNotice = async () => {
-    if (!window.confirm('Are you sure you want to cancel your move-out notice? Your active stay will continue.')) {
-      return;
-    }
-
     setError(null);
     setLoading(true);
     try {
       await tenantService.cancelNotice();
+      setShowCancelConfirmModal(false);
       setSuccessMsg('Notice period has been cancelled. Your stay status is ACTIVE.');
       setTimeout(() => {
         onStatusChanged?.();
         onClose();
-      }, 2000);
+      }, 1500);
     } catch (err: any) {
       const msg = err.response?.data?.message || 'Failed to cancel notice.';
       setError(Array.isArray(msg) ? msg[0] : msg);
@@ -175,7 +173,10 @@ export const NoticePeriodModal: React.FC<NoticePeriodModalProps> = ({
               </p>
               <button
                 type="button"
-                onClick={handleCancelNotice}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowCancelConfirmModal(true);
+                }}
                 disabled={loading}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 py-3.5 text-xs font-bold text-white shadow-md shadow-red-600/20 active:scale-95 hover:bg-red-700 disabled:opacity-50 transition-all tap-target"
               >
@@ -247,6 +248,54 @@ export const NoticePeriodModal: React.FC<NoticePeriodModalProps> = ({
           )}
         </div>
       </div>
+
+      {/* Confirmation Dialog (TW-18) */}
+      {showCancelConfirmModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!loading) setShowCancelConfirmModal(false);
+          }}
+        >
+          <div
+            className="w-full max-w-sm rounded-3xl bg-white p-5 shadow-2xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-700 font-bold shrink-0">
+                <FileText className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-gray-900">Cancel Notice Request?</h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Your move-out request will be cancelled and your stay will continue.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowCancelConfirmModal(false)}
+                disabled={loading}
+                className="flex-1 rounded-xl border border-gray-200 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                Keep Notice
+              </button>
+              <button
+                type="button"
+                onClick={handleCancelNotice}
+                disabled={loading}
+                className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-red-600 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-red-700 disabled:opacity-50"
+              >
+                {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                <span>Yes, Cancel</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

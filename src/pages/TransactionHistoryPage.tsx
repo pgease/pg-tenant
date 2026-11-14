@@ -175,21 +175,38 @@ export const TransactionHistoryPage: React.FC = () => {
                     )}
                   </div>
 
-                  {tx.receiptUrl ? (
-                    <a
-                      href={tx.receiptUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1 font-bold text-primary hover:underline text-[11px]"
-                    >
-                      <Download className="h-3 w-3" />
-                      <span>Receipt</span>
-                    </a>
-                  ) : tx.receiptNumber ? (
-                    <span className="text-[10px] text-gray-400">
-                      #{tx.receiptNumber}
-                    </span>
-                  ) : null}
+                  <div className="flex items-center gap-2">
+                    {tx.receiptNumber && (
+                      <span className="text-[10px] font-mono text-gray-400">
+                        #{tx.receiptNumber}
+                      </span>
+                    )}
+                    {(tx.receiptUrl || isSuccess) && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (tx.receiptUrl) {
+                            window.open(tx.receiptUrl, '_blank', 'noopener');
+                          } else {
+                            try {
+                              const receipt = await tenantService.getPaymentReceipt(tx.id);
+                              if (receipt?.receiptUrl || receipt?.url) {
+                                window.open(receipt.receiptUrl || receipt.url, '_blank', 'noopener');
+                              } else {
+                                alert(`Receipt #${receipt?.receiptNumber || tx.receiptNumber || tx.id.slice(0, 8)} is generated.`);
+                              }
+                            } catch {
+                              alert('Could not download receipt at this time.');
+                            }
+                          }
+                        }}
+                        className="inline-flex items-center gap-1 font-bold text-primary hover:underline text-[11px]"
+                      >
+                        <Download className="h-3 w-3" />
+                        <span>Receipt</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             );

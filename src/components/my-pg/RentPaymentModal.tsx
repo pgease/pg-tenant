@@ -108,7 +108,13 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
     e.preventDefault();
     setErrorMessage(null);
 
-    if (!utrNumber.trim() && !screenshotFile) {
+    const cleanUtr = utrNumber.replace(/\s/g, '');
+    if (cleanUtr && cleanUtr.length !== 12) {
+      setErrorMessage('UTR / Reference number must be exactly 12 digits (or leave blank if uploading screenshot).');
+      return;
+    }
+
+    if (!cleanUtr && !screenshotFile) {
       setErrorMessage('Please provide either the 12-digit UTR/reference number or upload a payment screenshot.');
       return;
     }
@@ -122,13 +128,13 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
         setUploading(false);
       }
 
-      // Record manual payment notification via ticket/complaint or verified note
-      await tenantService.raiseComplaint({
-        category: 'Rent Payment',
-        subject: `Rent Payment UTR: ${utrNumber || 'Screenshot Uploaded'} - ${dues.period.label}`,
-        description: `Payment confirmation submitted by tenant for amount ₹${dues.totalPayable}. Reference/UTR: ${utrNumber}. Photo: ${photoUrl || 'None'}`,
-        photoUrl,
-        priority: 'high',
+      // Record offline payment with UTR reference (TW-08)
+      await tenantService.submitManualPayment({
+        amount: dues.totalPayable,
+        reference: cleanUtr || 'SCREENSHOT_UPLOADED',
+        notes: `Direct UPI / Manual payment of ₹${dues.totalPayable} submitted for ${dues.period.label}. UTR: ${cleanUtr || 'N/A'}.`,
+        photoUrl: photoUrl || undefined,
+        paymentMethod: 'UPI_MANUAL',
       });
 
       setSubmissionSuccess(true);
@@ -137,7 +143,7 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
         onClose();
       }, 2500);
     } catch (err: any) {
-      setErrorMessage(err.message || 'Failed to submit payment details. Please try again.');
+      setErrorMessage(err?.response?.data?.message || err.message || 'Failed to submit payment details. Please try again.');
     } finally {
       setSubmitting(false);
       setUploading(false);
@@ -348,6 +354,18 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
                       Step 1: Direct UPI Transfer
                     </span>
 
+                    {/* QR Code Display (TW-08) */}
+                    {Boolean((settlement as any)?.settlementQrImageUrl || (settlement as any)?.settlementQrCodeUrl || (settlement as any)?.qrCodeUrl) && (
+                      <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-gray-50 border border-gray-200/80">
+                        <img
+                          src={(settlement as any)?.settlementQrImageUrl || (settlement as any)?.settlementQrCodeUrl || (settlement as any)?.qrCodeUrl}
+                          alt="Owner UPI QR Code"
+                          className="h-44 w-44 object-contain rounded-xl border border-white shadow-sm"
+                        />
+                        <p className="text-[10px] text-gray-400 mt-1 font-medium">Scan with any UPI app</p>
+                      </div>
+                    )}
+
                     {upiId ? (
                       <>
                         {upiIntentUrl && (
@@ -387,7 +405,7 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
                       <div className="text-[11px] text-brandText-muted bg-gray-50 p-2.5 rounded-xl border border-gray-100 space-y-1">
                         <p><strong>A/C:</strong> {settlement.settlementAccountNumber}</p>
                         <p><strong>IFSC:</strong> {settlement.settlementIfsc}</p>
-                        <p><strong>Holder:</strong> {settlement.settlementAccountHolder}</p>
+                        <p><strong>Holder:</strong> {settlement.settlementAccountHolder || 'PG Owner'}</p>
                       </div>
                     )}
                   </div>
@@ -398,16 +416,30 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
                       Step 2: Submit Payment Confirmation
                     </span>
 
-                    {/* 12-digit UTR Input */}
+                    {/* Prefilled Read-Only Amount (TW-08) */}
                     <div>
                       <label className="block text-[11px] font-semibold text-brandText-muted mb-1">
-                        12-digit UTR / Ref Number
+                        Amount Paid (₹)
                       </label>
                       <input
                         type="text"
+                        readOnly
+                        value={`₹${dues.totalPayable.toLocaleString('en-IN')}`}
+                        className="w-full rounded-xl border border-gray-200 bg-gray-100 px-3.5 py-2.5 text-xs font-bold text-brandText cursor-not-allowed select-none"
+                      />
+                    </div>
+
+                    {/* 12-digit UTR Input */}
+                    <div>
+                      <label className="block text-[11px] font-semibold text-brandText-muted mb-1">
+                        12-digit UTR / Ref Number <span className="font-normal">(Optional if screenshot attached)</span>
+                      </label>
+                      <input
+                        type="text"
+                        maxLength={12}
                         placeholder="e.g. 429182749102"
                         value={utrNumber}
-                        onChange={(e) => setUtrNumber(e.target.value)}
+                        onChange={(e) => setUtrNumber(e.target.value.replace(/\D/g, ''))}
                         className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-3.5 py-2.5 text-xs font-semibold text-brandText focus:border-primary focus:bg-white focus:outline-none"
                       />
                     </div>

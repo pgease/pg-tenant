@@ -536,6 +536,7 @@ export const ProfilePage: React.FC = () => {
                   className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-brandText focus:border-primary focus:outline-none"
                   placeholder="Your full name"
                 />
+                <span className="text-[10px] text-gray-400 block mt-1">Your PG owner will see this change</span>
               </div>
               <div>
                 <label className="text-xs font-semibold text-gray-600 block mb-1">Email Address</label>

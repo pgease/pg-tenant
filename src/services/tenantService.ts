@@ -253,4 +253,53 @@ export const tenantService = {
     const { data } = await apiClient.post(`/tenants/payments/easebuzz/${encodeURIComponent(txnid)}/upi`, body);
     return data;
   },
+
+  // Aadhaar KYC DigiLocker status (TW-03, TW-11)
+  async getKycStatus(): Promise<{
+    isKycVerified: boolean;
+    status: string;
+    verifiedAt?: string;
+    verifiedDetails?: {
+      aadhaar?: {
+        last4?: string;
+        name?: string;
+      };
+    };
+    directLink?: string;
+  } | null> {
+    try {
+      const { data } = await apiClient.get('/tenants/kyc');
+      return data?.kyc || data || null;
+    } catch {
+      return null;
+    }
+  },
+
+  // Payment Options & Direct UPI (TW-08)
+  async getPaymentOptions(): Promise<any> {
+    try {
+      const { data } = await apiClient.get('/tenants/payments/options');
+      return data;
+    } catch {
+      return null;
+    }
+  },
+
+  // Submit Manual / Offline Payment with 12-digit UTR (TW-08)
+  async submitManualPayment(dto: {
+    amount: number | string;
+    paymentMethod?: string;
+    reference?: string;
+    notes?: string;
+    photoUrl?: string;
+  }): Promise<any> {
+    const { data } = await apiClient.post('/tenants/payments/manual', dto);
+    return data;
+  },
+
+  // Payment Receipt Download (TW-15)
+  async getPaymentReceipt(paymentId: string): Promise<any> {
+    const { data } = await apiClient.get(`/tenants/payments/${encodeURIComponent(paymentId)}/receipt`);
+    return data;
+  },
 };
