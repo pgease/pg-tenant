@@ -68,6 +68,13 @@ export const MyPgPage: React.FC = () => {
     0
   );
 
+  const securityDeposit = Number(
+    propertyDetails?.roomTenant?.securityDeposit ??
+    (propertyDetails?.roomTenant as any)?.depositAmount ??
+    propertyDetails?.room?.securityDeposit ??
+    0
+  );
+
   const mapsUrl =
     (propertyDetails?.property as any)?.googleMapsUrl ||
     (propertyAddress
@@ -236,16 +243,22 @@ export const MyPgPage: React.FC = () => {
               )}
             </div>
 
-            {/* Inner Rent Card */}
+            {/* Inner Rent & Deposit Card */}
             <div className="rounded-2xl bg-white p-4 text-gray-900 shadow-sm flex items-center justify-between">
               <div>
-                <span className="text-[11px] font-semibold text-gray-500">Monthly Rent</span>
+                <span className="text-[11px] font-semibold text-gray-500">Monthly Rent & Dues</span>
                 <p className="text-lg font-black text-gray-900">
                   ₹{monthlyRent.toLocaleString('en-IN')}
+                  <span className="text-xs font-semibold text-gray-400">/mo</span>
                 </p>
-                <p className="text-[11px] font-semibold text-emerald-600">
-                  Active Tenancy
-                </p>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="text-[11px] font-semibold text-emerald-600">Active Stay</span>
+                  {securityDeposit > 0 && (
+                    <span className="text-[11px] text-gray-400 font-medium">
+                      • Deposit: ₹{securityDeposit.toLocaleString('en-IN')}
+                    </span>
+                  )}
+                </div>
               </div>
 
               <button

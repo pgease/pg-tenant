@@ -20,6 +20,14 @@ export interface RentCollectionDetails {
     amountPaid: number;
     balanceDue: number;
   };
+  breakdown?: {
+    rent?: number;
+    securityDeposit?: number;
+    electricity?: number;
+    miscellaneous?: number;
+    totalPayable?: number;
+    [key: string]: any;
+  };
   settlement?: {
     upiQrString?: string;
     qrImageUrl?: string | null;

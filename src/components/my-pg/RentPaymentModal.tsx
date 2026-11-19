@@ -18,6 +18,8 @@ import {
   UserCheck,
   FileText,
   Sparkles,
+  Home,
+  Zap,
 } from 'lucide-react';
 import { type RentCollectionDetails, tenantService } from '../../services/tenantService';
 
@@ -26,6 +28,9 @@ interface RentPaymentModalProps {
   onClose: () => void;
   dues: RentCollectionDetails | null;
   onPaymentSuccess?: () => void;
+  initialItem?: 'all' | 'rent' | 'security' | 'dues';
+  securityDepositAmount?: number;
+  isSecurityPaid?: boolean;
 }
 
 type PaymentMode = 'gateway' | 'upi' | 'cash';
@@ -35,9 +40,25 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
   onClose,
   dues,
   onPaymentSuccess,
+  initialItem = 'all',
+  securityDepositAmount = 0,
+  isSecurityPaid = false,
 }) => {
   const [paymentMode, setPaymentMode] = useState<PaymentMode>('gateway');
   const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  // Itemized Selection State
+  const effectiveRent = Number(dues?.lineItems?.rent?.amount || 0);
+  const effectiveSecurity = Number(
+    dues?.lineItems?.securityDeposit?.amount || securityDepositAmount || 0,
+  );
+  const effectiveMisc = Number(dues?.lineItems?.miscellaneous?.amount || 0);
+
+  const [includeRent, setIncludeRent] = useState(true);
+  const [includeSecurity, setIncludeSecurity] = useState(false);
+  const [includeMisc, setIncludeMisc] = useState(false);
+  const [isCustomAmount, setIsCustomAmount] = useState(false);
+  const [customAmountVal, setCustomAmountVal] = useState<number | string>('');
 
   // Gateway state
   const [gatewayConfig, setGatewayConfig] = useState<{
@@ -65,6 +86,49 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
   const [successType, setSuccessType] = useState<'upi' | 'cash'>('upi');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Sync initial selection based on user click
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (initialItem === 'security') {
+      setIncludeSecurity(true);
+      setIncludeRent(false);
+      setIncludeMisc(false);
+      setIsCustomAmount(false);
+    } else if (initialItem === 'rent') {
+      setIncludeRent(true);
+      setIncludeSecurity(false);
+      setIncludeMisc(false);
+      setIsCustomAmount(false);
+    } else if (initialItem === 'dues') {
+      setIncludeMisc(true);
+      setIncludeRent(false);
+      setIncludeSecurity(false);
+      setIsCustomAmount(false);
+    } else {
+      const rentUnpaid = dues?.status !== 'paid' && effectiveRent > 0;
+      const secUnpaid = !isSecurityPaid && effectiveSecurity > 0;
+      setIncludeRent(rentUnpaid || (!secUnpaid && effectiveRent > 0));
+      setIncludeSecurity(secUnpaid && !rentUnpaid);
+      setIncludeMisc(effectiveMisc > 0);
+      setIsCustomAmount(false);
+    }
+  }, [isOpen, initialItem, effectiveRent, effectiveSecurity, effectiveMisc, isSecurityPaid, dues?.status]);
+
+  // Compute live payable amount
+  const payableAmount = isCustomAmount
+    ? (Number(customAmountVal) || 0)
+    : (includeRent ? effectiveRent : 0) +
+      (includeSecurity ? effectiveSecurity : 0) +
+      (includeMisc ? effectiveMisc : 0);
+
+  // Sync cash amount with live payableAmount
+  useEffect(() => {
+    if (payableAmount > 0) {
+      setCashAmount(payableAmount);
+    }
+  }, [payableAmount]);
+
   // Check gateway availability and reset forms on open
   useEffect(() => {
     if (!isOpen) return;
@@ -78,9 +142,6 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
     setCashDate(new Date().toISOString().split('T')[0]);
     setCashReceiptFile(null);
     setCashNotes('');
-    if (dues) {
-      setCashAmount(dues.totalPayable);
-    }
 
     tenantService
       .getEasebuzzConfig()
@@ -102,18 +163,37 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [isOpen, dues]);
+  }, [isOpen]);
 
   if (!isOpen || !dues) return null;
 
+  const getSelectedPurposeText = () => {
+    if (isCustomAmount) {
+      return `Custom Dues Payment of ₹${Number(customAmountVal || 0).toLocaleString('en-IN')}`;
+    }
+    const items: string[] = [];
+    if (includeRent) items.push(`Monthly Rent (₹${effectiveRent.toLocaleString('en-IN')})`);
+    if (includeSecurity) items.push(`Security Deposit (₹${effectiveSecurity.toLocaleString('en-IN')})`);
+    if (includeMisc) items.push(`Utilities/Dues (₹${effectiveMisc.toLocaleString('en-IN')})`);
+    return items.length > 0 ? items.join(' + ') : 'Stay Dues';
+  };
+
   const handleInitiateGateway = async () => {
-    if (dues.totalPayable <= 0) return;
+    if (payableAmount <= 0) {
+      setErrorMessage('Please select at least one item or enter a valid amount.');
+      return;
+    }
     setErrorMessage(null);
     setIsInitiatingGateway(true);
     try {
       const res = await tenantService.createEasebuzzPayment({
         checkoutMode: gatewayConfig.checkoutMode,
-      });
+        dueIds: dues.rentCollectionId ? [dues.rentCollectionId] : undefined,
+        amount: payableAmount,
+        includeRent,
+        includeSecurityDeposit: includeSecurity,
+        includeMiscellaneous: includeMisc,
+      } as any);
 
       if (res.checkoutUrl) {
         window.location.href = res.checkoutUrl;
@@ -140,6 +220,11 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
     e.preventDefault();
     setErrorMessage(null);
 
+    if (payableAmount <= 0) {
+      setErrorMessage('Please select at least one item or enter a valid amount.');
+      return;
+    }
+
     const cleanUtr = utrNumber.replace(/\s/g, '');
     if (cleanUtr && cleanUtr.length !== 12) {
       setErrorMessage('UTR / Reference number must be exactly 12 digits (or leave blank if uploading screenshot).');
@@ -161,9 +246,9 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
       }
 
       await tenantService.submitManualPayment({
-        amount: dues.totalPayable,
+        amount: payableAmount,
         reference: cleanUtr || 'SCREENSHOT_UPLOADED',
-        notes: `Direct UPI transfer of ₹${dues.totalPayable.toLocaleString('en-IN')} submitted for ${dues.period.label}. UTR: ${cleanUtr || 'N/A'}.`,
+        notes: `Direct UPI transfer of ₹${payableAmount.toLocaleString('en-IN')} for ${getSelectedPurposeText()} (${dues.period.label}). UTR: ${cleanUtr || 'N/A'}.`,
         photoUrl: photoUrl || undefined,
         rentCollectionId: dues.rentCollectionId || undefined,
         paymentMethod: 'UPI_MANUAL',
@@ -208,7 +293,7 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
         setUploading(false);
       }
 
-      const handoverDetail = `Cash of ₹${amount.toLocaleString('en-IN')} handed over to ${cashRecipient.trim()} on ${cashDate || new Date().toISOString().split('T')[0]}.`;
+      const handoverDetail = `Cash of ₹${amount.toLocaleString('en-IN')} handed over to ${cashRecipient.trim()} on ${cashDate || new Date().toISOString().split('T')[0]} for ${getSelectedPurposeText()}.`;
       const finalNote = cashNotes.trim() ? `${handoverDetail} Note: ${cashNotes.trim()}` : handoverDetail;
 
       await tenantService.submitManualPayment({
@@ -238,7 +323,7 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
   const upiId = settlement.upiId || settlement.settlementUpiId || null;
   const payeeName = dues.owner?.name || dues.settlement?.accountHolderName || 'PG Stay';
   const upiIntentUrl = upiId
-    ? (settlement.upiQrString || `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${dues.totalPayable}&cu=INR&tn=${encodeURIComponent(`Rent ${payeeName}`)}`)
+    ? (settlement.upiQrString || `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${payableAmount}&cu=INR&tn=${encodeURIComponent(`PG Stay ${payeeName}`)}`)
     : null;
 
   const qrImageUrl = settlement.qrImageUrl || (settlement as any)?.settlementQrImageUrl || (settlement as any)?.settlementQrCodeUrl;
@@ -283,40 +368,175 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
           <div className="rounded-2xl bg-gradient-to-br from-teal-500/10 via-emerald-50/40 to-white p-4 border border-teal-200/80 shadow-xs flex items-center justify-between">
             <div>
               <span className="text-[11px] font-bold text-teal-800 uppercase tracking-wider">
-                Total Payable Amount
+                Total Selected Payable
               </span>
               <p className="text-2xl font-black text-brandText mt-0.5 tracking-tight">
-                ₹{dues.totalPayable.toLocaleString('en-IN')}
+                ₹{payableAmount.toLocaleString('en-IN')}
               </p>
             </div>
             <div className="text-right">
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100/90 px-3 py-1 text-xs font-bold text-amber-800 border border-amber-200">
-                <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
-                Payment Due
+              <span className="inline-flex items-center gap-1 rounded-full bg-teal-100/90 px-3 py-1 text-xs font-bold text-teal-900 border border-teal-200">
+                <span className="h-1.5 w-1.5 rounded-full bg-teal-600 animate-pulse" />
+                {isCustomAmount ? 'Custom Amount' : `${(includeRent ? 1 : 0) + (includeSecurity ? 1 : 0) + (includeMisc ? 1 : 0)} Item(s)`}
               </span>
             </div>
           </div>
 
-          {/* Dues Breakdown Pill */}
-          <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-3.5 space-y-2 text-xs">
-            <div className="flex items-center justify-between text-brandText-muted font-bold text-[10px] uppercase tracking-wider">
-              <span>Bill Breakdown</span>
-              <span>Amount</span>
-            </div>
-            <div className="flex justify-between py-1 border-b border-gray-200/60 text-brandText">
-              <span className="font-medium">{dues.lineItems.rent.title}</span>
-              <span className="font-bold">₹{dues.lineItems.rent.amount.toLocaleString('en-IN')}</span>
-            </div>
-            {dues.lineItems.securityDeposit?.amount > 0 && (
-              <div className="flex justify-between py-1 border-b border-gray-200/60 text-brandText">
-                <span className="font-medium">{dues.lineItems.securityDeposit.title}</span>
-                <span className="font-bold">₹{dues.lineItems.securityDeposit.amount.toLocaleString('en-IN')}</span>
+          {/* Interactive Itemized Selection Checklist */}
+          <div className="rounded-2xl border border-gray-200/80 bg-gray-50/70 p-3.5 space-y-2.5 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-brandText font-bold text-xs uppercase tracking-wider">
+                Select Items to Pay
+              </span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCustomAmount(false);
+                    setIncludeRent(effectiveRent > 0);
+                    setIncludeSecurity(effectiveSecurity > 0);
+                    setIncludeMisc(effectiveMisc > 0);
+                  }}
+                  className="text-[10px] font-bold text-primary hover:underline px-2 py-0.5 rounded bg-white border border-gray-200 shadow-2xs"
+                >
+                  Select All
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsCustomAmount(!isCustomAmount)}
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded border transition-all ${
+                    isCustomAmount
+                      ? 'bg-primary text-white border-primary shadow-2xs'
+                      : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100 shadow-2xs'
+                  }`}
+                >
+                  Custom Amount
+                </button>
               </div>
-            )}
-            {dues.lineItems.miscellaneous?.amount > 0 && (
-              <div className="flex justify-between py-1 text-brandText">
-                <span className="font-medium">{dues.lineItems.miscellaneous.title}</span>
-                <span className="font-bold">₹{dues.lineItems.miscellaneous.amount.toLocaleString('en-IN')}</span>
+            </div>
+
+            {/* Custom Amount Field (if toggled) */}
+            {isCustomAmount ? (
+              <div className="p-3 bg-white rounded-xl border border-teal-200 space-y-1.5 animate-fade-in">
+                <label className="text-[11px] font-bold text-teal-900 flex items-center justify-between">
+                  <span>Enter Custom Due / Partial Amount (₹)</span>
+                  <span className="text-[10px] text-gray-400 font-normal">e.g. ₹5,000</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2.5 text-sm font-bold text-gray-400">₹</span>
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="Enter amount to pay"
+                    value={customAmountVal}
+                    onChange={(e) => setCustomAmountVal(e.target.value)}
+                    className="w-full pl-8 pr-3 py-2 rounded-lg border border-gray-200 text-sm font-black text-brandText focus:border-primary focus:outline-none"
+                  />
+                </div>
+                <p className="text-[10px] text-gray-500">
+                  Use this to clear custom security deposit, partial rent, or agreed utility balance.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                {/* 1. Monthly Rent Option */}
+                {effectiveRent > 0 && (
+                  <div
+                    onClick={() => setIncludeRent(!includeRent)}
+                    className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition-all ${
+                      includeRent
+                        ? 'bg-white border-teal-500 shadow-xs'
+                        : 'bg-white/60 border-gray-200 opacity-60 hover:opacity-100'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className={`flex h-5 w-5 items-center justify-center rounded-md border transition-all ${
+                        includeRent ? 'bg-primary border-primary text-white' : 'border-gray-300 bg-white'
+                      }`}>
+                        {includeRent && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <Home className="h-3.5 w-3.5 text-primary" />
+                          <span className="font-bold text-brandText">{dues.lineItems?.rent?.title || 'Monthly Room Rent'}</span>
+                        </div>
+                        <span className="text-[10px] text-gray-400 block">{dues.period.label} cycle</span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-black text-brandText block">₹{effectiveRent.toLocaleString('en-IN')}</span>
+                      <span className={`text-[10px] font-bold ${dues.status === 'paid' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                        {dues.status === 'paid' ? 'Paid ✓' : 'Due'}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* 2. Security Deposit Option */}
+                {effectiveSecurity > 0 && (
+                  <div
+                    onClick={() => setIncludeSecurity(!includeSecurity)}
+                    className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition-all ${
+                      includeSecurity
+                        ? 'bg-white border-teal-500 shadow-xs'
+                        : 'bg-white/60 border-gray-200 opacity-60 hover:opacity-100'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className={`flex h-5 w-5 items-center justify-center rounded-md border transition-all ${
+                        includeSecurity ? 'bg-primary border-primary text-white' : 'border-gray-300 bg-white'
+                      }`}>
+                        {includeSecurity && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                          <span className="font-bold text-brandText">{dues.lineItems?.securityDeposit?.title || 'Security Deposit'}</span>
+                        </div>
+                        <span className="text-[10px] text-gray-400 block">Refundable caution deposit</span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-black text-brandText block">₹{effectiveSecurity.toLocaleString('en-IN')}</span>
+                      <span className={`text-[10px] font-bold ${isSecurityPaid ? 'text-emerald-600' : 'text-amber-600'}`}>
+                        {isSecurityPaid ? 'Secured ✓' : 'Deposit Due'}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. Miscellaneous & Utilities Option */}
+                {effectiveMisc > 0 && (
+                  <div
+                    onClick={() => setIncludeMisc(!includeMisc)}
+                    className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition-all ${
+                      includeMisc
+                        ? 'bg-white border-teal-500 shadow-xs'
+                        : 'bg-white/60 border-gray-200 opacity-60 hover:opacity-100'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className={`flex h-5 w-5 items-center justify-center rounded-md border transition-all ${
+                        includeMisc ? 'bg-primary border-primary text-white' : 'border-gray-300 bg-white'
+                      }`}>
+                        {includeMisc && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <Zap className="h-3.5 w-3.5 text-amber-500" />
+                          <span className="font-bold text-brandText">{dues.lineItems?.miscellaneous?.title || 'Utilities & Maintenance'}</span>
+                        </div>
+                        <span className="text-[10px] text-gray-400 block">
+                          {dues.lineItems?.miscellaneous?.description || 'Electricity & maintenance dues'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-black text-brandText block">₹{effectiveMisc.toLocaleString('en-IN')}</span>
+                      <span className="text-[10px] font-bold text-amber-600">Pending</span>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -431,7 +651,7 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
                       <button
                         type="button"
                         onClick={handleInitiateGateway}
-                        disabled={isInitiatingGateway || dues.totalPayable <= 0}
+                        disabled={isInitiatingGateway || payableAmount <= 0}
                         className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-4 text-sm font-bold text-white shadow-lg shadow-primary/25 disabled:opacity-50 hover:bg-primary-dark active:scale-[0.98] transition-all tap-target"
                       >
                         {isInitiatingGateway ? (
@@ -439,11 +659,11 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
                             <Loader2 className="h-4 w-4 animate-spin" />
                             <span>Opening UPI Gateway...</span>
                           </>
-                        ) : dues.totalPayable <= 0 ? (
-                          <span>No Dues Pending (₹0)</span>
+                        ) : payableAmount <= 0 ? (
+                          <span>Select an item to pay (₹0)</span>
                         ) : (
                           <>
-                            <span>Pay ₹{dues.totalPayable.toLocaleString('en-IN')} via Instant UPI</span>
+                            <span>Pay ₹{payableAmount.toLocaleString('en-IN')} via Instant UPI</span>
                             <ArrowRight className="h-4 w-4" />
                           </>
                         )}
@@ -603,14 +823,19 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
 
                     {/* Amount Paid */}
                     <div>
-                      <label className="block text-[11px] font-semibold text-brandText-muted mb-1">
-                        Amount Paid (₹)
-                      </label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-[11px] font-semibold text-brandText-muted">
+                          Amount Paid (₹)
+                        </label>
+                        <span className="text-[10px] text-teal-700 font-semibold">
+                          {getSelectedPurposeText()}
+                        </span>
+                      </div>
                       <input
                         type="text"
                         readOnly
-                        value={`₹${dues.totalPayable.toLocaleString('en-IN')}`}
-                        className="w-full rounded-xl border border-gray-200 bg-gray-100 px-3.5 py-2.5 text-xs font-bold text-brandText cursor-not-allowed select-none"
+                        value={`₹${payableAmount.toLocaleString('en-IN')}`}
+                        className="w-full rounded-xl border border-gray-200 bg-gray-100 px-3.5 py-2.5 text-xs font-bold text-brandText select-none"
                       />
                     </div>
 

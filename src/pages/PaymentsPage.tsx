@@ -6,6 +6,10 @@ import {
   ChevronRight,
   Smartphone,
   Loader2,
+  ShieldCheck,
+  Home,
+  Zap,
+  Sparkles,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -21,6 +25,7 @@ export const PaymentsPage: React.FC = () => {
   const [totalPaid, setTotalPaid] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [showPayModal, setShowPayModal] = useState(false);
+  const [modalInitialItem, setModalInitialItem] = useState<'all' | 'rent' | 'security' | 'dues'>('all');
 
   const loadPaymentData = async () => {
     setLoading(true);
@@ -53,8 +58,37 @@ export const PaymentsPage: React.FC = () => {
     dues?.lineItems?.rent?.amount ??
     0
   );
+
+  const securityDepositAmount = Number(
+    propertyDetails?.roomTenant?.securityDeposit ??
+    (propertyDetails?.roomTenant as any)?.depositAmount ??
+    propertyDetails?.room?.securityDeposit ??
+    dues?.lineItems?.securityDeposit?.amount ??
+    dues?.breakdown?.securityDeposit ??
+    0
+  );
+
+  const isSecurityPaid = Boolean(
+    dues?.lineItems?.securityDeposit?.isPaid ||
+    (propertyDetails?.roomTenant as any)?.securityDepositPaid ||
+    (propertyDetails?.roomTenant as any)?.isSecurityDepositPaid ||
+    (propertyDetails?.roomTenant as any)?.depositPaid
+  );
+
+  const miscAmount = Number(
+    dues?.lineItems?.miscellaneous?.amount ??
+    dues?.breakdown?.miscellaneous ??
+    dues?.breakdown?.electricity ??
+    0
+  );
+
   const amountDue = Number(dues?.totalPayable ?? dues?.summary?.balanceDue ?? monthlyRent);
   const isPaid = dues?.status === 'paid' || (amountDue === 0 && Boolean(propertyDetails));
+
+  const openPaymentForItem = (item: 'all' | 'rent' | 'security' | 'dues') => {
+    setModalInitialItem(item);
+    setShowPayModal(true);
+  };
 
   const formatDueDate = () => {
     if (propertyDetails?.nextRentDueDate) {
@@ -126,6 +160,9 @@ export const PaymentsPage: React.FC = () => {
         isOpen={showPayModal}
         onClose={() => setShowPayModal(false)}
         dues={dues}
+        initialItem={modalInitialItem}
+        securityDepositAmount={securityDepositAmount}
+        isSecurityPaid={isSecurityPaid}
         onPaymentSuccess={() => {
           loadPaymentData();
         }}
@@ -176,15 +213,143 @@ export const PaymentsPage: React.FC = () => {
             </p>
           </div>
 
-          {!isPaid && (
-            <button
-              onClick={() => setShowPayModal(true)}
-              className="flex items-center gap-1.5 rounded-2xl bg-white px-5 py-3 text-xs font-bold text-primary shadow-lg hover:bg-gray-50 active:scale-95 transition-all tap-target"
-            >
-              <CreditCard className="h-4 w-4 text-primary" />
-              <span>Pay Now</span>
-            </button>
-          )}
+          <button
+            onClick={() => openPaymentForItem('all')}
+            className="flex items-center gap-1.5 rounded-2xl bg-white px-5 py-3 text-xs font-bold text-primary shadow-lg hover:bg-gray-50 active:scale-95 transition-all tap-target"
+          >
+            <CreditCard className="h-4 w-4 text-primary" />
+            <span>{isPaid ? 'Make Payment' : 'Pay All Dues'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 2.5 Itemized Stay Bills & Charges (Rent, Security Deposit, Utilities) */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-xs font-bold text-brandText uppercase tracking-wider flex items-center gap-1.5">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            Itemized Dues & Charges
+          </h3>
+          <span className="text-[10px] text-gray-400 font-medium">Select item to pay individually</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {/* Card 1: Monthly Room Rent */}
+          <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm flex flex-col justify-between space-y-3">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-primary">
+                  <Home className="h-5 w-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-brandText">Monthly Room Rent</h4>
+                  <p className="text-[11px] text-gray-400">{formatDueDate()}</p>
+                </div>
+              </div>
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                isPaid ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
+              }`}>
+                {isPaid ? 'PAID ✓' : 'UNPAID'}
+              </span>
+            </div>
+
+            <div className="pt-1 border-t border-gray-50 flex items-center justify-between">
+              <div>
+                <span className="text-[10px] text-gray-400 block">Amount</span>
+                <span className="text-base font-black text-brandText">
+                  ₹{monthlyRent.toLocaleString('en-IN')}
+                </span>
+              </div>
+              <button
+                onClick={() => openPaymentForItem('rent')}
+                className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all shadow-xs ${
+                  isPaid
+                    ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-primary text-white hover:bg-primary-dark active:scale-95'
+                }`}
+              >
+                {isPaid ? 'Paid Details' : 'Pay Rent'}
+              </button>
+            </div>
+          </div>
+
+          {/* Card 2: Security Deposit */}
+          <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm flex flex-col justify-between space-y-3">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-brandText">Security Deposit</h4>
+                  <p className="text-[11px] text-gray-400">Refundable stay caution deposit</p>
+                </div>
+              </div>
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                isSecurityPaid ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
+              }`}>
+                {isSecurityPaid ? 'SECURED ✓' : 'PENDING'}
+              </span>
+            </div>
+
+            <div className="pt-1 border-t border-gray-50 flex items-center justify-between">
+              <div>
+                <span className="text-[10px] text-gray-400 block">Deposit Amount</span>
+                <span className="text-base font-black text-brandText">
+                  ₹{securityDepositAmount.toLocaleString('en-IN')}
+                </span>
+              </div>
+              <button
+                onClick={() => openPaymentForItem('security')}
+                className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all shadow-xs ${
+                  isSecurityPaid
+                    ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95'
+                }`}
+              >
+                {isSecurityPaid ? 'Deposit Status' : 'Pay Deposit'}
+              </button>
+            </div>
+          </div>
+
+          {/* Card 3: Utilities, Electricity & Extra Dues */}
+          <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm flex flex-col justify-between space-y-3">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                  <Zap className="h-5 w-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-brandText">Utilities & Extra Dues</h4>
+                  <p className="text-[11px] text-gray-400">Electricity, maintenance & add-ons</p>
+                </div>
+              </div>
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                miscAmount === 0 ? 'bg-gray-100 text-gray-600' : 'bg-red-50 text-red-700'
+              }`}>
+                {miscAmount === 0 ? 'CLEARED' : 'DUE'}
+              </span>
+            </div>
+
+            <div className="pt-1 border-t border-gray-50 flex items-center justify-between">
+              <div>
+                <span className="text-[10px] text-gray-400 block">Pending Charges</span>
+                <span className="text-base font-black text-brandText">
+                  ₹{miscAmount.toLocaleString('en-IN')}
+                </span>
+              </div>
+              <button
+                onClick={() => openPaymentForItem('dues')}
+                className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all shadow-xs ${
+                  miscAmount === 0
+                    ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-amber-600 text-white hover:bg-amber-700 active:scale-95'
+                }`}
+              >
+                {miscAmount === 0 ? 'No Dues' : 'Pay Charges'}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
