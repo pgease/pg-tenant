@@ -381,13 +381,22 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
 
   const settlement = dues.settlement || {};
   const upiId = settlement.upiId || settlement.settlementUpiId || null;
-  const payeeName = dues.owner?.name || dues.settlement?.accountHolderName || 'PG Stay';
+  const payeeName = dues.owner?.name || settlement.accountHolderName || dues.property?.name || 'PG Stay';
+
+  // Format amount for standard NPCI UPI intent (must be positive number with 2 decimal places, e.g. 315.00)
+  const formattedAmount = payableAmount > 0 ? payableAmount.toFixed(2) : '';
+  const note = `PG Stay ${dues.tenant?.name || ''} ${dues.period?.label || ''}`.trim() || `Rent ${payeeName}`;
+
+  // Always generate live UPI Intent URL with the actual selected payableAmount
   const upiIntentUrl = upiId
-    ? (settlement.upiQrString || `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${payableAmount}&cu=INR&tn=${encodeURIComponent(`PG Stay ${payeeName}`)}`)
+    ? `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}${formattedAmount ? `&am=${formattedAmount}` : ''}&cu=INR&tn=${encodeURIComponent(note)}`
     : null;
 
+  // Always render dynamic QR matching the live payable amount, fallback to static backend image if no UPI ID
   const qrImageUrl = settlement.qrImageUrl || (settlement as any)?.settlementQrImageUrl || (settlement as any)?.settlementQrCodeUrl;
-  const qrDisplayUrl = qrImageUrl || (settlement.upiQrString ? `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(settlement.upiQrString)}` : null);
+  const qrDisplayUrl = upiIntentUrl
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiIntentUrl)}`
+    : qrImageUrl || (settlement.upiQrString ? `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(settlement.upiQrString)}` : null);
   const displayAccountNum = settlement.accountNumberMasked || settlement.accountNumber || settlement.settlementAccountNumber;
   const displayIfsc = settlement.ifscCode || settlement.settlementIfsc;
   const displayHolder = settlement.accountHolderName || settlement.settlementAccountHolder || dues.owner?.name || 'PG Owner';

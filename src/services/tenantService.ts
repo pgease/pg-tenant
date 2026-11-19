@@ -93,6 +93,14 @@ export interface RentCollectionDetails {
     name?: string;
     contactNumber?: string;
   };
+  tenant?: {
+    id?: string;
+    name?: string;
+    phone?: string;
+    email?: string;
+    roomNumber?: string;
+    roomName?: string;
+  };
   property?: {
     id?: string;
     name?: string;
