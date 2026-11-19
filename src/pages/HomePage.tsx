@@ -21,11 +21,19 @@ import {
   AlertCircle,
   DoorOpen,
   FileText,
+  ShieldCheck,
+  FileSignature,
+  IndianRupee,
+  ExternalLink,
+  Clock,
+  Receipt,
+  FileCheck,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { tenantService, type RentCollectionDetails } from '../services/tenantService';
 import { PgExplorerSection } from '../components/search/PgExplorerSection';
+import { RentPaymentModal } from '../components/my-pg/RentPaymentModal';
 
 function getTimeGreeting(): string {
   const hour = new Date().getHours();
@@ -54,9 +62,11 @@ export const HomePage: React.FC = () => {
   const [todayDining, setTodayDining] = useState<any>(null);
   const [rentDues, setRentDues] = useState<RentCollectionDetails | null>(null);
   const [hasUnreadNotices, setHasUnreadNotices] = useState<boolean>(false);
-  const [pendingAgreement, setPendingAgreement] = useState<any | null>(null);
+  const [agreements, setAgreements] = useState<any[]>([]);
+  const [kycData, setKycData] = useState<any | null>(null);
+  const [showPayModal, setShowPayModal] = useState<boolean>(false);
 
-  useEffect(() => {
+  const loadData = () => {
     if (isAuthenticated) {
       tenantService
         .getNotices()
@@ -68,17 +78,18 @@ export const HomePage: React.FC = () => {
       tenantService
         .getAgreements()
         .then((agrs) => {
-          const ready = (agrs || []).find((a: any) => {
-            const st = (a.status || '').toUpperCase();
-            return (st === 'SENT' || st === 'READY_TO_SIGN' || st === 'PENDING') && Boolean(a.signUrl || a.signingUrl);
-          });
-          if (ready) setPendingAgreement(ready);
+          setAgreements(Array.isArray(agrs) ? agrs : []);
         })
-        .catch(() => {});
-    }
-  }, [isAuthenticated]);
+        .catch(() => setAgreements([]));
 
-  useEffect(() => {
+      tenantService
+        .getKycStatus()
+        .then((kyc) => {
+          setKycData(kyc);
+        })
+        .catch(() => setKycData(null));
+    }
+
     if (isLinkedTenant) {
       // 1. Fetch Today's Dining Menu
       tenantService
@@ -103,7 +114,11 @@ export const HomePage: React.FC = () => {
         })
         .catch(() => {});
     }
-  }, [isLinkedTenant]);
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [isAuthenticated, isLinkedTenant]);
 
   const handleSaveName = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -284,13 +299,75 @@ export const HomePage: React.FC = () => {
   const roomAndBedLabel = roomNum
     ? `Room ${roomNum}${bedNum ? ` · Bed ${bedNum}` : ''}`
     : 'Room Assigned';
-  const monthlyRent = propertyDetails?.roomTenant?.monthlyRent ?? 0;
-  const totalPayable = rentDues?.totalPayable ?? (rentDues as any)?.payable ?? rentDues?.summary?.balanceDue ?? 0;
-  const duesStatus = (rentDues?.status || (totalPayable > 0 ? 'DUE' : 'UP_TO_DATE')).toUpperCase();
+
+  // Accurate Outstanding Balance calculation (resilient against totalPayable: 0 quirk)
+  const balanceDue = rentDues?.summary?.balanceDue !== undefined
+    ? Number(rentDues.summary.balanceDue)
+    : rentDues?.summary?.totalPayable !== undefined
+    ? Number(rentDues.summary.totalPayable)
+    : rentDues?.payable !== undefined
+    ? Number(rentDues.payable)
+    : Number(rentDues?.totalPayable || 0);
+
+  const duesStatus = (rentDues?.status || (balanceDue > 0 ? 'DUE' : 'UP_TO_DATE')).toUpperCase();
   const nextDueDateVal = (rentDues as any)?.nextDueDate;
   const nextDueText = nextDueDateVal
     ? new Date(nextDueDateVal).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
     : '';
+
+  const monthlyRent = Number(
+    rentDues?.lineItems?.rent?.amount ??
+    propertyDetails?.roomTenant?.rentAmount ??
+    (propertyDetails?.roomTenant as any)?.monthlyRent ??
+    propertyDetails?.room?.monthlyRent ??
+    0
+  );
+
+  const isRentPaid = Boolean(
+    rentDues?.lineItems?.rent?.isPaid ||
+    (rentDues?.summary?.rentDue === 0 && (rentDues?.summary?.amountPaid ?? 0) > 0)
+  );
+
+  const securityDepositAmount = Number(
+    rentDues?.lineItems?.securityDeposit?.amount ??
+    propertyDetails?.roomTenant?.securityDeposit ??
+    (propertyDetails?.roomTenant as any)?.depositAmount ??
+    propertyDetails?.room?.securityDeposit ??
+    0
+  );
+
+  const isSecurityPaid = Boolean(
+    rentDues?.lineItems?.securityDeposit?.isPaid ||
+    (propertyDetails?.roomTenant as any)?.securityDepositPaid ||
+    (propertyDetails?.roomTenant as any)?.isSecurityDepositPaid ||
+    (propertyDetails?.roomTenant as any)?.depositPaid
+  );
+
+  const otherDuesList = rentDues?.lineItems?.miscellaneous?.otherDues || [];
+
+  // KYC Status Calculation
+  const rawKycStatus = (kycData?.status || '').toUpperCase();
+  const isKycVerified = Boolean(
+    kycData?.isKycVerified ||
+    rawKycStatus === 'VERIFIED' ||
+    rawKycStatus === 'COMPLETED' ||
+    tenant?.isKycVerified
+  );
+  const isKycRequested = rawKycStatus === 'REQUESTED' || rawKycStatus === 'ACTION_REQUIRED';
+  const isKycInProgress = rawKycStatus === 'IN_PROGRESS' || rawKycStatus === 'INITIATED';
+
+  // Agreement Status Calculation
+  const signedAgreement = (agreements || []).find((a: any) => {
+    const st = (a.status || '').toUpperCase();
+    return st === 'SIGNED' || st === 'COMPLETED' || a.isSigned;
+  });
+
+  const readyToSignAgreement = (agreements || []).find((a: any) => {
+    const st = (a.status || '').toUpperCase();
+    return (st === 'SENT' || st === 'READY_TO_SIGN' || st === 'PENDING') && Boolean(a.signUrl || a.signingUrl);
+  });
+
+  const isAgreementSigned = Boolean(signedAgreement);
 
   return (
     <div className="space-y-4 pt-1 pb-6 animate-fade-in">
@@ -390,10 +467,10 @@ export const HomePage: React.FC = () => {
             Active Resident
           </span>
 
-          {duesStatus === 'OVERDUE' || (totalPayable > 0 && duesStatus !== 'ADVANCE') ? (
+          {duesStatus === 'OVERDUE' || (balanceDue > 0 && duesStatus !== 'ADVANCE') ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-amber-400/20 border border-amber-300/30 px-2 py-0.5 text-[10px] font-bold text-amber-200">
               <AlertCircle className="h-3 w-3" />
-              <span>₹{totalPayable.toLocaleString('en-IN')} {duesStatus === 'OVERDUE' ? 'Overdue' : nextDueText ? `Due ${nextDueText}` : 'Due'}</span>
+              <span>₹{balanceDue.toLocaleString('en-IN')} {duesStatus === 'OVERDUE' ? 'Overdue' : nextDueText ? `Due ${nextDueText}` : 'Due'}</span>
             </span>
           ) : duesStatus === 'ADVANCE' ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/20 border border-emerald-300/30 px-2 py-0.5 text-[10px] font-bold text-emerald-200">
@@ -447,32 +524,311 @@ export const HomePage: React.FC = () => {
           </button>
 
           <button
-            onClick={() => navigate('/payments')}
+            onClick={() => {
+              if (balanceDue > 0) {
+                setShowPayModal(true);
+              } else {
+                navigate('/payments');
+              }
+            }}
             className="rounded-xl bg-white px-3.5 py-1.5 text-xs font-bold text-teal-900 shadow-sm hover:bg-teal-50 active:scale-95 transition-all"
           >
-            {totalPayable > 0 ? 'Pay Now' : 'View Ledger'}
+            {balanceDue > 0 ? 'Pay Dues' : 'View Ledger'}
           </button>
         </div>
       </div>
 
-      {/* Pending Agreement Action Banner (TW-14) */}
-      {pendingAgreement && (
-        <div
-          onClick={() => navigate('/documents')}
-          className="rounded-2xl border border-amber-300 bg-amber-50 p-3.5 flex items-center justify-between cursor-pointer hover:bg-amber-100/70 transition-all shadow-xs"
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold">
-              <FileText className="h-4 w-4" />
+      {/* 3. Outstanding Dues & Bill Breakdown Card */}
+      {balanceDue > 0 ? (
+        <div className="rounded-3xl border border-rose-200/90 bg-gradient-to-br from-rose-50/60 via-white to-amber-50/40 p-5 shadow-sm space-y-4 animate-fade-in">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-2.5">
+              <div className="h-10 w-10 rounded-2xl bg-rose-100 border border-rose-200/80 flex items-center justify-center text-rose-700 font-bold shrink-0">
+                <IndianRupee className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-gray-900 flex items-center gap-1.5">
+                  Outstanding Dues
+                  <span className="rounded-full bg-rose-100 text-rose-800 text-[10px] font-bold px-2 py-0.5">
+                    {duesStatus === 'OVERDUE' ? 'Overdue' : 'Payment Due'}
+                  </span>
+                </h3>
+                <p className="text-[11px] text-gray-500 mt-0.5">
+                  Period: {rentDues?.period?.label || 'Current Period'} · {roomAndBedLabel}
+                </p>
+              </div>
             </div>
+
+            {nextDueText && (
+              <span className="text-[11px] font-bold text-gray-600 bg-white/80 border border-gray-200 px-2.5 py-1 rounded-xl shrink-0 flex items-center gap-1">
+                <Clock className="h-3 w-3 text-gray-400" />
+                <span>Due by {nextDueText}</span>
+              </span>
+            )}
+          </div>
+
+          {/* Amount Callout with Instant Pay */}
+          <div className="bg-white/90 border border-rose-100 rounded-2xl p-4 flex items-baseline justify-between shadow-xs">
             <div>
-              <p className="text-xs font-bold text-amber-950">Rent Agreement Ready to Sign</p>
-              <p className="text-[11px] text-amber-800">Your PG owner generated your agreement. Review & e-Sign digitally.</p>
+              <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400 block">
+                Total Payable Balance
+              </span>
+              <span className="text-2xl font-black text-rose-600 tabular-nums">
+                ₹{balanceDue.toLocaleString('en-IN')}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowPayModal(true)}
+              className="rounded-xl bg-[#008080] hover:bg-[#006666] text-white font-bold text-xs px-4 py-2.5 shadow-md shadow-[#008080]/20 active:scale-95 transition-all flex items-center gap-1.5"
+            >
+              <span>Pay Dues Now</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
+          {/* Itemized Mini Ledger */}
+          <div className="space-y-2 pt-1 border-t border-rose-100/70 text-xs">
+            <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400 block">
+              Bill Breakdown
+            </span>
+            <div className="space-y-1.5">
+              {monthlyRent > 0 && (
+                <div className="flex items-center justify-between py-1 px-2.5 rounded-xl bg-white/60 border border-gray-100">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-3.5 w-3.5 text-gray-400" />
+                    <span className="font-semibold text-gray-800">Monthly Rent</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-gray-900 tabular-nums">₹{monthlyRent.toLocaleString('en-IN')}</span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      isRentPaid ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
+                    }`}>
+                      {isRentPaid ? 'Paid' : 'Unpaid'}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {securityDepositAmount > 0 && !isSecurityPaid && (
+                <div className="flex items-center justify-between py-1 px-2.5 rounded-xl bg-white/60 border border-gray-100">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-3.5 w-3.5 text-gray-400" />
+                    <span className="font-semibold text-gray-800">Security Deposit</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-gray-900 tabular-nums">₹{securityDepositAmount.toLocaleString('en-IN')}</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
+                      Pending
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {otherDuesList.map((item) => (
+                <div key={item.id} className="flex items-center justify-between py-1 px-2.5 rounded-xl bg-white/60 border border-gray-100">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Receipt className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                    <span className="font-semibold text-gray-800 truncate">{item.title || item.dueType || 'Extra Fee'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="font-bold text-gray-900 tabular-nums">₹{Number(item.amount).toLocaleString('en-IN')}</span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      item.isPaid ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
+                    }`}>
+                      {item.isPaid ? 'Paid' : 'Due'}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-          <span className="text-xs font-bold text-amber-900 bg-white/90 border border-amber-200 px-2.5 py-1 rounded-lg shrink-0">
-            Sign →
-          </span>
+
+          <div className="flex items-center justify-between pt-1">
+            <button
+              type="button"
+              onClick={() => navigate('/payments')}
+              className="text-xs font-bold text-[#008080] hover:underline flex items-center gap-1"
+            >
+              <span>View Full Ledger, Direct UPI & Cash Handover Options</span>
+              <ChevronRight className="h-3 w-3" />
+            </button>
+          </div>
+        </div>
+      ) : rentDues ? (
+        <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-3.5 flex items-center justify-between animate-fade-in">
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+              <CheckCircle2 className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-emerald-950">All Dues Cleared</p>
+              <p className="text-[11px] text-emerald-800">Your rent & stay charges are settled. No pending balance.</p>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate('/payments')}
+            className="text-xs font-bold text-emerald-900 hover:underline shrink-0"
+          >
+            History →
+          </button>
+        </div>
+      ) : null}
+
+      {/* 4. Onboarding & Legal Compliance Section (KYC & Rent Agreement) */}
+      {(!isKycVerified || !isAgreementSigned) ? (
+        <div className="space-y-2.5 animate-fade-in">
+          <div className="flex items-center justify-between pl-0.5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
+              <ShieldCheck className="h-3.5 w-3.5 text-amber-600" />
+              <span>Stay Compliance & Legal Documents</span>
+            </h3>
+            <button
+              onClick={() => navigate('/documents')}
+              className="text-[11px] font-bold text-[#008080] hover:underline"
+            >
+              Manage all →
+            </button>
+          </div>
+
+          <div className="space-y-2.5">
+            {/* Aadhaar KYC Card */}
+            {!isKycVerified ? (
+              <div className="rounded-2xl border border-amber-200/90 bg-amber-50/60 p-4 shadow-xs space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 shrink-0">
+                      <ShieldCheck className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="text-xs font-bold text-gray-900">Aadhaar DigiLocker KYC</h4>
+                        <span className="rounded-full bg-amber-200/80 px-2 py-0.5 text-[10px] font-bold text-amber-900">
+                          {isKycRequested ? 'Action Required' : isKycInProgress ? 'In Progress' : 'Pending'}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-gray-600 mt-0.5 leading-relaxed">
+                        {isKycRequested
+                          ? 'Your PG owner requested digital Aadhaar verification. Complete it securely in 60s via DigiLocker.'
+                          : 'Mandatory tenant identity verification for government register and police compliance.'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1 border-t border-amber-200/60">
+                  {kycData?.directLink ? (
+                    <a
+                      href={kycData.directLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 py-2.5 text-xs font-bold text-white shadow-sm transition-all"
+                    >
+                      <span>Complete DigiLocker KYC</span>
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => navigate('/documents')}
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 py-2.5 text-xs font-bold text-white shadow-sm transition-all"
+                    >
+                      <span>Start DigiLocker Verification</span>
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => navigate('/documents')}
+                    className="rounded-xl border border-amber-300 bg-white px-3 py-2.5 text-xs font-bold text-amber-900 hover:bg-amber-50"
+                  >
+                    View Details
+                  </button>
+                </div>
+              </div>
+            ) : null}
+
+            {/* Rent Agreement Card */}
+            {readyToSignAgreement ? (
+              <div className="rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50/80 via-white to-purple-50/50 p-4 shadow-xs space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-700 shrink-0">
+                      <FileSignature className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="text-xs font-bold text-gray-900">Rent Agreement Ready to Sign</h4>
+                        <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-800">
+                          e-Sign Pending
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-gray-600 mt-0.5 leading-relaxed">
+                        Your digital room lease agreement for {roomAndBedLabel} has been generated. Review clauses and sign legally with Aadhaar OTP.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1 border-t border-indigo-100">
+                  <a
+                    href={readyToSignAgreement.signUrl || readyToSignAgreement.signingUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 py-2.5 text-xs font-bold text-white shadow-sm transition-all"
+                  >
+                    <span>Review & e-Sign Agreement</span>
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/documents')}
+                    className="rounded-xl border border-indigo-200 bg-white px-3 py-2.5 text-xs font-bold text-indigo-900 hover:bg-indigo-50"
+                  >
+                    Documents
+                  </button>
+                </div>
+              </div>
+            ) : !isAgreementSigned ? (
+              <div className="rounded-2xl border border-gray-200 bg-gray-50/70 p-3.5 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-200 text-gray-600 shrink-0">
+                    <FileText className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <h4 className="text-xs font-bold text-gray-800">Rental Agreement</h4>
+                      <span className="rounded-full bg-gray-200 px-2 py-0.5 text-[9px] font-bold text-gray-600">
+                        Pending Generation
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-gray-500 mt-0.5">
+                      Your digital tenancy agreement will be issued by {propertyName}. You can review & e-sign once created.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigate('/documents')}
+                  className="text-xs font-bold text-[#008080] hover:underline shrink-0 ml-2"
+                >
+                  Status →
+                </button>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50/60 to-teal-50/40 p-3 flex items-center justify-between animate-fade-in">
+          <div className="flex items-center gap-2">
+            <FileCheck className="h-4 w-4 text-emerald-600 shrink-0" />
+            <span className="text-xs font-bold text-emerald-950">Stay Verified · KYC & Agreement Complete</span>
+          </div>
+          <button
+            onClick={() => navigate('/documents')}
+            className="text-[11px] font-bold text-emerald-800 hover:underline"
+          >
+            View Docs →
+          </button>
         </div>
       )}
 
@@ -640,6 +996,24 @@ export const HomePage: React.FC = () => {
         </div>
         <ArrowRight className="h-4 w-4 text-[#008080] shrink-0" />
       </div>
+
+      {/* 6. Rent Payment Modal */}
+      {showPayModal && (
+        <RentPaymentModal
+          isOpen={showPayModal}
+          onClose={() => {
+            setShowPayModal(false);
+            loadData();
+          }}
+          dues={rentDues}
+          onPaymentSuccess={() => {
+            setShowPayModal(false);
+            loadData();
+          }}
+          securityDepositAmount={securityDepositAmount}
+          isSecurityPaid={isSecurityPaid}
+        />
+      )}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Wifi,
   FileText,
@@ -30,6 +30,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { AmenitiesModal } from '../components/my-pg/AmenitiesModal';
 import { TenantInventoryModal } from '../components/inventory/TenantInventoryModal';
+import { AgreementsKycModal } from '../components/my-pg/AgreementsKycModal';
+import { tenantService, type RentCollectionDetails } from '../services/tenantService';
 
 export const MyPgPage: React.FC = () => {
   const navigate = useNavigate();
@@ -43,6 +45,8 @@ export const MyPgPage: React.FC = () => {
   const [showSecurityModal, setShowSecurityModal] = useState(false);
   const [showInventoryModal, setShowInventoryModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showAgreementsKycModal, setShowAgreementsKycModal] = useState(false);
+  const [rentDues, setRentDues] = useState<RentCollectionDetails | null>(null);
   const [inviteCode, setInviteCode] = useState('');
   const [linking, setLinking] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
@@ -50,6 +54,17 @@ export const MyPgPage: React.FC = () => {
   // Wi-Fi card state
   const [showWifiPassword, setShowWifiPassword] = useState(false);
   const [wifiCopied, setWifiCopied] = useState(false);
+
+  useEffect(() => {
+    if (isLinkedTenant) {
+      tenantService
+        .getRentDues()
+        .then((d) => {
+          if (d) setRentDues(d);
+        })
+        .catch(() => {});
+    }
+  }, [isLinkedTenant]);
 
   // Derived Dynamic Data for Linked PG
   const propertyName = propertyDetails?.property?.name || 'Active PG Stay';
@@ -74,6 +89,14 @@ export const MyPgPage: React.FC = () => {
     propertyDetails?.room?.securityDeposit ??
     0
   );
+
+  const balanceDue = rentDues?.summary?.balanceDue !== undefined
+    ? Number(rentDues.summary.balanceDue)
+    : rentDues?.summary?.totalPayable !== undefined
+    ? Number(rentDues.summary.totalPayable)
+    : rentDues?.payable !== undefined
+    ? Number(rentDues.payable)
+    : Number(rentDues?.totalPayable || 0);
 
   const mapsUrl =
     (propertyDetails?.property as any)?.googleMapsUrl ||
@@ -246,13 +269,24 @@ export const MyPgPage: React.FC = () => {
             {/* Inner Rent & Deposit Card */}
             <div className="rounded-2xl bg-white p-4 text-gray-900 shadow-sm flex items-center justify-between">
               <div>
-                <span className="text-[11px] font-semibold text-gray-500">Monthly Rent & Dues</span>
+                <span className="text-[11px] font-semibold text-gray-500">Monthly Rent & Outstanding</span>
                 <p className="text-lg font-black text-gray-900">
-                  ₹{monthlyRent.toLocaleString('en-IN')}
-                  <span className="text-xs font-semibold text-gray-400">/mo</span>
+                  {balanceDue > 0 ? (
+                    <>
+                      <span className="text-rose-600">₹{balanceDue.toLocaleString('en-IN')}</span>
+                      <span className="text-xs font-bold text-rose-500 ml-1.5">Due</span>
+                    </>
+                  ) : (
+                    <>
+                      ₹{monthlyRent.toLocaleString('en-IN')}
+                      <span className="text-xs font-semibold text-gray-400">/mo</span>
+                    </>
+                  )}
                 </p>
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[11px] font-semibold text-emerald-600">Active Stay</span>
+                  <span className={`text-[11px] font-semibold ${balanceDue > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                    {balanceDue > 0 ? 'Payment Due' : 'Rent Settled'}
+                  </span>
                   {securityDeposit > 0 && (
                     <span className="text-[11px] text-gray-400 font-medium">
                       • Deposit: ₹{securityDeposit.toLocaleString('en-IN')}
@@ -265,9 +299,33 @@ export const MyPgPage: React.FC = () => {
                 onClick={() => navigate('/payments')}
                 className="rounded-xl bg-[#008080] px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-[#008080]/20 hover:bg-[#006b6b] active:scale-95 transition-all tap-target"
               >
-                Pay Dues
+                {balanceDue > 0 ? 'Pay Dues' : 'Ledger'}
               </button>
             </div>
+          </div>
+
+          {/* Agreements & KYC Legal Card */}
+          <div
+            onClick={() => setShowAgreementsKycModal(true)}
+            className="rounded-3xl border border-indigo-100 bg-gradient-to-r from-indigo-50/70 via-white to-purple-50/40 p-4 flex items-center justify-between cursor-pointer hover:border-indigo-300 shadow-xs active:scale-[0.99] transition-all"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-700 shadow-xs">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold text-xs text-gray-900">Agreements & Aadhaar KYC</span>
+                  <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-800">
+                    Compliance
+                  </span>
+                </div>
+                <p className="text-[11px] text-gray-600 mt-0.5">
+                  View DigiLocker KYC verification & digital tenancy agreement
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-indigo-700 shrink-0" />
           </div>
 
           {/* Move-In Inventory Handover Banner Card */}
@@ -700,6 +758,13 @@ export const MyPgPage: React.FC = () => {
         tenantId={propertyDetails?.roomTenant?.id || propertyDetails?.tenant?.id || ''}
         roomNumber={String(propertyDetails?.room?.roomNumber || '')}
         bedNumber={String(propertyDetails?.roomTenant?.bedNumber || propertyDetails?.tenant?.bedNumber || '')}
+      />
+
+      {/* Agreements & KYC Status Modal */}
+      <AgreementsKycModal
+        isOpen={showAgreementsKycModal}
+        onClose={() => setShowAgreementsKycModal(false)}
+        tenantData={propertyDetails?.tenant}
       />
     </div>
   );
