@@ -22,10 +22,17 @@ export interface RentCollectionDetails {
   };
   settlement?: {
     upiQrString?: string;
+    qrImageUrl?: string | null;
+    upiId?: string;
     settlementUpiId?: string;
+    accountHolderName?: string;
     settlementAccountHolder?: string;
+    accountNumber?: string;
+    accountNumberMasked?: string;
     settlementAccountNumber?: string;
+    ifscCode?: string;
     settlementIfsc?: string;
+    bankName?: string;
     settlementBankName?: string;
   };
   owner?: {
@@ -106,13 +113,18 @@ export const tenantService = {
     return data;
   },
 
-  async uploadPhoto(file: File): Promise<string> {
+  async uploadPhoto(file: File, folder?: string): Promise<string> {
     const formData = new FormData();
     formData.append('photo', file);
-    const { data } = await apiClient.post('/tenants/upload-photo', formData, {
+    const url = folder ? `/tenants/upload-photo?folder=${encodeURIComponent(folder)}` : '/tenants/upload-photo';
+    const { data } = await apiClient.post(url, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return data.photo?.url || data.photo || data.url;
+  },
+
+  async uploadPaymentProof(file: File): Promise<string> {
+    return this.uploadPhoto(file, 'payment-proofs');
   },
 
   // Stay Amenities & WiFi
@@ -292,6 +304,7 @@ export const tenantService = {
     reference?: string;
     notes?: string;
     photoUrl?: string;
+    rentCollectionId?: string;
   }): Promise<any> {
     const { data } = await apiClient.post('/tenants/payments/manual', dto);
     return data;

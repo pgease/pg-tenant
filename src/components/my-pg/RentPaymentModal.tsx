@@ -124,7 +124,7 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
       let photoUrl = '';
       if (screenshotFile) {
         setUploading(true);
-        photoUrl = await tenantService.uploadPhoto(screenshotFile);
+        photoUrl = await tenantService.uploadPaymentProof(screenshotFile);
         setUploading(false);
       }
 
@@ -134,6 +134,7 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
         reference: cleanUtr || 'SCREENSHOT_UPLOADED',
         notes: `Direct UPI / Manual payment of ₹${dues.totalPayable} submitted for ${dues.period.label}. UTR: ${cleanUtr || 'N/A'}.`,
         photoUrl: photoUrl || undefined,
+        rentCollectionId: dues.rentCollectionId || undefined,
         paymentMethod: 'UPI_MANUAL',
       });
 
@@ -151,10 +152,18 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
   };
 
   const settlement = dues.settlement || {};
-  const upiId = settlement.settlementUpiId || null;
+  const upiId = settlement.upiId || settlement.settlementUpiId || null;
+  const payeeName = dues.owner?.name || dues.settlement?.accountHolderName || 'PG Stay';
   const upiIntentUrl = upiId
-    ? (settlement.upiQrString || `upi://pay?pa=${encodeURIComponent(upiId)}&pn=PG%20Ease&am=${dues.totalPayable}&cu=INR`)
+    ? (settlement.upiQrString || `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${dues.totalPayable}&cu=INR&tn=${encodeURIComponent(`Rent ${payeeName}`)}`)
     : null;
+
+  const qrImageUrl = settlement.qrImageUrl || (settlement as any)?.settlementQrImageUrl || (settlement as any)?.settlementQrCodeUrl;
+  const qrDisplayUrl = qrImageUrl || (settlement.upiQrString ? `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(settlement.upiQrString)}` : null);
+  const displayAccountNum = settlement.accountNumberMasked || settlement.accountNumber || settlement.settlementAccountNumber;
+  const displayIfsc = settlement.ifscCode || settlement.settlementIfsc;
+  const displayHolder = settlement.accountHolderName || settlement.settlementAccountHolder || dues.owner?.name || 'PG Owner';
+  const displayBank = settlement.bankName || settlement.settlementBankName;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 animate-fade-in">
@@ -355,10 +364,10 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
                     </span>
 
                     {/* QR Code Display (TW-08) */}
-                    {Boolean((settlement as any)?.settlementQrImageUrl || (settlement as any)?.settlementQrCodeUrl || (settlement as any)?.qrCodeUrl) && (
+                    {Boolean(qrDisplayUrl) && (
                       <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-gray-50 border border-gray-200/80">
                         <img
-                          src={(settlement as any)?.settlementQrImageUrl || (settlement as any)?.settlementQrCodeUrl || (settlement as any)?.qrCodeUrl}
+                          src={qrDisplayUrl!}
                           alt="Owner UPI QR Code"
                           className="h-44 w-44 object-contain rounded-xl border border-white shadow-sm"
                         />
@@ -401,11 +410,12 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
                     )}
 
                     {/* Bank Details Dropdown / View */}
-                    {settlement.settlementAccountNumber && (
+                    {Boolean(displayAccountNum || displayIfsc) && (
                       <div className="text-[11px] text-brandText-muted bg-gray-50 p-2.5 rounded-xl border border-gray-100 space-y-1">
-                        <p><strong>A/C:</strong> {settlement.settlementAccountNumber}</p>
-                        <p><strong>IFSC:</strong> {settlement.settlementIfsc}</p>
-                        <p><strong>Holder:</strong> {settlement.settlementAccountHolder || 'PG Owner'}</p>
+                        {displayBank && <p><strong>Bank:</strong> {displayBank}</p>}
+                        {displayAccountNum && <p><strong>A/C:</strong> {displayAccountNum}</p>}
+                        {displayIfsc && <p><strong>IFSC:</strong> {displayIfsc}</p>}
+                        {displayHolder && <p><strong>Holder:</strong> {displayHolder}</p>}
                       </div>
                     )}
                   </div>
