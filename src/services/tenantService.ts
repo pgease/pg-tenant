@@ -1,25 +1,65 @@
 import { apiClient } from './apiClient';
 
+export interface OtherDueItem {
+  id: string;
+  mode?: string;
+  title: string;
+  amount: number;
+  dueDate?: string;
+  dueType?: string;
+  category?: string;
+  createdAt?: string;
+  description?: string;
+  isPaid?: boolean;
+  amountPaid?: number;
+  balance?: number;
+}
+
 export interface RentCollectionDetails {
   rentCollectionId: string;
   paymentLink?: string;
-  status: 'paid' | 'partial' | 'pending';
+  status: 'paid' | 'partial' | 'pending' | 'DUE' | string;
   period: {
     month: number;
     year: number;
     label: string;
   };
   totalPayable: number;
+  payable?: number;
+  nextDueDate?: string;
   lineItems: {
     rent: { title: string; amount: number; isPaid: boolean; dueDay?: number };
     securityDeposit: { title: string; amount: number; isPaid: boolean };
-    miscellaneous: { title: string; amount: number; description?: string; isPaid: boolean };
+    miscellaneous: {
+      title: string;
+      amount: number;
+      baseFee?: number;
+      electricityAmount?: number;
+      otherDuesAmount?: number;
+      description?: string;
+      isPaid: boolean;
+      otherDues?: OtherDueItem[];
+    };
   };
   summary: {
     totalBilled: number;
     amountPaid: number;
     balanceDue: number;
+    rentDue?: number;
+    totalPayable?: number;
+    status?: string;
   };
+  lines?: Array<{
+    id: string;
+    type?: string;
+    label?: string;
+    category?: string;
+    amount: number;
+    amountPaid?: number;
+    balance?: number;
+    isOverdue?: boolean;
+    daysOverdue?: number;
+  }>;
   breakdown?: {
     rent?: number;
     securityDeposit?: number;
@@ -27,6 +67,11 @@ export interface RentCollectionDetails {
     miscellaneous?: number;
     totalPayable?: number;
     [key: string]: any;
+  };
+  paymentInfo?: {
+    paidAt?: string;
+    reference?: string;
+    paymentMethod?: string;
   };
   settlement?: {
     upiQrString?: string;
@@ -42,10 +87,23 @@ export interface RentCollectionDetails {
     settlementIfsc?: string;
     bankName?: string;
     settlementBankName?: string;
+    isAssignedToTenant?: boolean;
   };
   owner?: {
     name?: string;
     contactNumber?: string;
+  };
+  property?: {
+    id?: string;
+    name?: string;
+    propertyCode?: string;
+    address?: string;
+    photos?: string[];
+  };
+  room?: {
+    id?: string;
+    roomNumber?: string;
+    bedNumber?: number;
   };
 }
 

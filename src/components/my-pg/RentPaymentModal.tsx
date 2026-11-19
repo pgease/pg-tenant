@@ -31,6 +31,7 @@ interface RentPaymentModalProps {
   initialItem?: 'all' | 'rent' | 'security' | 'dues';
   securityDepositAmount?: number;
   isSecurityPaid?: boolean;
+  preselectedDueId?: string | null;
 }
 
 type PaymentMode = 'gateway' | 'upi' | 'cash';
@@ -43,6 +44,7 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
   initialItem = 'all',
   securityDepositAmount = 0,
   isSecurityPaid = false,
+  preselectedDueId = null,
 }) => {
   const [paymentMode, setPaymentMode] = useState<PaymentMode>('gateway');
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -52,11 +54,40 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
   const effectiveSecurity = Number(
     dues?.lineItems?.securityDeposit?.amount || securityDepositAmount || 0,
   );
-  const effectiveMisc = Number(dues?.lineItems?.miscellaneous?.amount || 0);
+  const effectiveMisc = Number(
+    dues?.lineItems?.miscellaneous?.otherDuesAmount ??
+    dues?.lineItems?.miscellaneous?.amount ??
+    0,
+  );
+
+  // Extract individual other dues
+  const otherDuesList = dues?.lineItems?.miscellaneous?.otherDues || [];
+  const linesList = dues?.lines || [];
+
+  const individualDues = otherDuesList.length > 0
+    ? otherDuesList.map((item) => ({
+        id: item.id,
+        title: item.title || item.dueType || 'Extra Charge',
+        amount: Number(item.amount || item.balance || 0),
+        balance: Number(item.balance !== undefined ? item.balance : item.amount || 0),
+        dueDate: item.dueDate,
+        type: item.dueType || 'Due',
+      }))
+    : linesList.length > 0
+    ? linesList.map((l) => ({
+        id: l.id,
+        title: l.label || 'Extra Charge',
+        amount: Number(l.amount || 0),
+        balance: Number(l.balance ?? l.amount ?? 0),
+        dueDate: dues?.nextDueDate,
+        type: l.category || 'Due',
+      }))
+    : [];
 
   const [includeRent, setIncludeRent] = useState(true);
   const [includeSecurity, setIncludeSecurity] = useState(false);
   const [includeMisc, setIncludeMisc] = useState(false);
+  const [selectedDueIds, setSelectedDueIds] = useState<string[]>([]);
   const [isCustomAmount, setIsCustomAmount] = useState(false);
   const [customAmountVal, setCustomAmountVal] = useState<number | string>('');
 
@@ -90,6 +121,15 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
   useEffect(() => {
     if (!isOpen) return;
 
+    if (preselectedDueId) {
+      setSelectedDueIds([preselectedDueId]);
+      setIncludeMisc(true);
+      setIncludeRent(false);
+      setIncludeSecurity(false);
+      setIsCustomAmount(false);
+      return;
+    }
+
     if (initialItem === 'security') {
       setIncludeSecurity(true);
       setIncludeRent(false);
@@ -102,25 +142,45 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
       setIsCustomAmount(false);
     } else if (initialItem === 'dues') {
       setIncludeMisc(true);
+      setSelectedDueIds(individualDues.map((d) => d.id));
       setIncludeRent(false);
       setIncludeSecurity(false);
       setIsCustomAmount(false);
     } else {
-      const rentUnpaid = dues?.status !== 'paid' && effectiveRent > 0;
-      const secUnpaid = !isSecurityPaid && effectiveSecurity > 0;
-      setIncludeRent(rentUnpaid || (!secUnpaid && effectiveRent > 0));
-      setIncludeSecurity(secUnpaid && !rentUnpaid);
+      const isRentSettled = Boolean(dues?.lineItems?.rent?.isPaid || dues?.summary?.rentDue === 0);
+      const isSecSettled = Boolean(isSecurityPaid || dues?.lineItems?.securityDeposit?.isPaid);
+      setIncludeRent(!isRentSettled && effectiveRent > 0);
+      setIncludeSecurity(!isSecSettled && effectiveSecurity > 0);
       setIncludeMisc(effectiveMisc > 0);
+      setSelectedDueIds(individualDues.map((d) => d.id));
       setIsCustomAmount(false);
     }
-  }, [isOpen, initialItem, effectiveRent, effectiveSecurity, effectiveMisc, isSecurityPaid, dues?.status]);
+  }, [
+    isOpen,
+    initialItem,
+    preselectedDueId,
+    effectiveRent,
+    effectiveSecurity,
+    effectiveMisc,
+    isSecurityPaid,
+    dues?.status,
+    dues?.lineItems?.rent?.isPaid,
+    dues?.lineItems?.securityDeposit?.isPaid,
+    dues?.summary?.rentDue,
+  ]);
 
   // Compute live payable amount
+  const selectedMiscAmount = individualDues.length > 0 && selectedDueIds.length > 0
+    ? individualDues.filter((d) => selectedDueIds.includes(d.id)).reduce((sum, d) => sum + d.amount, 0)
+    : includeMisc
+    ? effectiveMisc
+    : 0;
+
   const payableAmount = isCustomAmount
     ? (Number(customAmountVal) || 0)
     : (includeRent ? effectiveRent : 0) +
       (includeSecurity ? effectiveSecurity : 0) +
-      (includeMisc ? effectiveMisc : 0);
+      (includeMisc ? (individualDues.length > 0 ? selectedMiscAmount : effectiveMisc) : 0);
 
   // Sync cash amount with live payableAmount
   useEffect(() => {
@@ -507,34 +567,90 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
 
                 {/* 3. Miscellaneous & Utilities Option */}
                 {effectiveMisc > 0 && (
-                  <div
-                    onClick={() => setIncludeMisc(!includeMisc)}
-                    className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition-all ${
-                      includeMisc
-                        ? 'bg-white border-teal-500 shadow-xs'
-                        : 'bg-white/60 border-gray-200 opacity-60 hover:opacity-100'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <div className={`flex h-5 w-5 items-center justify-center rounded-md border transition-all ${
-                        includeMisc ? 'bg-primary border-primary text-white' : 'border-gray-300 bg-white'
-                      }`}>
-                        {includeMisc && <Check className="h-3.5 w-3.5 stroke-[3]" />}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <Zap className="h-3.5 w-3.5 text-amber-500" />
-                          <span className="font-bold text-brandText">{dues.lineItems?.miscellaneous?.title || 'Utilities & Maintenance'}</span>
+                  <div className="space-y-1.5">
+                    <div
+                      onClick={() => {
+                        const nextState = !includeMisc;
+                        setIncludeMisc(nextState);
+                        if (nextState) {
+                          setSelectedDueIds(individualDues.map((d) => d.id));
+                        } else {
+                          setSelectedDueIds([]);
+                        }
+                      }}
+                      className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition-all ${
+                        includeMisc
+                          ? 'bg-white border-teal-500 shadow-xs'
+                          : 'bg-white/60 border-gray-200 opacity-60 hover:opacity-100'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className={`flex h-5 w-5 items-center justify-center rounded-md border transition-all ${
+                          includeMisc ? 'bg-primary border-primary text-white' : 'border-gray-300 bg-white'
+                        }`}>
+                          {includeMisc && <Check className="h-3.5 w-3.5 stroke-[3]" />}
                         </div>
-                        <span className="text-[10px] text-gray-400 block">
-                          {dues.lineItems?.miscellaneous?.description || 'Electricity & maintenance dues'}
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <Zap className="h-3.5 w-3.5 text-amber-500" />
+                            <span className="font-bold text-brandText">{dues.lineItems?.miscellaneous?.title || 'Utilities & Maintenance'}</span>
+                          </div>
+                          <span className="text-[10px] text-gray-400 block">
+                            {individualDues.length > 0
+                              ? `${selectedDueIds.length} of ${individualDues.length} item(s) selected`
+                              : (dues.lineItems?.miscellaneous?.description || 'Electricity & maintenance dues')}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-black text-brandText block">
+                          ₹{(individualDues.length > 0 && includeMisc ? selectedMiscAmount : effectiveMisc).toLocaleString('en-IN')}
                         </span>
+                        <span className="text-[10px] font-bold text-amber-600">Pending</span>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <span className="font-black text-brandText block">₹{effectiveMisc.toLocaleString('en-IN')}</span>
-                      <span className="text-[10px] font-bold text-amber-600">Pending</span>
-                    </div>
+
+                    {/* Indented Individual Dues Breakdown */}
+                    {includeMisc && individualDues.length > 0 && (
+                      <div className="pl-4 pt-1 space-y-1.5 animate-fade-in">
+                        {individualDues.map((d) => {
+                          const isSelected = selectedDueIds.includes(d.id);
+                          return (
+                            <div
+                              key={d.id}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (isSelected) {
+                                  const updated = selectedDueIds.filter((id) => id !== d.id);
+                                  setSelectedDueIds(updated);
+                                  if (updated.length === 0) setIncludeMisc(false);
+                                } else {
+                                  setSelectedDueIds([...selectedDueIds, d.id]);
+                                }
+                              }}
+                              className={`flex items-center justify-between p-2 rounded-xl border text-[11px] cursor-pointer transition-all ${
+                                isSelected
+                                  ? 'bg-amber-50/70 border-amber-300 shadow-2xs'
+                                  : 'bg-white border-gray-200 opacity-60 hover:opacity-100'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <div className={`flex h-4 w-4 items-center justify-center rounded border transition-all ${
+                                  isSelected ? 'bg-amber-500 border-amber-500 text-white' : 'border-gray-300 bg-white'
+                                }`}>
+                                  {isSelected && <Check className="h-3 w-3 stroke-[3]" />}
+                                </div>
+                                <div>
+                                  <span className="font-bold text-brandText">{d.title}</span>
+                                  <span className="text-[10px] text-gray-400 block">{d.type}</span>
+                                </div>
+                              </div>
+                              <span className="font-black text-brandText">₹{d.amount.toLocaleString('en-IN')}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
