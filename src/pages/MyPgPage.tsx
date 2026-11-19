@@ -25,12 +25,16 @@ import {
   Eye,
   EyeOff,
   Sparkles,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { AmenitiesModal } from '../components/my-pg/AmenitiesModal';
 import { TenantInventoryModal } from '../components/inventory/TenantInventoryModal';
 import { AgreementsKycModal } from '../components/my-pg/AgreementsKycModal';
+import { RentPaymentModal } from '../components/my-pg/RentPaymentModal';
 import { tenantService, type RentCollectionDetails } from '../services/tenantService';
 
 export const MyPgPage: React.FC = () => {
@@ -46,6 +50,7 @@ export const MyPgPage: React.FC = () => {
   const [showInventoryModal, setShowInventoryModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showAgreementsKycModal, setShowAgreementsKycModal] = useState(false);
+  const [showPayModal, setShowPayModal] = useState(false);
   const [rentDues, setRentDues] = useState<RentCollectionDetails | null>(null);
   const [inviteCode, setInviteCode] = useState('');
   const [linking, setLinking] = useState(false);
@@ -55,7 +60,7 @@ export const MyPgPage: React.FC = () => {
   const [showWifiPassword, setShowWifiPassword] = useState(false);
   const [wifiCopied, setWifiCopied] = useState(false);
 
-  useEffect(() => {
+  const fetchDues = () => {
     if (isLinkedTenant) {
       tenantService
         .getRentDues()
@@ -64,6 +69,10 @@ export const MyPgPage: React.FC = () => {
         })
         .catch(() => {});
     }
+  };
+
+  useEffect(() => {
+    fetchDues();
   }, [isLinkedTenant]);
 
   // Derived Dynamic Data for Linked PG
@@ -77,6 +86,7 @@ export const MyPgPage: React.FC = () => {
   const roomAndBedLabel = roomNumber ? `${roomNumber}${bedNumber ? ` · Bed ${bedNumber}` : ''}` : '';
 
   const monthlyRent = Number(
+    rentDues?.lineItems?.rent?.amount ??
     propertyDetails?.roomTenant?.rentAmount ??
     (propertyDetails?.roomTenant as any)?.monthlyRent ??
     propertyDetails?.room?.monthlyRent ??
@@ -84,6 +94,7 @@ export const MyPgPage: React.FC = () => {
   );
 
   const securityDeposit = Number(
+    rentDues?.lineItems?.securityDeposit?.amount ??
     propertyDetails?.roomTenant?.securityDeposit ??
     (propertyDetails?.roomTenant as any)?.depositAmount ??
     propertyDetails?.room?.securityDeposit ??
@@ -97,6 +108,20 @@ export const MyPgPage: React.FC = () => {
     : rentDues?.payable !== undefined
     ? Number(rentDues.payable)
     : Number(rentDues?.totalPayable || 0);
+
+  const isRentPaid = Boolean(
+    rentDues?.lineItems?.rent?.isPaid ||
+    (rentDues?.summary?.rentDue !== undefined && rentDues.summary.rentDue === 0)
+  );
+
+  const isSecurityPaid = Boolean(
+    rentDues?.lineItems?.securityDeposit?.isPaid ||
+    (propertyDetails?.roomTenant as any)?.isSecurityPaid
+  );
+
+  const otherDuesList = Array.isArray(rentDues?.lineItems?.miscellaneous?.otherDues)
+    ? rentDues.lineItems.miscellaneous.otherDues
+    : [];
 
   const mapsUrl =
     (propertyDetails?.property as any)?.googleMapsUrl ||
@@ -266,41 +291,112 @@ export const MyPgPage: React.FC = () => {
               )}
             </div>
 
-            {/* Inner Rent & Deposit Card */}
-            <div className="rounded-2xl bg-white p-4 text-gray-900 shadow-sm flex items-center justify-between">
-              <div>
-                <span className="text-[11px] font-semibold text-gray-500">Monthly Rent & Outstanding</span>
-                <p className="text-lg font-black text-gray-900">
-                  {balanceDue > 0 ? (
-                    <>
-                      <span className="text-rose-600">₹{balanceDue.toLocaleString('en-IN')}</span>
-                      <span className="text-xs font-bold text-rose-500 ml-1.5">Due</span>
-                    </>
-                  ) : (
-                    <>
+            {/* Inner Rent & Outstanding Breakdown Card */}
+            <div className="rounded-2xl bg-white p-4 text-gray-900 shadow-sm space-y-3">
+              <div className="grid grid-cols-2 gap-3 pb-2.5 border-b border-gray-100">
+                {/* 1. Monthly Rent (Contracted) */}
+                <div>
+                  <span className="text-[11px] font-semibold text-gray-500 block">Monthly Rent</span>
+                  <div className="flex items-baseline gap-1 mt-0.5">
+                    <span className="text-base font-black text-gray-900">
                       ₹{monthlyRent.toLocaleString('en-IN')}
-                      <span className="text-xs font-semibold text-gray-400">/mo</span>
-                    </>
-                  )}
-                </p>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className={`text-[11px] font-semibold ${balanceDue > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
-                    {balanceDue > 0 ? 'Payment Due' : 'Rent Settled'}
-                  </span>
-                  {securityDeposit > 0 && (
-                    <span className="text-[11px] text-gray-400 font-medium">
-                      • Deposit: ₹{securityDeposit.toLocaleString('en-IN')}
                     </span>
-                  )}
+                    <span className="text-[11px] font-medium text-gray-400">/mo</span>
+                  </div>
+                  <div className="mt-1">
+                    {isRentPaid ? (
+                      <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                        <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                        <span>Paid</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 border border-rose-200/80 px-2 py-0.5 text-[10px] font-bold text-rose-700">
+                        <AlertCircle className="h-3 w-3 text-rose-600" />
+                        <span>Unpaid</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* 2. Outstanding Balance / Dues */}
+                <div className="border-l border-gray-100 pl-3">
+                  <span className="text-[11px] font-semibold text-gray-500 block">
+                    {balanceDue > 0 ? 'Pending Dues' : 'Current Dues'}
+                  </span>
+                  <div className="flex items-baseline gap-1 mt-0.5">
+                    <span className={`text-base font-black ${balanceDue > 0 ? 'text-rose-600' : 'text-emerald-700'}`}>
+                      ₹{balanceDue.toLocaleString('en-IN')}
+                    </span>
+                    {balanceDue > 0 && <span className="text-[10px] font-bold text-rose-500">due</span>}
+                  </div>
+                  <div className="mt-1">
+                    {balanceDue > 0 ? (
+                      <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 border border-amber-200/80 px-2 py-0.5 text-[10px] font-bold text-amber-800">
+                        <Clock className="h-3 w-3 text-amber-600" />
+                        <span>Action Required</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                        <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                        <span>Cleared</span>
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <button
-                onClick={() => navigate('/payments')}
-                className="rounded-xl bg-[#008080] px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-[#008080]/20 hover:bg-[#006b6b] active:scale-95 transition-all tap-target"
-              >
-                {balanceDue > 0 ? 'Pay Dues' : 'Ledger'}
-              </button>
+              {/* Itemized extra dues (Wifi, Laundry, Joining fee, etc.) if any pending */}
+              {otherDuesList.length > 0 && balanceDue > 0 && (
+                <div className="pt-1 pb-1">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1.5 flex items-center justify-between">
+                    <span>Due Breakdown</span>
+                    <span>{otherDuesList.length} item{otherDuesList.length === 1 ? '' : 's'}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {otherDuesList.map((d: any, i: number) => (
+                      <span
+                        key={d.id || i}
+                        className="inline-flex items-center gap-1 rounded-md bg-rose-50/70 border border-rose-200/70 px-2 py-0.5 text-[10px] font-medium text-rose-900"
+                      >
+                        <span className="text-gray-600">{d.title || d.dueType}:</span>
+                        <span className="font-bold text-rose-700">₹{Number(d.amount).toLocaleString('en-IN')}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Sub-bar: Security Deposit & Action Button */}
+              <div className="flex items-center justify-between gap-2 pt-1 border-t border-gray-100">
+                <div className="flex items-center gap-1.5 text-[11px] text-gray-500">
+                  <span className="font-semibold text-gray-700">Deposit:</span>
+                  <span className="font-bold text-gray-900">₹{securityDeposit.toLocaleString('en-IN')}</span>
+                  {securityDeposit > 0 && (
+                    <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded ${isSecurityPaid ? 'text-emerald-700 bg-emerald-50' : 'text-amber-700 bg-amber-50'}`}>
+                      {isSecurityPaid ? '(Settled ✓)' : '(Pending)'}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {balanceDue > 0 ? (
+                    <button
+                      onClick={() => setShowPayModal(true)}
+                      className="rounded-xl bg-[#008080] px-4 py-2 text-xs font-bold text-white shadow-md shadow-[#008080]/20 hover:bg-[#006b6b] active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <CreditCard className="h-3.5 w-3.5" />
+                      <span>Pay Dues (₹{balanceDue.toLocaleString('en-IN')})</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => navigate('/payments')}
+                      className="rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-1.5 text-xs font-bold text-gray-700 hover:bg-gray-100 active:scale-95 transition-all cursor-pointer"
+                    >
+                      View Ledger
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -766,6 +862,24 @@ export const MyPgPage: React.FC = () => {
         onClose={() => setShowAgreementsKycModal(false)}
         tenantData={propertyDetails?.tenant}
       />
+
+      {/* Instant Rent & Dues Payment Modal */}
+      {showPayModal && (
+        <RentPaymentModal
+          isOpen={showPayModal}
+          onClose={() => {
+            setShowPayModal(false);
+            fetchDues();
+          }}
+          dues={rentDues}
+          onPaymentSuccess={() => {
+            setShowPayModal(false);
+            fetchDues();
+          }}
+          securityDepositAmount={securityDeposit}
+          isSecurityPaid={isSecurityPaid}
+        />
+      )}
     </div>
   );
 };
