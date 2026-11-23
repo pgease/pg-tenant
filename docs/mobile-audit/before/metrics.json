@@ -1,0 +1,1819 @@
+[
+  {
+    "viewport": "360x800",
+    "screen": "home",
+    "route": "/",
+    "file": "/workspace/docs/mobile-audit/before/360x800-home.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "div",
+        "className": "absolute -right-8 -bottom-8 h-36 w-36 rounded-full bg-white/5 blur-2xl pointer-events-none",
+        "text": "",
+        "right": 372,
+        "width": 144
+      }
+    ],
+    "tinyTapCount": 7,
+    "tinyTaps": [
+      {
+        "text": "Ananya Sharma",
+        "w": 133,
+        "h": 24
+      },
+      {
+        "text": "View Stay Details",
+        "w": 114,
+        "h": 16
+      },
+      {
+        "text": "Pay Dues",
+        "w": 79,
+        "h": 28
+      },
+      {
+        "text": "View Full Ledger, Direct UPI & Cash Hand",
+        "w": 278,
+        "h": 32
+      },
+      {
+        "text": "Manage all →",
+        "w": 63,
+        "h": 33
+      },
+      {
+        "text": "Complete DigiLocker KYC",
+        "w": 183,
+        "h": 36
+      },
+      {
+        "text": "View Details",
+        "w": 95,
+        "h": 38
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "search",
+    "route": "/search",
+    "file": "/workspace/docs/mobile-audit/before/360x800-search.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 wh",
+        "text": "With Food",
+        "right": 377,
+        "width": 83
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 wh",
+        "text": "AC Rooms",
+        "right": 465,
+        "width": 82
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "All",
+        "right": 514,
+        "width": 43
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Delhi NCR",
+        "right": 606,
+        "width": 86
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Noida",
+        "right": 676,
+        "width": 63
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Bangalore",
+        "right": 769,
+        "width": 87
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Kolkata",
+        "right": 848,
+        "width": 73
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Lucknow",
+        "right": 933,
+        "width": 79
+      }
+    ],
+    "tinyTapCount": 16,
+    "tinyTaps": [
+      {
+        "text": "Filters",
+        "w": 77,
+        "h": 30
+      },
+      {
+        "text": "Near Me",
+        "w": 89,
+        "h": 30
+      },
+      {
+        "text": "Under ₹10K",
+        "w": 90,
+        "h": 30
+      },
+      {
+        "text": "With Food",
+        "w": 83,
+        "h": 30
+      },
+      {
+        "text": "AC Rooms",
+        "w": 82,
+        "h": 30
+      },
+      {
+        "text": "All",
+        "w": 43,
+        "h": 28
+      },
+      {
+        "text": "Delhi NCR",
+        "w": 86,
+        "h": 30
+      },
+      {
+        "text": "Noida",
+        "w": 63,
+        "h": 30
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "my-pg",
+    "route": "/my-pg",
+    "file": "/workspace/docs/mobile-audit/before/360x800-my-pg.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 9,
+    "tinyTaps": [
+      {
+        "text": "Open in Maps",
+        "w": 105,
+        "h": 25
+      },
+      {
+        "text": "Call Owner",
+        "w": 36,
+        "h": 36
+      },
+      {
+        "text": "WhatsApp Owner",
+        "w": 36,
+        "h": 36
+      },
+      {
+        "text": "Call Staff",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "text": "WhatsApp Staff",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "text": "Details",
+        "w": 55,
+        "h": 16
+      },
+      {
+        "text": "Show password",
+        "w": 22,
+        "h": 22
+      },
+      {
+        "text": "Copy",
+        "w": 60,
+        "h": 23
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "payments",
+    "route": "/payments",
+    "file": "/workspace/docs/mobile-audit/before/360x800-payments.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 8,
+    "tinyTaps": [
+      {
+        "text": "Pay Rent",
+        "w": 77,
+        "h": 28
+      },
+      {
+        "text": "Pay Deposit",
+        "w": 94,
+        "h": 28
+      },
+      {
+        "text": "Pay ₹2850",
+        "w": 86,
+        "h": 28
+      },
+      {
+        "text": "Pay All (₹2,850)",
+        "w": 66,
+        "h": 32
+      },
+      {
+        "text": "Pay",
+        "w": 41,
+        "h": 27
+      },
+      {
+        "text": "Pay",
+        "w": 41,
+        "h": 27
+      },
+      {
+        "text": "Pay",
+        "w": 41,
+        "h": 27
+      },
+      {
+        "text": "Full Ledger",
+        "w": 76,
+        "h": 16
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "transactions",
+    "route": "/transactions",
+    "file": "/workspace/docs/mobile-audit/before/360x800-transactions.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 2,
+    "tinyTaps": [
+      {
+        "text": "Refresh",
+        "w": 79,
+        "h": 26
+      },
+      {
+        "text": "Receipt",
+        "w": 54,
+        "h": 17
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "complaints",
+    "route": "/complaints",
+    "file": "/workspace/docs/mobile-audit/before/360x800-complaints.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all tap-target border bo",
+        "text": "WiFi / Network",
+        "right": 456,
+        "width": 109
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all tap-target border bo",
+        "text": "Food & Mess",
+        "right": 556,
+        "width": 94
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all tap-target border bo",
+        "text": "Air Conditioning",
+        "right": 679,
+        "width": 116
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all tap-target border bo",
+        "text": "Security & Gate",
+        "right": 796,
+        "width": 112
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all tap-target border bo",
+        "text": "Other",
+        "right": 862,
+        "width": 59
+      }
+    ],
+    "tinyTapCount": 2,
+    "tinyTaps": [
+      {
+        "text": "Refresh",
+        "w": 79,
+        "h": 26
+      },
+      {
+        "text": "New Complaint",
+        "w": 127,
+        "h": 24
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "guests",
+    "route": "/guests",
+    "file": "/workspace/docs/mobile-audit/before/360x800-guests.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 4,
+    "tinyTaps": [
+      {
+        "text": "Refresh",
+        "w": 79,
+        "h": 26
+      },
+      {
+        "text": "Add Guest Log",
+        "w": 123,
+        "h": 24
+      },
+      {
+        "text": "Guest Entry Logs",
+        "w": 156,
+        "h": 32
+      },
+      {
+        "text": "Night Out Intimation",
+        "w": 156,
+        "h": 32
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "night-out",
+    "route": "/night-out",
+    "file": "/workspace/docs/mobile-audit/before/360x800-night-out.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 1,
+    "tinyTaps": [
+      {
+        "text": "New Night Out",
+        "w": 129,
+        "h": 28
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "food",
+    "route": "/food",
+    "file": "/workspace/docs/mobile-audit/before/360x800-food.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all tap-target flex ",
+        "text": "Thursday",
+        "right": 407,
+        "width": 82
+      },
+      {
+        "tag": "span",
+        "className": "",
+        "text": "Thursday",
+        "right": 392,
+        "width": 52
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all tap-target flex ",
+        "text": "Friday",
+        "right": 479,
+        "width": 66
+      },
+      {
+        "tag": "span",
+        "className": "",
+        "text": "Friday",
+        "right": 464,
+        "width": 36
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all tap-target flex ",
+        "text": "Saturday",
+        "right": 566,
+        "width": 81
+      },
+      {
+        "tag": "span",
+        "className": "",
+        "text": "Saturday",
+        "right": 551,
+        "width": 51
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all tap-target flex ",
+        "text": "Sunday",
+        "right": 643,
+        "width": 71
+      },
+      {
+        "tag": "span",
+        "className": "",
+        "text": "Sunday",
+        "right": 628,
+        "width": 41
+      }
+    ],
+    "tinyTapCount": 1,
+    "tinyTaps": [
+      {
+        "text": "Refresh Menu",
+        "w": 26,
+        "h": 26
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "wifi",
+    "route": "/wifi",
+    "file": "/workspace/docs/mobile-audit/before/360x800-wifi.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 2,
+    "tinyTaps": [
+      {
+        "text": "Show password",
+        "w": 28,
+        "h": 28
+      },
+      {
+        "text": "Copy",
+        "w": 66,
+        "h": 24
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "notice",
+    "route": "/notice",
+    "file": "/workspace/docs/mobile-audit/before/360x800-notice.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 1,
+    "tinyTaps": [
+      {
+        "text": "Submit 30-Day Notice",
+        "w": 286,
+        "h": 36
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "announcements",
+    "route": "/announcements",
+    "file": "/workspace/docs/mobile-audit/before/360x800-announcements.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 3,
+    "tinyTaps": [
+      {
+        "text": "All (1)",
+        "w": 53,
+        "h": 30
+      },
+      {
+        "text": "Urgent (1)",
+        "w": 79,
+        "h": 30
+      },
+      {
+        "text": "General (0)",
+        "w": 88,
+        "h": 30
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "documents",
+    "route": "/documents",
+    "file": "/workspace/docs/mobile-audit/before/360x800-documents.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 2,
+    "tinyTaps": [
+      {
+        "text": "Complete DigiLocker KYC",
+        "w": 286,
+        "h": 36
+      },
+      {
+        "text": "Download Signed PDF",
+        "w": 168,
+        "h": 34
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "notifications",
+    "route": "/notifications",
+    "file": "/workspace/docs/mobile-audit/before/360x800-notifications.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 2,
+    "tinyTaps": [
+      {
+        "text": "Mark all read",
+        "w": 67,
+        "h": 17
+      },
+      {
+        "text": "Clear all",
+        "w": 22,
+        "h": 22
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "saved",
+    "route": "/saved",
+    "file": "/workspace/docs/mobile-audit/before/360x800-saved.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 2,
+    "tinyTaps": [
+      {
+        "text": "Remove from Saved",
+        "w": 28,
+        "h": 28
+      },
+      {
+        "text": "View",
+        "w": 58,
+        "h": 26
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "menu",
+    "route": "/profile",
+    "file": "/workspace/docs/mobile-audit/before/360x800-menu.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 1,
+    "tinyTaps": [
+      {
+        "text": "Edit",
+        "w": 52,
+        "h": 26
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "pg-detail",
+    "route": "/pg/satya-heights",
+    "file": "/workspace/docs/mobile-audit/before/360x800-pg-detail.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 1,
+    "tinyTaps": [
+      {
+        "text": "View on Google Maps",
+        "w": 136,
+        "h": 16
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "payment-result",
+    "route": "/payments/result?txnid=MOCKTXN1&status=success",
+    "file": "/workspace/docs/mobile-audit/before/360x800-payment-result.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 2,
+    "tinyTaps": [
+      {
+        "text": "",
+        "w": 12,
+        "h": 12
+      },
+      {
+        "text": "",
+        "w": 12,
+        "h": 12
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "modal-pay-gateway",
+    "route": "/payments#pay",
+    "file": "/workspace/docs/mobile-audit/before/360x800-modal-pay-gateway.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 10,
+    "tinyTaps": [
+      {
+        "text": "Select All",
+        "w": 59,
+        "h": 38
+      },
+      {
+        "text": "Custom Amount",
+        "w": 90,
+        "h": 38
+      },
+      {
+        "text": "Pay Rent",
+        "w": 77,
+        "h": 28
+      },
+      {
+        "text": "Pay Deposit",
+        "w": 94,
+        "h": 28
+      },
+      {
+        "text": "Pay ₹2850",
+        "w": 86,
+        "h": 28
+      },
+      {
+        "text": "Pay All (₹2,850)",
+        "w": 66,
+        "h": 32
+      },
+      {
+        "text": "Pay",
+        "w": 41,
+        "h": 27
+      },
+      {
+        "text": "Pay",
+        "w": 41,
+        "h": 27
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "modal-pay-upi",
+    "route": "/payments#upi",
+    "file": "/workspace/docs/mobile-audit/before/360x800-modal-pay-upi.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 12,
+    "tinyTaps": [
+      {
+        "text": "Select All",
+        "w": 59,
+        "h": 38
+      },
+      {
+        "text": "Custom Amount",
+        "w": 90,
+        "h": 38
+      },
+      {
+        "text": "Copy Account Number",
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Copy IFSC",
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Pay Rent",
+        "w": 77,
+        "h": 28
+      },
+      {
+        "text": "Pay Deposit",
+        "w": 94,
+        "h": 28
+      },
+      {
+        "text": "Pay ₹2850",
+        "w": 86,
+        "h": 28
+      },
+      {
+        "text": "Pay All (₹2,850)",
+        "w": 66,
+        "h": 32
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "modal-filters",
+    "route": "/search#filters",
+    "file": "/workspace/docs/mobile-audit/before/360x800-modal-filters.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 wh",
+        "text": "With Food",
+        "right": 377,
+        "width": 83
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 wh",
+        "text": "AC Rooms",
+        "right": 465,
+        "width": 82
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "All",
+        "right": 514,
+        "width": 43
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Delhi NCR",
+        "right": 606,
+        "width": 86
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Noida",
+        "right": 676,
+        "width": 63
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Bangalore",
+        "right": 769,
+        "width": 87
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Kolkata",
+        "right": 848,
+        "width": 73
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Lucknow",
+        "right": 933,
+        "width": 79
+      }
+    ],
+    "tinyTapCount": 16,
+    "tinyTaps": [
+      {
+        "text": "Filters",
+        "w": 77,
+        "h": 30
+      },
+      {
+        "text": "Near Me",
+        "w": 89,
+        "h": 30
+      },
+      {
+        "text": "Under ₹10K",
+        "w": 90,
+        "h": 30
+      },
+      {
+        "text": "With Food",
+        "w": 83,
+        "h": 30
+      },
+      {
+        "text": "AC Rooms",
+        "w": 82,
+        "h": 30
+      },
+      {
+        "text": "All",
+        "w": 43,
+        "h": 28
+      },
+      {
+        "text": "Delhi NCR",
+        "w": 86,
+        "h": 30
+      },
+      {
+        "text": "Noida",
+        "w": 63,
+        "h": 30
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "modal-edit-profile",
+    "route": "/profile#edit",
+    "file": "/workspace/docs/mobile-audit/before/360x800-modal-edit-profile.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 5,
+    "tinyTaps": [
+      {
+        "text": "Edit",
+        "w": 52,
+        "h": 26
+      },
+      {
+        "text": "",
+        "w": 28,
+        "h": 28
+      },
+      {
+        "text": "Upload Photo",
+        "w": 121,
+        "h": 26
+      },
+      {
+        "text": "Cancel",
+        "w": 141,
+        "h": 38
+      },
+      {
+        "text": "Save",
+        "w": 139,
+        "h": 38
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "guest-home",
+    "route": "/?guest",
+    "file": "/workspace/docs/mobile-audit/before/360x800-guest-home.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 wh",
+        "text": "With Food",
+        "right": 377,
+        "width": 83
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 wh",
+        "text": "AC Rooms",
+        "right": 466,
+        "width": 82
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "All",
+        "right": 515,
+        "width": 43
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Delhi NCR",
+        "right": 607,
+        "width": 86
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Noida",
+        "right": 676,
+        "width": 63
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Bangalore",
+        "right": 769,
+        "width": 87
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Kolkata",
+        "right": 849,
+        "width": 73
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Lucknow",
+        "right": 933,
+        "width": 79
+      }
+    ],
+    "tinyTapCount": 18,
+    "tinyTaps": [
+      {
+        "text": "Explore PGs",
+        "w": 85,
+        "h": 24
+      },
+      {
+        "text": "Explore Verified PGs",
+        "w": 159,
+        "h": 28
+      },
+      {
+        "text": "Filters",
+        "w": 77,
+        "h": 30
+      },
+      {
+        "text": "Near Me",
+        "w": 89,
+        "h": 30
+      },
+      {
+        "text": "Under ₹10K",
+        "w": 90,
+        "h": 30
+      },
+      {
+        "text": "With Food",
+        "w": 83,
+        "h": 30
+      },
+      {
+        "text": "AC Rooms",
+        "w": 82,
+        "h": 30
+      },
+      {
+        "text": "All",
+        "w": 43,
+        "h": 28
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "login",
+    "route": "/login",
+    "file": "/workspace/docs/mobile-audit/before/360x800-login.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "div",
+        "className": "absolute -top-12 -right-12 h-44 w-44 rounded-full bg-white/10 blur-xl pointer-events-none",
+        "text": "",
+        "right": 408,
+        "width": 176
+      },
+      {
+        "tag": "div",
+        "className": "absolute top-24 -left-14 h-40 w-40 rounded-full bg-white/5 blur-lg pointer-events-none",
+        "text": "",
+        "right": 104,
+        "width": 160
+      }
+    ],
+    "tinyTapCount": 5,
+    "tinyTaps": [
+      {
+        "text": "Skip for now",
+        "w": 67,
+        "h": 16
+      },
+      {
+        "text": "WhatsApp",
+        "w": 104,
+        "h": 30
+      },
+      {
+        "text": "SMS",
+        "w": 70,
+        "h": 30
+      },
+      {
+        "text": "Terms & Conditions",
+        "w": 94,
+        "h": 14
+      },
+      {
+        "text": "Privacy Policy",
+        "w": 68,
+        "h": 14
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "unlinked-my-pg",
+    "route": "/my-pg?unlinked",
+    "file": "/workspace/docs/mobile-audit/before/360x800-unlinked-my-pg.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "unlinked-home",
+    "route": "/?unlinked",
+    "file": "/workspace/docs/mobile-audit/before/360x800-unlinked-home.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 2,
+    "tinyTaps": [
+      {
+        "text": "Log out",
+        "w": 40,
+        "h": 16
+      },
+      {
+        "text": "Or browse available verified PGs & Hoste",
+        "w": 248,
+        "h": 16
+      }
+    ]
+  },
+  {
+    "viewport": "412x915",
+    "screen": "home",
+    "route": "/",
+    "file": "/workspace/docs/mobile-audit/before/412x915-home.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "div",
+        "className": "absolute -right-8 -bottom-8 h-36 w-36 rounded-full bg-white/5 blur-2xl pointer-events-none",
+        "text": "",
+        "right": 424,
+        "width": 144
+      }
+    ],
+    "tinyTapCount": 8,
+    "tinyTaps": [
+      {
+        "text": "Ananya Sharma",
+        "w": 133,
+        "h": 24
+      },
+      {
+        "text": "View Stay Details",
+        "w": 114,
+        "h": 16
+      },
+      {
+        "text": "Pay Dues",
+        "w": 79,
+        "h": 28
+      },
+      {
+        "text": "Pay Dues Now",
+        "w": 130,
+        "h": 36
+      },
+      {
+        "text": "View Full Ledger, Direct UPI & Cash Hand",
+        "w": 311,
+        "h": 16
+      },
+      {
+        "text": "Manage all →",
+        "w": 69,
+        "h": 17
+      },
+      {
+        "text": "Complete DigiLocker KYC",
+        "w": 235,
+        "h": 36
+      },
+      {
+        "text": "View Details",
+        "w": 95,
+        "h": 38
+      }
+    ]
+  },
+  {
+    "viewport": "412x915",
+    "screen": "search",
+    "route": "/search",
+    "file": "/workspace/docs/mobile-audit/before/412x915-search.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 wh",
+        "text": "AC Rooms",
+        "right": 465,
+        "width": 82
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "All",
+        "right": 514,
+        "width": 43
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Delhi NCR",
+        "right": 606,
+        "width": 86
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Noida",
+        "right": 676,
+        "width": 63
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Bangalore",
+        "right": 769,
+        "width": 87
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Kolkata",
+        "right": 848,
+        "width": 73
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Lucknow",
+        "right": 933,
+        "width": 79
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Kota",
+        "right": 995,
+        "width": 57
+      }
+    ],
+    "tinyTapCount": 16,
+    "tinyTaps": [
+      {
+        "text": "Filters",
+        "w": 77,
+        "h": 30
+      },
+      {
+        "text": "Near Me",
+        "w": 89,
+        "h": 30
+      },
+      {
+        "text": "Under ₹10K",
+        "w": 90,
+        "h": 30
+      },
+      {
+        "text": "With Food",
+        "w": 83,
+        "h": 30
+      },
+      {
+        "text": "AC Rooms",
+        "w": 82,
+        "h": 30
+      },
+      {
+        "text": "All",
+        "w": 43,
+        "h": 28
+      },
+      {
+        "text": "Delhi NCR",
+        "w": 86,
+        "h": 30
+      },
+      {
+        "text": "Noida",
+        "w": 63,
+        "h": 30
+      }
+    ]
+  },
+  {
+    "viewport": "412x915",
+    "screen": "my-pg",
+    "route": "/my-pg",
+    "file": "/workspace/docs/mobile-audit/before/412x915-my-pg.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 9,
+    "tinyTaps": [
+      {
+        "text": "Open in Maps",
+        "w": 105,
+        "h": 25
+      },
+      {
+        "text": "Call Owner",
+        "w": 36,
+        "h": 36
+      },
+      {
+        "text": "WhatsApp Owner",
+        "w": 36,
+        "h": 36
+      },
+      {
+        "text": "Call Staff",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "text": "WhatsApp Staff",
+        "w": 32,
+        "h": 32
+      },
+      {
+        "text": "Details",
+        "w": 55,
+        "h": 16
+      },
+      {
+        "text": "Show password",
+        "w": 22,
+        "h": 22
+      },
+      {
+        "text": "Copy",
+        "w": 60,
+        "h": 23
+      }
+    ]
+  },
+  {
+    "viewport": "412x915",
+    "screen": "payments",
+    "route": "/payments",
+    "file": "/workspace/docs/mobile-audit/before/412x915-payments.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 8,
+    "tinyTaps": [
+      {
+        "text": "Pay Rent",
+        "w": 77,
+        "h": 28
+      },
+      {
+        "text": "Pay Deposit",
+        "w": 94,
+        "h": 28
+      },
+      {
+        "text": "Pay ₹2850",
+        "w": 86,
+        "h": 28
+      },
+      {
+        "text": "Pay All (₹2,850)",
+        "w": 77,
+        "h": 32
+      },
+      {
+        "text": "Pay",
+        "w": 41,
+        "h": 27
+      },
+      {
+        "text": "Pay",
+        "w": 41,
+        "h": 27
+      },
+      {
+        "text": "Pay",
+        "w": 41,
+        "h": 27
+      },
+      {
+        "text": "Full Ledger",
+        "w": 76,
+        "h": 16
+      }
+    ]
+  },
+  {
+    "viewport": "412x915",
+    "screen": "transactions",
+    "route": "/transactions",
+    "file": "/workspace/docs/mobile-audit/before/412x915-transactions.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 2,
+    "tinyTaps": [
+      {
+        "text": "Refresh",
+        "w": 79,
+        "h": 26
+      },
+      {
+        "text": "Receipt",
+        "w": 54,
+        "h": 17
+      }
+    ]
+  },
+  {
+    "viewport": "412x915",
+    "screen": "complaints",
+    "route": "/complaints",
+    "file": "/workspace/docs/mobile-audit/before/412x915-complaints.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all tap-target border bo",
+        "text": "WiFi / Network",
+        "right": 456,
+        "width": 109
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all tap-target border bo",
+        "text": "Food & Mess",
+        "right": 556,
+        "width": 94
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all tap-target border bo",
+        "text": "Air Conditioning",
+        "right": 679,
+        "width": 116
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all tap-target border bo",
+        "text": "Security & Gate",
+        "right": 796,
+        "width": 112
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all tap-target border bo",
+        "text": "Other",
+        "right": 862,
+        "width": 59
+      }
+    ],
+    "tinyTapCount": 2,
+    "tinyTaps": [
+      {
+        "text": "Refresh",
+        "w": 79,
+        "h": 26
+      },
+      {
+        "text": "New Complaint",
+        "w": 127,
+        "h": 24
+      }
+    ]
+  },
+  {
+    "viewport": "412x915",
+    "screen": "guests",
+    "route": "/guests",
+    "file": "/workspace/docs/mobile-audit/before/412x915-guests.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 4,
+    "tinyTaps": [
+      {
+        "text": "Refresh",
+        "w": 79,
+        "h": 26
+      },
+      {
+        "text": "Add Guest Log",
+        "w": 123,
+        "h": 24
+      },
+      {
+        "text": "Guest Entry Logs",
+        "w": 182,
+        "h": 32
+      },
+      {
+        "text": "Night Out Intimation",
+        "w": 182,
+        "h": 32
+      }
+    ]
+  },
+  {
+    "viewport": "412x915",
+    "screen": "night-out",
+    "route": "/night-out",
+    "file": "/workspace/docs/mobile-audit/before/412x915-night-out.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 1,
+    "tinyTaps": [
+      {
+        "text": "New Night Out",
+        "w": 129,
+        "h": 28
+      }
+    ]
+  },
+  {
+    "viewport": "412x915",
+    "screen": "food",
+    "route": "/food",
+    "file": "/workspace/docs/mobile-audit/before/412x915-food.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all tap-target flex ",
+        "text": "Friday",
+        "right": 479,
+        "width": 66
+      },
+      {
+        "tag": "span",
+        "className": "",
+        "text": "Friday",
+        "right": 464,
+        "width": 36
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all tap-target flex ",
+        "text": "Saturday",
+        "right": 566,
+        "width": 81
+      },
+      {
+        "tag": "span",
+        "className": "",
+        "text": "Saturday",
+        "right": 551,
+        "width": 51
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all tap-target flex ",
+        "text": "Sunday",
+        "right": 643,
+        "width": 71
+      },
+      {
+        "tag": "span",
+        "className": "",
+        "text": "Sunday",
+        "right": 628,
+        "width": 41
+      }
+    ],
+    "tinyTapCount": 1,
+    "tinyTaps": [
+      {
+        "text": "Refresh Menu",
+        "w": 26,
+        "h": 26
+      }
+    ]
+  },
+  {
+    "viewport": "412x915",
+    "screen": "wifi",
+    "route": "/wifi",
+    "file": "/workspace/docs/mobile-audit/before/412x915-wifi.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 2,
+    "tinyTaps": [
+      {
+        "text": "Show password",
+        "w": 28,
+        "h": 28
+      },
+      {
+        "text": "Copy",
+        "w": 66,
+        "h": 24
+      }
+    ]
+  },
+  {
+    "viewport": "412x915",
+    "screen": "notice",
+    "route": "/notice",
+    "file": "/workspace/docs/mobile-audit/before/412x915-notice.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 1,
+    "tinyTaps": [
+      {
+        "text": "Submit 30-Day Notice",
+        "w": 338,
+        "h": 36
+      }
+    ]
+  },
+  {
+    "viewport": "412x915",
+    "screen": "announcements",
+    "route": "/announcements",
+    "file": "/workspace/docs/mobile-audit/before/412x915-announcements.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 3,
+    "tinyTaps": [
+      {
+        "text": "All (1)",
+        "w": 53,
+        "h": 30
+      },
+      {
+        "text": "Urgent (1)",
+        "w": 79,
+        "h": 30
+      },
+      {
+        "text": "General (0)",
+        "w": 88,
+        "h": 30
+      }
+    ]
+  },
+  {
+    "viewport": "412x915",
+    "screen": "documents",
+    "route": "/documents",
+    "file": "/workspace/docs/mobile-audit/before/412x915-documents.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 2,
+    "tinyTaps": [
+      {
+        "text": "Complete DigiLocker KYC",
+        "w": 338,
+        "h": 36
+      },
+      {
+        "text": "Download Signed PDF",
+        "w": 168,
+        "h": 34
+      }
+    ]
+  },
+  {
+    "viewport": "412x915",
+    "screen": "notifications",
+    "route": "/notifications",
+    "file": "/workspace/docs/mobile-audit/before/412x915-notifications.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 2,
+    "tinyTaps": [
+      {
+        "text": "Mark all read",
+        "w": 67,
+        "h": 17
+      },
+      {
+        "text": "Clear all",
+        "w": 22,
+        "h": 22
+      }
+    ]
+  },
+  {
+    "viewport": "412x915",
+    "screen": "saved",
+    "route": "/saved",
+    "file": "/workspace/docs/mobile-audit/before/412x915-saved.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 2,
+    "tinyTaps": [
+      {
+        "text": "Remove from Saved",
+        "w": 28,
+        "h": 28
+      },
+      {
+        "text": "View",
+        "w": 58,
+        "h": 26
+      }
+    ]
+  },
+  {
+    "viewport": "412x915",
+    "screen": "menu",
+    "route": "/profile",
+    "file": "/workspace/docs/mobile-audit/before/412x915-menu.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 1,
+    "tinyTaps": [
+      {
+        "text": "Edit",
+        "w": 52,
+        "h": 26
+      }
+    ]
+  },
+  {
+    "viewport": "412x915",
+    "screen": "pg-detail",
+    "route": "/pg/satya-heights",
+    "file": "/workspace/docs/mobile-audit/before/412x915-pg-detail.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 1,
+    "tinyTaps": [
+      {
+        "text": "View on Google Maps",
+        "w": 136,
+        "h": 16
+      }
+    ]
+  },
+  {
+    "viewport": "412x915",
+    "screen": "payment-result",
+    "route": "/payments/result?txnid=MOCKTXN1&status=success",
+    "file": "/workspace/docs/mobile-audit/before/412x915-payment-result.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 2,
+    "tinyTaps": [
+      {
+        "text": "",
+        "w": 12,
+        "h": 12
+      },
+      {
+        "text": "",
+        "w": 12,
+        "h": 12
+      }
+    ]
+  },
+  {
+    "viewport": "412x915",
+    "screen": "guest-home",
+    "route": "/?guest",
+    "file": "/workspace/docs/mobile-audit/before/412x915-guest-home.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 wh",
+        "text": "AC Rooms",
+        "right": 465,
+        "width": 82
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "All",
+        "right": 514,
+        "width": 43
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Delhi NCR",
+        "right": 606,
+        "width": 86
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Noida",
+        "right": 676,
+        "width": 63
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Bangalore",
+        "right": 769,
+        "width": 87
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Kolkata",
+        "right": 848,
+        "width": 73
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Lucknow",
+        "right": 933,
+        "width": 79
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Kota",
+        "right": 995,
+        "width": 57
+      }
+    ],
+    "tinyTapCount": 18,
+    "tinyTaps": [
+      {
+        "text": "Explore PGs",
+        "w": 85,
+        "h": 24
+      },
+      {
+        "text": "Explore Verified PGs",
+        "w": 159,
+        "h": 28
+      },
+      {
+        "text": "Filters",
+        "w": 77,
+        "h": 30
+      },
+      {
+        "text": "Near Me",
+        "w": 89,
+        "h": 30
+      },
+      {
+        "text": "Under ₹10K",
+        "w": 90,
+        "h": 30
+      },
+      {
+        "text": "With Food",
+        "w": 83,
+        "h": 30
+      },
+      {
+        "text": "AC Rooms",
+        "w": 82,
+        "h": 30
+      },
+      {
+        "text": "All",
+        "w": 43,
+        "h": 28
+      }
+    ]
+  }
+]

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
   Search,
-  Bell,
   Pencil,
   X,
   Building2,
@@ -433,26 +432,17 @@ export const HomePage: React.FC = () => {
         </div>
 
         {/* Right Actions: Avatar + Notification Bell */}
-        <div className="flex items-center gap-2.5">
-          <div
-            onClick={() => navigate('/profile')}
-            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-2 border-primary/40 bg-teal-50 text-xs font-bold text-[#008080] shadow-sm hover:opacity-90 active:scale-95 transition-all"
-          >
-            {tenant?.name ? tenant.name.slice(0, 2).toUpperCase() : 'SH'}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => navigate('/notifications')}
-            className="relative flex h-9 w-9 items-center justify-center rounded-2xl border border-gray-100 bg-white text-gray-600 shadow-sm hover:bg-gray-50 active:scale-95 transition-all tap-target"
-            title="Notifications"
-          >
-            <Bell className="h-4 w-4" />
-            {hasUnreadNotices && (
-              <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
-            )}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => navigate('/profile')}
+          className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-primary/40 bg-teal-50 text-xs font-bold text-[#008080] shadow-sm hover:opacity-90"
+          aria-label="Menu"
+        >
+          {tenant?.name ? tenant.name.slice(0, 2).toUpperCase() : 'SH'}
+          {hasUnreadNotices && (
+            <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white" />
+          )}
+        </button>
       </div>
 
       {/* 2. Hero Active Stay Card (Clean, modern, premium single card) */}
@@ -461,7 +451,7 @@ export const HomePage: React.FC = () => {
         <div className="absolute -right-8 -bottom-8 h-36 w-36 rounded-full bg-white/5 blur-2xl pointer-events-none" />
 
         {/* Top Tag: Active Resident */}
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 px-2.5 py-0.5 text-[10px] font-bold text-emerald-300 backdrop-blur-md">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
             Active Resident
@@ -514,7 +504,7 @@ export const HomePage: React.FC = () => {
         </div>
 
         {/* Card Footer Actions */}
-        <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
+        <div className="mt-4 pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
           <button
             onClick={() => navigate('/my-pg')}
             className="text-xs font-bold text-teal-200 hover:text-white flex items-center gap-1 transition-colors"
@@ -541,13 +531,13 @@ export const HomePage: React.FC = () => {
       {/* 3. Outstanding Dues & Bill Breakdown Card */}
       {balanceDue > 0 ? (
         <div className="rounded-3xl border border-rose-200/90 bg-gradient-to-br from-rose-50/60 via-white to-amber-50/40 p-5 shadow-sm space-y-4 animate-fade-in">
-          <div className="flex items-start justify-between gap-2">
+          <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="flex items-center gap-2.5">
               <div className="h-10 w-10 rounded-2xl bg-rose-100 border border-rose-200/80 flex items-center justify-center text-rose-700 font-bold shrink-0">
                 <IndianRupee className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-sm font-black text-gray-900 flex items-center gap-1.5">
+                <h3 className="text-sm font-black text-gray-900 flex flex-wrap items-center gap-1.5">
                   Outstanding Dues
                   <span className="rounded-full bg-rose-100 text-rose-800 text-[10px] font-bold px-2 py-0.5">
                     {duesStatus === 'OVERDUE' ? 'Overdue' : 'Payment Due'}
@@ -568,7 +558,7 @@ export const HomePage: React.FC = () => {
           </div>
 
           {/* Amount Callout with Instant Pay */}
-          <div className="bg-white/90 border border-rose-100 rounded-2xl p-4 flex items-baseline justify-between shadow-xs">
+          <div className="bg-white/90 border border-rose-100 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 shadow-xs">
             <div>
               <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400 block">
                 Total Payable Balance

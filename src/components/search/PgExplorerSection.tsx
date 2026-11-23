@@ -3,7 +3,6 @@ import {
   Search as SearchIcon,
   SlidersHorizontal,
   Crosshair,
-  Loader2,
   Filter,
 } from 'lucide-react';
 import {
@@ -13,6 +12,8 @@ import {
 } from '../../services/searchService';
 import { PropertyCard } from './PropertyCard';
 import { FilterDrawer } from './FilterDrawer';
+import { ListSkeleton } from '../ui/ListSkeleton';
+import { InlineError } from '../ui/InlineError';
 
 const CITIES = ['All', 'Delhi NCR', 'Noida', 'Bangalore', 'Kolkata', 'Lucknow', 'Kota'];
 
@@ -29,6 +30,7 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
 }) => {
   const [properties, setProperties] = useState<PropertyListItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState<boolean>(false);
   const [showFilters, setShowFilters] = useState<boolean>(false);
 
   // Filter chips state
@@ -46,6 +48,7 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
 
   const loadProperties = useCallback(async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       const activeFilters: SearchFilters = {
         city: selectedCity === 'All' ? undefined : selectedCity,
@@ -62,6 +65,8 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
       setProperties(res.properties);
     } catch (err) {
       console.error('Error loading properties:', err);
+      setLoadError(true);
+      setProperties([]);
     } finally {
       setLoading(false);
     }
@@ -141,7 +146,7 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
       </div>
 
       {/* 2. Filter Pills Row */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+      <div className="flex items-center gap-1.5 overflow-x-auto overscroll-x-contain no-scrollbar py-1">
         {/* Filters button */}
         <button
           type="button"
@@ -254,10 +259,12 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
 
       {/* 4. Properties List Feed */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-16">
-          <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
-          <p className="text-xs font-semibold text-gray-500">Loading verified properties...</p>
+        <div className="space-y-2">
+          <ListSkeleton rows={3} />
+          <p className="text-center text-xs font-semibold text-gray-500">Loading verified properties...</p>
         </div>
+      ) : loadError ? (
+        <InlineError message="Could not load PGs. Check your connection and try again." onRetry={loadProperties} />
       ) : properties.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-teal-200 bg-teal-50/30 p-8 text-center space-y-3">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-100/80 text-primary">

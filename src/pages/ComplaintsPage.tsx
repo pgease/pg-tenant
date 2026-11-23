@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { tenantService, type Complaint } from '../services/tenantService';
+import { ListSkeleton } from '../components/ui/ListSkeleton';
+import { InlineError } from '../components/ui/InlineError';
 import { useAuth } from '../context/AuthContext';
 
 const CATEGORIES = [
@@ -44,9 +46,11 @@ export const ComplaintsPage: React.FC = () => {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  const [loadError, setLoadError] = useState(false);
 
   const loadComplaints = async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       if (isAuthenticated) {
         const list = await tenantService.getComplaints();
@@ -54,6 +58,7 @@ export const ComplaintsPage: React.FC = () => {
       }
     } catch (err) {
       console.error('Failed to load complaints:', err);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -110,10 +115,10 @@ export const ComplaintsPage: React.FC = () => {
   return (
     <div className="space-y-4 pt-1 pb-6 animate-fade-in">
       {/* Top Navigation Bar */}
-      <div className="flex items-center justify-between">
+      <div className="page-toolbar flex flex-wrap items-center justify-between gap-2">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-brandText tap-target"
+          className="page-back flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-brandText tap-target"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>Back</span>
@@ -203,7 +208,7 @@ export const ComplaintsPage: React.FC = () => {
                   type="file"
                   accept="image/*"
                   onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                  className="hidden"
+                  className="sr-only"
                 />
               </label>
             </div>
@@ -261,10 +266,12 @@ export const ComplaintsPage: React.FC = () => {
           </div>
 
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-16">
-              <Loader2 className="h-7 w-7 animate-spin text-primary mb-2" />
-              <p className="text-xs font-medium text-gray-500">Loading complaints...</p>
+            <div className="space-y-2">
+              <ListSkeleton rows={3} />
+              <p className="text-center text-xs font-medium text-gray-500">Loading complaints...</p>
             </div>
+          ) : loadError ? (
+            <InlineError message="Could not load complaints." onRetry={loadComplaints} />
           ) : filtered.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-gray-200 bg-gray-50/50 p-10 text-center space-y-3">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-primary">

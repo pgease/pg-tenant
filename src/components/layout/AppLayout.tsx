@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { BottomTabBar } from './BottomTabBar';
+import { MobileDrawer } from './MobileDrawer';
 import { SplashScreen } from '../common/SplashScreen';
 import { OnboardingCarousel } from '../common/OnboardingCarousel';
 import { OfflineScreen } from '../common/OfflineScreen';
@@ -8,20 +9,8 @@ import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 import { isAppMode, initAppBridge } from '../../utils/appBridge';
 import { useAuth } from '../../context/AuthContext';
 import { tenantService } from '../../services/tenantService';
-import {
-  Bell,
-  LayoutGrid,
-  Search,
-  Building2,
-  CreditCard,
-  FileText,
-  Utensils,
-  Wifi,
-  DoorOpen,
-  User,
-  LogOut,
-  MessageSquareWarning,
-} from 'lucide-react';
+import { desktopNavItems, rootTabPaths } from '../../navigation/appMenu';
+import { ArrowLeft, Bell, LogOut, Menu } from 'lucide-react';
 
 export const AppLayout: React.FC = () => {
   const { isOnline, checkConnection } = useNetworkStatus();
@@ -33,6 +22,7 @@ export const AppLayout: React.FC = () => {
   const [showSplash, setShowSplash] = useState<boolean>(false);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
   const [hasUnread, setHasUnread] = useState<boolean>(false);
+  const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -42,6 +32,10 @@ export const AppLayout: React.FC = () => {
         .catch(() => setHasUnread(false));
     }
   }, [isAuthenticated, location.pathname]);
+
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     const appModeActive = isAppMode();
@@ -69,7 +63,8 @@ export const AppLayout: React.FC = () => {
     if (path.startsWith('/complaints')) return 'Complaints';
     if (path.startsWith('/night-out')) return 'Night Out';
     if (path.startsWith('/guests') || path.startsWith('/guest-entry')) return 'Guest Pass';
-    if (path.startsWith('/food')) return 'Food & Dining';
+    if (path.startsWith('/food') || path.startsWith('/dining')) return 'Food & Dining';
+    if (path.startsWith('/saved')) return 'Saved Properties';
     if (path.startsWith('/wifi')) return 'WiFi Credentials';
     if (path.startsWith('/announcements') || path.startsWith('/notices')) return 'Notice Board';
     if (path.startsWith('/notice-period') || path.startsWith('/notice')) return 'Notice Period';
@@ -82,20 +77,10 @@ export const AppLayout: React.FC = () => {
   };
 
   const hideTabBar = location.pathname.startsWith('/login') || location.pathname.startsWith('/auth');
-
-  const desktopNavItems = [
-    { to: '/', label: 'Dashboard', icon: LayoutGrid, end: true },
-    { to: '/search', label: 'Explore PGs', icon: Search },
-    { to: '/my-pg', label: 'My PG Stay', icon: Building2 },
-    { to: '/payments', label: 'Rent & Payments', icon: CreditCard },
-    { to: '/documents', label: 'Documents & KYC', icon: FileText },
-    { to: '/food', label: 'Food Menu', icon: Utensils },
-    { to: '/wifi', label: 'Wi-Fi Network', icon: Wifi },
-    { to: '/complaints', label: 'Complaints', icon: MessageSquareWarning },
-    { to: '/announcements', label: 'Notice Board', icon: Bell },
-    { to: '/notice', label: 'Notice Period', icon: DoorOpen },
-    { to: '/profile', label: 'Profile & Settings', icon: User },
-  ];
+  const isHome = location.pathname === '/' || location.pathname === '/home';
+  const isDetail = location.pathname.startsWith('/pg/');
+  const showAppBar = !location.pathname.startsWith('/login') && !isDetail;
+  const showBack = showAppBar && !isHome && !rootTabPaths.has(location.pathname);
 
   const maskedPhone = tenant?.phone
     ? `${tenant.phone.slice(0, 2)}XXXXX${tenant.phone.slice(-3)}`
@@ -121,8 +106,8 @@ export const AppLayout: React.FC = () => {
 
         {/* Desktop Left Sidebar Navigation (TW-17) */}
         {!hideTabBar && (
-          <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:shrink-0 lg:border-r lg:border-gray-100 lg:bg-slate-50/60 p-5 min-h-dvh justify-between">
-            <div className="space-y-6">
+          <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:shrink-0 lg:border-r lg:border-gray-100 lg:bg-slate-50/60 p-5 min-h-dvh justify-between overflow-hidden">
+            <div className="space-y-6 flex-1 min-h-0 overflow-y-auto">
               {/* Brand Logo */}
               <div
                 onClick={() => navigate('/')}
@@ -213,56 +198,82 @@ export const AppLayout: React.FC = () => {
           </aside>
         )}
 
+        <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+
         {/* Content Container */}
         <div className="flex-1 min-w-0 flex flex-col min-h-dvh">
-          {/* Header with PG Ease Brand Logo (for mobile or subpages) */}
-          {!location.pathname.startsWith('/pg/') &&
-            !location.pathname.startsWith('/login') &&
-            location.pathname !== '/' &&
-            location.pathname !== '/home' && (
-            <header className="sticky top-0 z-20 flex items-center justify-between border-b border-gray-100/80 bg-white/95 px-5 py-3.5 backdrop-blur-md pt-safe">
-              <div className="flex items-center gap-2">
-                <div
+          {showAppBar && (
+            <header
+              className={`sticky top-0 z-20 items-center gap-1 border-b border-gray-100/80 bg-white/95 px-2 backdrop-blur-md pt-safe min-h-14 ${
+                isHome ? 'flex lg:hidden' : 'flex'
+              }`}
+            >
+              {showBack ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.history.length > 1) navigate(-1);
+                    else navigate('/');
+                  }}
+                  className="flex h-11 shrink-0 items-center gap-1 rounded-full px-2 text-sm font-semibold text-gray-700 hover:bg-gray-100"
+                  aria-label="Back"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                  <span>Back</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setDrawerOpen(true)}
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-gray-700 hover:bg-gray-100 lg:hidden"
+                  aria-label="All services"
+                >
+                  <Menu className="h-5 w-5" />
+                </button>
+              )}
+
+              <div className="flex min-w-0 flex-1 items-center gap-2">
+                <button
+                  type="button"
                   onClick={() => navigate('/')}
-                  className="cursor-pointer flex items-center"
+                  className="hidden min-[400px]:flex h-11 shrink-0 items-center"
+                  aria-label="PG Ease"
                 >
                   <img
                     src="/assets/pgease-full-brand-logo.png"
-                    alt="PG Ease"
-                    className="h-7 w-auto object-contain"
+                    alt=""
+                    className="h-6 w-auto object-contain"
                   />
-                </div>
-
-                <span className="text-sm font-bold text-brandText tracking-tight border-l border-gray-200 pl-2 truncate max-w-[200px]">
-                  {getHeaderTitle()}
-                </span>
+                </button>
+                <h1 className="min-w-0 truncate text-base font-bold text-brandText">
+                  {isHome ? 'PG Ease' : getHeaderTitle()}
+                </h1>
               </div>
 
-              {/* Notification Bell (Navigates to /notifications) */}
               <button
+                type="button"
                 onClick={() => navigate('/notifications')}
-                className="relative flex h-9 w-9 items-center justify-center rounded-full text-gray-500 hover:text-brandText hover:bg-gray-100 transition-all active:scale-95 tap-target"
+                className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-brandText"
                 title="Notifications"
+                aria-label="Notifications"
               >
                 <Bell className="h-5 w-5" strokeWidth={1.8} />
                 {hasUnread && (
-                  <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
+                  <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
                 )}
               </button>
             </header>
           )}
 
-          {/* Main Content Area */}
           <main
-            className={`flex-1 overflow-y-auto ${
-              !location.pathname.startsWith('/login') ? 'px-5 py-4' : ''
-            } ${!hideTabBar ? 'pb-24 lg:pb-8' : 'pb-safe'}`}
+            className={`flex-1 overflow-x-hidden overflow-y-auto ${
+              !location.pathname.startsWith('/login') ? 'px-4 py-4 sm:px-5' : ''
+            } ${!hideTabBar ? 'pb-tabbar lg:pb-8' : 'pb-safe'}`}
           >
             <Outlet context={{ inAppMode }} />
           </main>
         </div>
 
-        {/* Bottom Tab Bar (Mobile only, hidden on lg screens) */}
         {!hideTabBar && <BottomTabBar />}
       </div>
     </div>

@@ -5,7 +5,6 @@ import {
   CreditCard,
   ChevronRight,
   Smartphone,
-  Loader2,
   ShieldCheck,
   Home,
   Zap,
@@ -19,6 +18,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { tenantService, type RentCollectionDetails, type OtherDueItem } from '../services/tenantService';
+import { ListSkeleton } from '../components/ui/ListSkeleton';
+import { InlineError } from '../components/ui/InlineError';
 import { RentPaymentModal } from '../components/my-pg/RentPaymentModal';
 
 export const PaymentsPage: React.FC = () => {
@@ -29,6 +30,7 @@ export const PaymentsPage: React.FC = () => {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [totalPaid, setTotalPaid] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const [historyError, setHistoryError] = useState(false);
   const [showPayModal, setShowPayModal] = useState(false);
   const [modalInitialItem, setModalInitialItem] = useState<'all' | 'rent' | 'security' | 'dues'>('all');
   const [modalPreselectedDueId, setModalPreselectedDueId] = useState<string | null>(null);
@@ -37,10 +39,15 @@ export const PaymentsPage: React.FC = () => {
     setLoading(true);
     try {
       if (isAuthenticated && isLinkedTenant) {
+        let historyFailed = false;
         const [duesRes, historyRes] = await Promise.all([
           tenantService.getRentDues().catch(() => null),
-          tenantService.getRentHistory(1, 20).catch(() => ({ transactions: [], totalAmountPaid: 0 })),
+          tenantService.getRentHistory(1, 20).catch(() => {
+            historyFailed = true;
+            return { transactions: [], totalAmountPaid: 0 };
+          }),
         ]);
+        setHistoryError(historyFailed);
         setDues(duesRes);
         const txList = historyRes.transactions || historyRes.history || (Array.isArray(historyRes) ? historyRes : []);
         setTransactions(txList);
@@ -250,11 +257,11 @@ export const PaymentsPage: React.FC = () => {
       />
 
       {/* 1. Top Metric Cards (Live Backend Data) */}
-      <div className="grid grid-cols-3 gap-2.5">
+      <div className="grid grid-cols-1 min-[420px]:grid-cols-3 gap-2.5">
         {/* Total Billed in Period */}
         <div className="rounded-2xl border border-gray-100 bg-white p-3.5 shadow-sm">
-          <span className="text-[11px] font-semibold text-gray-500 block truncate">Total Invoiced</span>
-          <p className="text-base font-black text-brandText mt-0.5 truncate">
+          <span className="text-[11px] font-semibold leading-tight text-gray-500 block">Total Invoiced</span>
+          <p className="text-base font-black text-brandText mt-0.5 break-anywhere">
             ₹{totalBilled.toLocaleString('en-IN')}
           </p>
           <span className="text-[10px] text-gray-400 font-medium">Period total</span>
@@ -262,10 +269,10 @@ export const PaymentsPage: React.FC = () => {
 
         {/* Outstanding Due */}
         <div className="rounded-2xl border border-gray-100 bg-white p-3.5 shadow-sm">
-          <span className={`text-[11px] font-semibold block truncate ${balanceDue > 0 ? 'text-red-500' : 'text-emerald-600'}`}>
+          <span className={`text-[11px] font-semibold leading-tight block ${balanceDue > 0 ? 'text-red-500' : 'text-emerald-600'}`}>
             {balanceDue > 0 ? 'Outstanding Due' : 'All Cleared'}
           </span>
-          <p className={`text-base font-black mt-0.5 truncate ${balanceDue > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+          <p className={`text-base font-black mt-0.5 break-anywhere ${balanceDue > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
             ₹{balanceDue.toLocaleString('en-IN')}
           </p>
           <span className="text-[10px] text-gray-400 font-medium">
@@ -275,8 +282,8 @@ export const PaymentsPage: React.FC = () => {
 
         {/* Total Cleared */}
         <div className="rounded-2xl border border-gray-100 bg-white p-3.5 shadow-sm">
-          <span className="text-[11px] font-semibold text-emerald-600 block truncate">Amount Paid</span>
-          <p className="text-base font-black text-brandText mt-0.5 truncate">
+          <span className="text-[11px] font-semibold leading-tight text-emerald-600 block">Amount Paid</span>
+          <p className="text-base font-black text-brandText mt-0.5 break-anywhere">
             ₹{(totalPaid || amountPaidInPeriod).toLocaleString('en-IN')}
           </p>
           <span className="text-[10px] text-gray-400 font-medium">Cleared to date</span>
@@ -323,7 +330,7 @@ export const PaymentsPage: React.FC = () => {
 
         {/* Last payment reference banner if present */}
         {dues?.paymentInfo?.paymentMethod && (
-          <div className="mt-4 pt-3 border-t border-white/15 flex items-center justify-between text-[11px] text-white/90">
+          <div className="mt-4 pt-3 border-t border-white/15 flex flex-wrap items-center justify-between gap-2 text-[11px] text-white/90">
             <span className="flex items-center gap-1.5">
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-300" />
               <span>
@@ -502,7 +509,7 @@ export const PaymentsPage: React.FC = () => {
             {detailedDuesList.map((due) => (
               <div
                 key={due.id}
-                className="p-3.5 flex items-center justify-between hover:bg-gray-50/60 transition-colors"
+                className="p-3.5 flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between hover:bg-gray-50/60 transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-50 text-gray-700 shrink-0">
@@ -616,10 +623,12 @@ export const PaymentsPage: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-10">
-            <Loader2 className="h-6 w-6 animate-spin text-primary mb-1.5" />
-            <p className="text-xs text-gray-400">Loading transactions...</p>
+          <div className="space-y-2">
+            <ListSkeleton rows={2} />
+            <p className="text-center text-xs text-gray-400">Loading transactions...</p>
           </div>
+        ) : historyError ? (
+          <InlineError message="Could not load transactions." onRetry={loadPaymentData} />
         ) : transactions.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 p-6 text-center space-y-1.5">
             <p className="text-xs font-semibold text-brandText">No Payment Transactions Recorded</p>
