@@ -5,11 +5,12 @@ import {
   Calendar,
   AlertTriangle,
   Info,
-  Loader2,
   Megaphone,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { tenantService } from '../services/tenantService';
+import { ListSkeleton } from '../components/ui/ListSkeleton';
+import { InlineError } from '../components/ui/InlineError';
 import { useAuth } from '../context/AuthContext';
 
 export interface NoticeItem {
@@ -29,11 +30,14 @@ export const AnnouncementsPage: React.FC = () => {
 
   const [notices, setNotices] = useState<NoticeItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
   const [filter, setFilter] = useState<'all' | 'urgent' | 'general'>('all');
 
   useEffect(() => {
     if (isAuthenticated) {
       setLoading(true);
+      setLoadError(false);
       tenantService
         .getNotices()
         .then((data) => {
@@ -41,12 +45,13 @@ export const AnnouncementsPage: React.FC = () => {
         })
         .catch(() => {
           setNotices([]);
+          setLoadError(true);
         })
         .finally(() => setLoading(false));
     } else {
       setLoading(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, retryKey]);
 
   const filtered = notices.filter((n) => {
     if (filter === 'urgent') return n.priority === 'urgent' || n.priority === 'high';
@@ -57,10 +62,10 @@ export const AnnouncementsPage: React.FC = () => {
   return (
     <div className="space-y-4 pt-1 pb-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="page-toolbar flex flex-wrap items-center justify-between gap-2">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-brandText tap-target"
+          className="page-back flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-brandText tap-target"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>Back</span>
@@ -110,10 +115,12 @@ export const AnnouncementsPage: React.FC = () => {
       {/* Notices List */}
       <div className="space-y-3">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-16">
-            <Loader2 className="h-7 w-7 animate-spin text-purple-600 mb-2" />
-            <p className="text-xs font-medium text-gray-500">Loading notices...</p>
+          <div className="space-y-2">
+            <ListSkeleton rows={3} />
+            <p className="text-center text-xs font-medium text-gray-500">Loading notices...</p>
           </div>
+        ) : loadError ? (
+          <InlineError message="Could not load notices." onRetry={() => setRetryKey((key) => key + 1)} />
         ) : filtered.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-gray-200 bg-gray-50/50 p-10 text-center space-y-2">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-50 text-purple-600">

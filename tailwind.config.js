@@ -36,6 +36,9 @@ export default {
       fontFamily: {
         outfit: ['Outfit', 'sans-serif'],
       },
+      minHeight: {
+        14: '3.5rem',
+      },
       boxShadow: {
         'tab-bar': '0 -2px 10px rgba(0, 0, 0, 0.05)',
         'card-soft': '0 2px 8px -2px rgba(0, 128, 128, 0.08), 0 1px 4px -1px rgba(0, 0, 0, 0.04)',

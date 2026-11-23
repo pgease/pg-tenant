@@ -1,0 +1,969 @@
+[
+  {
+    "viewport": "360x800",
+    "screen": "home",
+    "route": "/",
+    "file": "/workspace/docs/mobile-audit/after/360x800-home.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "div",
+        "className": "absolute -right-8 -bottom-8 h-36 w-36 rounded-full bg-white/5 blur-2xl pointer-events-none",
+        "text": "",
+        "right": 376,
+        "width": 144
+      }
+    ],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "search",
+    "route": "/search",
+    "file": "/workspace/docs/mobile-audit/after/360x800-search.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 wh",
+        "text": "With Food",
+        "right": 373,
+        "width": 83
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 wh",
+        "text": "AC Rooms",
+        "right": 461,
+        "width": 82
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "All",
+        "right": 511,
+        "width": 44
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Delhi NCR",
+        "right": 603,
+        "width": 86
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Noida",
+        "right": 673,
+        "width": 63
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Bangalore",
+        "right": 766,
+        "width": 87
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Kolkata",
+        "right": 845,
+        "width": 73
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Lucknow",
+        "right": 930,
+        "width": 79
+      }
+    ],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "my-pg",
+    "route": "/my-pg",
+    "file": "/workspace/docs/mobile-audit/after/360x800-my-pg.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "payments",
+    "route": "/payments",
+    "file": "/workspace/docs/mobile-audit/after/360x800-payments.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "transactions",
+    "route": "/transactions",
+    "file": "/workspace/docs/mobile-audit/after/360x800-transactions.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "complaints",
+    "route": "/complaints",
+    "file": "/workspace/docs/mobile-audit/after/360x800-complaints.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all tap-target border bo",
+        "text": "WiFi / Network",
+        "right": 452,
+        "width": 109
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all tap-target border bo",
+        "text": "Food & Mess",
+        "right": 552,
+        "width": 94
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all tap-target border bo",
+        "text": "Air Conditioning",
+        "right": 675,
+        "width": 116
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all tap-target border bo",
+        "text": "Security & Gate",
+        "right": 792,
+        "width": 112
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all tap-target border bo",
+        "text": "Other",
+        "right": 858,
+        "width": 59
+      }
+    ],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "guests",
+    "route": "/guests",
+    "file": "/workspace/docs/mobile-audit/after/360x800-guests.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "night-out",
+    "route": "/night-out",
+    "file": "/workspace/docs/mobile-audit/after/360x800-night-out.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "food",
+    "route": "/food",
+    "file": "/workspace/docs/mobile-audit/after/360x800-food.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all tap-target flex ",
+        "text": "Thursday",
+        "right": 403,
+        "width": 82
+      },
+      {
+        "tag": "span",
+        "className": "",
+        "text": "Thursday",
+        "right": 388,
+        "width": 52
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all tap-target flex ",
+        "text": "Friday",
+        "right": 475,
+        "width": 66
+      },
+      {
+        "tag": "span",
+        "className": "",
+        "text": "Friday",
+        "right": 460,
+        "width": 36
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all tap-target flex ",
+        "text": "Saturday",
+        "right": 562,
+        "width": 81
+      },
+      {
+        "tag": "span",
+        "className": "",
+        "text": "Saturday",
+        "right": 547,
+        "width": 51
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all tap-target flex ",
+        "text": "Sunday",
+        "right": 639,
+        "width": 71
+      },
+      {
+        "tag": "span",
+        "className": "",
+        "text": "Sunday",
+        "right": 624,
+        "width": 41
+      }
+    ],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "wifi",
+    "route": "/wifi",
+    "file": "/workspace/docs/mobile-audit/after/360x800-wifi.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "notice",
+    "route": "/notice",
+    "file": "/workspace/docs/mobile-audit/after/360x800-notice.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "announcements",
+    "route": "/announcements",
+    "file": "/workspace/docs/mobile-audit/after/360x800-announcements.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "documents",
+    "route": "/documents",
+    "file": "/workspace/docs/mobile-audit/after/360x800-documents.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "notifications",
+    "route": "/notifications",
+    "file": "/workspace/docs/mobile-audit/after/360x800-notifications.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "saved",
+    "route": "/saved",
+    "file": "/workspace/docs/mobile-audit/after/360x800-saved.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "menu",
+    "route": "/profile",
+    "file": "/workspace/docs/mobile-audit/after/360x800-menu.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "pg-detail",
+    "route": "/pg/satya-heights",
+    "file": "/workspace/docs/mobile-audit/after/360x800-pg-detail.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "payment-result",
+    "route": "/payments/result?txnid=MOCKTXN1&status=success",
+    "file": "/workspace/docs/mobile-audit/after/360x800-payment-result.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "modal-pay-gateway",
+    "route": "/payments#pay",
+    "file": "/workspace/docs/mobile-audit/after/360x800-modal-pay-gateway.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "modal-pay-upi",
+    "route": "/payments#upi",
+    "file": "/workspace/docs/mobile-audit/after/360x800-modal-pay-upi.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "modal-filters",
+    "route": "/search#filters",
+    "file": "/workspace/docs/mobile-audit/after/360x800-modal-filters.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 wh",
+        "text": "With Food",
+        "right": 373,
+        "width": 83
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 wh",
+        "text": "AC Rooms",
+        "right": 461,
+        "width": 82
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "All",
+        "right": 511,
+        "width": 44
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Delhi NCR",
+        "right": 603,
+        "width": 86
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Noida",
+        "right": 673,
+        "width": 63
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Bangalore",
+        "right": 766,
+        "width": 87
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Kolkata",
+        "right": 845,
+        "width": 73
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Lucknow",
+        "right": 930,
+        "width": 79
+      }
+    ],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "modal-edit-profile",
+    "route": "/profile#edit",
+    "file": "/workspace/docs/mobile-audit/after/360x800-modal-edit-profile.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "drawer",
+    "route": "/#drawer",
+    "file": "/workspace/docs/mobile-audit/after/360x800-drawer.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "div",
+        "className": "absolute -right-8 -bottom-8 h-36 w-36 rounded-full bg-white/5 blur-2xl pointer-events-none",
+        "text": "",
+        "right": 376,
+        "width": 144
+      }
+    ],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "guest-home",
+    "route": "/?guest",
+    "file": "/workspace/docs/mobile-audit/after/360x800-guest-home.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 wh",
+        "text": "With Food",
+        "right": 373,
+        "width": 83
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 wh",
+        "text": "AC Rooms",
+        "right": 461,
+        "width": 82
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "All",
+        "right": 511,
+        "width": 44
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Delhi NCR",
+        "right": 603,
+        "width": 86
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Noida",
+        "right": 673,
+        "width": 63
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Bangalore",
+        "right": 766,
+        "width": 87
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Kolkata",
+        "right": 845,
+        "width": 73
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Lucknow",
+        "right": 930,
+        "width": 79
+      }
+    ],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "login",
+    "route": "/login",
+    "file": "/workspace/docs/mobile-audit/after/360x800-login.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "div",
+        "className": "absolute -top-12 -right-12 h-44 w-44 rounded-full bg-white/10 blur-xl pointer-events-none",
+        "text": "",
+        "right": 408,
+        "width": 176
+      },
+      {
+        "tag": "div",
+        "className": "absolute top-24 -left-14 h-40 w-40 rounded-full bg-white/5 blur-lg pointer-events-none",
+        "text": "",
+        "right": 104,
+        "width": 160
+      }
+    ],
+    "tinyTapCount": 2,
+    "tinyTaps": [
+      {
+        "text": "Terms & Conditions",
+        "w": 94,
+        "h": 14
+      },
+      {
+        "text": "Privacy Policy",
+        "w": 68,
+        "h": 14
+      }
+    ]
+  },
+  {
+    "viewport": "360x800",
+    "screen": "unlinked-my-pg",
+    "route": "/my-pg?unlinked",
+    "file": "/workspace/docs/mobile-audit/after/360x800-unlinked-my-pg.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "360x800",
+    "screen": "unlinked-home",
+    "route": "/?unlinked",
+    "file": "/workspace/docs/mobile-audit/after/360x800-unlinked-home.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "412x915",
+    "screen": "home",
+    "route": "/",
+    "file": "/workspace/docs/mobile-audit/after/412x915-home.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "div",
+        "className": "absolute -right-8 -bottom-8 h-36 w-36 rounded-full bg-white/5 blur-2xl pointer-events-none",
+        "text": "",
+        "right": 428,
+        "width": 144
+      }
+    ],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "412x915",
+    "screen": "search",
+    "route": "/search",
+    "file": "/workspace/docs/mobile-audit/after/412x915-search.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 wh",
+        "text": "AC Rooms",
+        "right": 461,
+        "width": 82
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "All",
+        "right": 511,
+        "width": 44
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Delhi NCR",
+        "right": 603,
+        "width": 86
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Noida",
+        "right": 673,
+        "width": 63
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Bangalore",
+        "right": 766,
+        "width": 87
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Kolkata",
+        "right": 845,
+        "width": 73
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Lucknow",
+        "right": 930,
+        "width": 79
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Kota",
+        "right": 992,
+        "width": 57
+      }
+    ],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "412x915",
+    "screen": "my-pg",
+    "route": "/my-pg",
+    "file": "/workspace/docs/mobile-audit/after/412x915-my-pg.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "412x915",
+    "screen": "payments",
+    "route": "/payments",
+    "file": "/workspace/docs/mobile-audit/after/412x915-payments.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "412x915",
+    "screen": "transactions",
+    "route": "/transactions",
+    "file": "/workspace/docs/mobile-audit/after/412x915-transactions.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "412x915",
+    "screen": "complaints",
+    "route": "/complaints",
+    "file": "/workspace/docs/mobile-audit/after/412x915-complaints.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all tap-target border bo",
+        "text": "WiFi / Network",
+        "right": 452,
+        "width": 109
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all tap-target border bo",
+        "text": "Food & Mess",
+        "right": 552,
+        "width": 94
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all tap-target border bo",
+        "text": "Air Conditioning",
+        "right": 675,
+        "width": 116
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all tap-target border bo",
+        "text": "Security & Gate",
+        "right": 792,
+        "width": 112
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all tap-target border bo",
+        "text": "Other",
+        "right": 858,
+        "width": 59
+      }
+    ],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "412x915",
+    "screen": "guests",
+    "route": "/guests",
+    "file": "/workspace/docs/mobile-audit/after/412x915-guests.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "412x915",
+    "screen": "night-out",
+    "route": "/night-out",
+    "file": "/workspace/docs/mobile-audit/after/412x915-night-out.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "412x915",
+    "screen": "food",
+    "route": "/food",
+    "file": "/workspace/docs/mobile-audit/after/412x915-food.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all tap-target flex ",
+        "text": "Friday",
+        "right": 475,
+        "width": 66
+      },
+      {
+        "tag": "span",
+        "className": "",
+        "text": "Friday",
+        "right": 460,
+        "width": 36
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all tap-target flex ",
+        "text": "Saturday",
+        "right": 562,
+        "width": 81
+      },
+      {
+        "tag": "span",
+        "className": "",
+        "text": "Saturday",
+        "right": 547,
+        "width": 51
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all tap-target flex ",
+        "text": "Sunday",
+        "right": 639,
+        "width": 71
+      },
+      {
+        "tag": "span",
+        "className": "",
+        "text": "Sunday",
+        "right": 624,
+        "width": 41
+      }
+    ],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "412x915",
+    "screen": "wifi",
+    "route": "/wifi",
+    "file": "/workspace/docs/mobile-audit/after/412x915-wifi.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "412x915",
+    "screen": "notice",
+    "route": "/notice",
+    "file": "/workspace/docs/mobile-audit/after/412x915-notice.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "412x915",
+    "screen": "announcements",
+    "route": "/announcements",
+    "file": "/workspace/docs/mobile-audit/after/412x915-announcements.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "412x915",
+    "screen": "documents",
+    "route": "/documents",
+    "file": "/workspace/docs/mobile-audit/after/412x915-documents.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "412x915",
+    "screen": "notifications",
+    "route": "/notifications",
+    "file": "/workspace/docs/mobile-audit/after/412x915-notifications.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "412x915",
+    "screen": "saved",
+    "route": "/saved",
+    "file": "/workspace/docs/mobile-audit/after/412x915-saved.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "412x915",
+    "screen": "menu",
+    "route": "/profile",
+    "file": "/workspace/docs/mobile-audit/after/412x915-menu.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "412x915",
+    "screen": "pg-detail",
+    "route": "/pg/satya-heights",
+    "file": "/workspace/docs/mobile-audit/after/412x915-pg-detail.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "412x915",
+    "screen": "payment-result",
+    "route": "/payments/result?txnid=MOCKTXN1&status=success",
+    "file": "/workspace/docs/mobile-audit/after/412x915-payment-result.png",
+    "docOverflow": 0,
+    "offenders": [],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  },
+  {
+    "viewport": "412x915",
+    "screen": "guest-home",
+    "route": "/?guest",
+    "file": "/workspace/docs/mobile-audit/after/412x915-guest-home.png",
+    "docOverflow": 0,
+    "offenders": [
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 wh",
+        "text": "AC Rooms",
+        "right": 461,
+        "width": 82
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "All",
+        "right": 511,
+        "width": 44
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Delhi NCR",
+        "right": 603,
+        "width": 86
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Noida",
+        "right": 673,
+        "width": 63
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Bangalore",
+        "right": 766,
+        "width": 87
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Kolkata",
+        "right": 845,
+        "width": 73
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Lucknow",
+        "right": 930,
+        "width": 79
+      },
+      {
+        "tag": "button",
+        "className": "flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ",
+        "text": "Kota",
+        "right": 992,
+        "width": 57
+      }
+    ],
+    "tinyTapCount": 0,
+    "tinyTaps": []
+  }
+]

@@ -233,10 +233,10 @@ export const DiningPage: React.FC = () => {
   return (
     <div className="space-y-4 pt-1 pb-6 animate-fade-in">
       {/* Header bar */}
-      <div className="flex items-center justify-between">
+      <div className="page-toolbar flex flex-wrap items-center justify-between gap-2">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-brandText tap-target"
+          className="page-back flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-brandText tap-target"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>Back</span>
@@ -252,7 +252,7 @@ export const DiningPage: React.FC = () => {
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin text-primary' : ''}`} />
           </button>
-          <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-primary">
+          <span className="max-w-[48vw] truncate rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-primary">
             {propertyDetails?.property?.name || 'Mess Dining'}
           </span>
         </div>

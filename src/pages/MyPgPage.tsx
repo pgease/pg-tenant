@@ -20,6 +20,8 @@ import {
   ChevronRight,
   ExternalLink,
   MessageCircle,
+  Moon,
+  BellRing,
   Copy,
   Check,
   Eye,
@@ -273,7 +275,7 @@ export const MyPgPage: React.FC = () => {
                 <div className="flex items-center justify-between gap-2 mt-1.5 flex-wrap">
                   <p className="flex items-center gap-1 text-xs text-white/80">
                     <MapPin className="h-3.5 w-3.5 shrink-0 text-teal-300" />
-                    <span className="truncate max-w-[240px] sm:max-w-md">{propertyAddress}</span>
+                    <span className="break-anywhere">{propertyAddress}</span>
                   </p>
 
                   {mapsUrl && (
@@ -367,7 +369,7 @@ export const MyPgPage: React.FC = () => {
               )}
 
               {/* Sub-bar: Security Deposit & Action Button */}
-              <div className="flex items-center justify-between gap-2 pt-1 border-t border-gray-100">
+              <div className="flex flex-col items-stretch gap-3 border-t border-gray-100 pt-3 min-[480px]:flex-row min-[480px]:items-center min-[480px]:justify-between">
                 <div className="flex items-center gap-1.5 text-[11px] text-gray-500">
                   <span className="font-semibold text-gray-700">Deposit:</span>
                   <span className="font-bold text-gray-900">₹{securityDeposit.toLocaleString('en-IN')}</span>
@@ -382,7 +384,7 @@ export const MyPgPage: React.FC = () => {
                   {balanceDue > 0 ? (
                     <button
                       onClick={() => setShowPayModal(true)}
-                      className="rounded-xl bg-[#008080] px-4 py-2 text-xs font-bold text-white shadow-md shadow-[#008080]/20 hover:bg-[#006b6b] active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+                      className="w-full min-[480px]:w-auto justify-center rounded-xl bg-[#008080] px-4 py-2 text-xs font-bold text-white shadow-md shadow-[#008080]/20 hover:bg-[#006b6b] active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
                     >
                       <CreditCard className="h-3.5 w-3.5" />
                       <span>Pay Dues (₹{balanceDue.toLocaleString('en-IN')})</span>
@@ -454,7 +456,7 @@ export const MyPgPage: React.FC = () => {
               PG Features & Services
             </h3>
 
-            <div className="grid grid-cols-4 gap-2.5">
+            <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
               <button
                 onClick={() => navigate('/wifi')}
                 className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-3 shadow-sm hover:border-teal-200 active:scale-95 transition-all"
@@ -503,6 +505,26 @@ export const MyPgPage: React.FC = () => {
                   <Users className="h-5 w-5" />
                 </div>
                 <span className="text-[11px] font-bold text-gray-900 text-center">Guests</span>
+              </button>
+
+              <button
+                onClick={() => navigate('/night-out')}
+                className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-3 shadow-sm hover:border-indigo-200 active:scale-95 transition-all"
+              >
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 mb-1.5">
+                  <Moon className="h-5 w-5" />
+                </div>
+                <span className="text-[11px] font-bold text-gray-900 text-center">Night Out</span>
+              </button>
+
+              <button
+                onClick={() => navigate('/announcements')}
+                className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-3 shadow-sm hover:border-amber-200 active:scale-95 transition-all"
+              >
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 mb-1.5">
+                  <BellRing className="h-5 w-5" />
+                </div>
+                <span className="text-[11px] font-bold text-gray-900 text-center leading-tight">Notice Board</span>
               </button>
 
               <button
@@ -566,7 +588,7 @@ export const MyPgPage: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <a
                       href={`tel:+91${cleanOwnerPhone}`}
-                      className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-primary hover:bg-teal-100 transition-colors"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-50 text-primary hover:bg-teal-100 transition-colors"
                       title="Call Owner"
                     >
                       <Phone className="h-4 w-4" />
@@ -575,7 +597,7 @@ export const MyPgPage: React.FC = () => {
                       href={`https://wa.me/91${cleanOwnerPhone}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
                       title="WhatsApp Owner"
                     >
                       <MessageCircle className="h-4 w-4" />
@@ -613,7 +635,7 @@ export const MyPgPage: React.FC = () => {
                         <div className="flex items-center gap-2">
                           <a
                             href={`tel:+91${cleanStaffPhone}`}
-                            className="flex h-8 w-8 items-center justify-center rounded-xl bg-gray-50 text-gray-700 hover:bg-gray-100 transition-colors"
+                            className="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-50 text-gray-700 hover:bg-gray-100 transition-colors"
                             title="Call Staff"
                           >
                             <Phone className="h-3.5 w-3.5" />
@@ -622,7 +644,7 @@ export const MyPgPage: React.FC = () => {
                             href={`https://wa.me/91${cleanStaffPhone}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                            className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
                             title="WhatsApp Staff"
                           >
                             <MessageCircle className="h-3.5 w-3.5" />

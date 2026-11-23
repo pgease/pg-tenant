@@ -59,10 +59,10 @@ export const TransactionHistoryPage: React.FC = () => {
   return (
     <div className="space-y-4 pt-1 pb-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="page-toolbar flex flex-wrap items-center justify-between gap-2">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-brandText tap-target"
+          className="page-back flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-brandText tap-target"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>Back</span>

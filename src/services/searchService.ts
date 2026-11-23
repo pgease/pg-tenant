@@ -206,7 +206,7 @@ export const searchService = {
       };
     } catch (err) {
       console.error('Failed to search properties:', err);
-      return { properties: [], total: 0 };
+      throw err;
     }
   },
 

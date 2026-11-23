@@ -23,6 +23,7 @@ import {
   Camera,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { menuPageServices } from '../navigation/appMenu';
 import { StaffModal } from '../components/my-pg/StaffModal';
 import { AmenitiesModal } from '../components/my-pg/AmenitiesModal';
 
@@ -166,10 +167,11 @@ export const ProfilePage: React.FC = () => {
             {/* Avatar Circle with Photo or Initials */}
             <div className="relative group">
               <input
+                id="tenant-profile-photo"
                 type="file"
                 ref={fileInputRef}
                 accept="image/*"
-                className="hidden"
+                className="sr-only"
                 onChange={handlePhotoSelected}
               />
               <div className="relative flex h-14 w-14 items-center justify-center rounded-full border-2 border-primary bg-teal-50 font-bold text-primary text-lg overflow-hidden shrink-0 shadow-sm">
@@ -189,15 +191,13 @@ export const ProfilePage: React.FC = () => {
               </div>
 
               {isAuthenticated && (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploadingPhoto}
-                  className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white shadow-md hover:bg-primary-dark transition-all active:scale-95 border-2 border-white tap-target"
+                <label
+                  htmlFor="tenant-profile-photo"
+                  className="absolute -bottom-1 -left-1 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-primary text-white shadow-md hover:bg-primary-dark border-2 border-white"
                   title="Upload profile photo"
                 >
-                  <Camera className="h-3 w-3" />
-                </button>
+                  <Camera className="h-4 w-4" />
+                </label>
               )}
             </div>
 
@@ -236,7 +236,7 @@ export const ProfilePage: React.FC = () => {
         {/* Dynamic Stay Info Row (Replaces static 4 Months/48K/2 Referrals) */}
         <div className="mt-4 grid grid-cols-3 divide-x divide-gray-100 border-t border-gray-100 pt-3 text-center">
           <div>
-            <span className="block text-xs font-bold text-primary truncate px-1">
+            <span className="block text-xs font-bold text-primary leading-tight line-clamp-2 px-1">
               {isLinkedTenant ? propertyDetails?.property?.name || 'Linked' : 'Not Linked'}
             </span>
             <span className="text-[10px] font-medium text-gray-400">Assigned PG</span>
@@ -257,6 +257,33 @@ export const ProfilePage: React.FC = () => {
             </span>
             <span className="text-[10px] font-medium text-gray-400">Status</span>
           </div>
+        </div>
+      </div>
+
+      <div className="space-y-1.5">
+        <h3 className="px-1 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+          PG Features & Services
+        </h3>
+        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm divide-y divide-gray-50">
+          {menuPageServices.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.to}
+                type="button"
+                onClick={() => navigate(item.to)}
+                className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-primary">
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <span className="text-xs sm:text-sm font-semibold text-brandText">{item.label}</span>
+                </div>
+                <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
+              </button>
+            );
+          })}
         </div>
       </div>
 

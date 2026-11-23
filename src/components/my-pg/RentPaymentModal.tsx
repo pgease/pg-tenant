@@ -404,7 +404,7 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 animate-fade-in">
-      <div className="flex flex-col w-full max-w-lg max-h-[92dvh] rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl overflow-hidden pb-safe">
+      <div className="sheet-full flex flex-col w-full max-w-lg max-h-[100dvh] sm:max-h-[92dvh] rounded-none sm:rounded-3xl bg-white shadow-2xl overflow-hidden">
         
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 bg-white shrink-0">
@@ -453,11 +453,11 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
 
           {/* Interactive Itemized Selection Checklist */}
           <div className="rounded-2xl border border-gray-200/80 bg-gray-50/70 p-3.5 space-y-2.5 text-xs">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="text-brandText font-bold text-xs uppercase tracking-wider">
                 Select Items to Pay
               </span>
-              <div className="flex items-center gap-1.5">
+              <div className="flex flex-wrap items-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => {
@@ -666,63 +666,6 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
             )}
           </div>
 
-          {/* 3-Way Mode Selector Tabs */}
-          <div className="grid grid-cols-3 gap-1 rounded-2xl bg-gray-100/90 p-1.5 border border-gray-200/70">
-            {/* Tab 1: Instant Gateway */}
-            <button
-              type="button"
-              onClick={() => {
-                setPaymentMode('gateway');
-                setErrorMessage(null);
-              }}
-              className={`flex flex-col sm:flex-row items-center justify-center gap-1 rounded-xl py-2 px-1 text-xs font-bold transition-all ${
-                paymentMode === 'gateway'
-                  ? 'bg-white text-primary shadow-sm ring-1 ring-black/5'
-                  : 'text-brandText-muted hover:text-brandText hover:bg-white/50'
-              }`}
-            >
-              <CreditCard className="h-3.5 w-3.5 flex-shrink-0" />
-              <span className="truncate">Instant UPI</span>
-              {gatewayConfig.available && (
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 hidden sm:inline-block" />
-              )}
-            </button>
-
-            {/* Tab 2: Direct UPI / QR */}
-            <button
-              type="button"
-              onClick={() => {
-                setPaymentMode('upi');
-                setErrorMessage(null);
-              }}
-              className={`flex flex-col sm:flex-row items-center justify-center gap-1 rounded-xl py-2 px-1 text-xs font-bold transition-all ${
-                paymentMode === 'upi'
-                  ? 'bg-white text-primary shadow-sm ring-1 ring-black/5'
-                  : 'text-brandText-muted hover:text-brandText hover:bg-white/50'
-              }`}
-            >
-              <QrCode className="h-3.5 w-3.5 flex-shrink-0" />
-              <span className="truncate">Direct UPI / QR</span>
-            </button>
-
-            {/* Tab 3: Paid in Cash */}
-            <button
-              type="button"
-              onClick={() => {
-                setPaymentMode('cash');
-                setErrorMessage(null);
-              }}
-              className={`flex flex-col sm:flex-row items-center justify-center gap-1 rounded-xl py-2 px-1 text-xs font-bold transition-all ${
-                paymentMode === 'cash'
-                  ? 'bg-white text-emerald-700 shadow-sm ring-1 ring-black/5'
-                  : 'text-brandText-muted hover:text-brandText hover:bg-white/50'
-              }`}
-            >
-              <Banknote className="h-3.5 w-3.5 flex-shrink-0 text-emerald-600" />
-              <span className="truncate">Paid in Cash</span>
-            </button>
-          </div>
-
           {/* Submission Success View */}
           {submissionSuccess ? (
             <div className="rounded-2xl bg-teal-50 p-6 text-center border border-teal-200 animate-fade-in space-y-2">
@@ -868,7 +811,7 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
                         <div className="flex items-center justify-between rounded-xl bg-gray-50 px-3.5 py-2.5 border border-gray-200">
                           <div>
                             <span className="text-[10px] text-brandText-muted block">Owner UPI ID</span>
-                            <span className="text-xs font-bold text-brandText font-mono">{upiId}</span>
+                            <span className="text-xs font-bold text-brandText font-mono break-anywhere">{upiId}</span>
                           </div>
                           <button
                             type="button"
@@ -994,7 +937,7 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
                         <input
                           type="file"
                           accept="image/*"
-                          className="hidden"
+                          className="sr-only"
                           onChange={(e) => {
                             if (e.target.files?.[0]) {
                               setScreenshotFile(e.target.files[0]);
@@ -1125,7 +1068,7 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
                         <input
                           type="file"
                           accept="image/*"
-                          className="hidden"
+                          className="sr-only"
                           onChange={(e) => {
                             if (e.target.files?.[0]) {
                               setCashReceiptFile(e.target.files[0]);
@@ -1172,6 +1115,56 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
               )}
             </>
           )}
+        </div>
+
+        <div className="shrink-0 border-t border-gray-100 bg-white px-3 pt-2 pb-safe">
+          <div className="grid grid-cols-3 gap-1 rounded-2xl bg-gray-100/90 p-1.5 border border-gray-200/70">
+            <button
+              type="button"
+              onClick={() => {
+                setPaymentMode('gateway');
+                setErrorMessage(null);
+              }}
+              className={`flex flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-xs font-bold transition-all ${
+                paymentMode === 'gateway'
+                  ? 'bg-white text-primary shadow-sm ring-1 ring-black/5'
+                  : 'text-brandText-muted hover:text-brandText hover:bg-white/50'
+              }`}
+            >
+              <CreditCard className="h-4 w-4 flex-shrink-0" />
+              <span className="text-center leading-tight">Instant UPI</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPaymentMode('upi');
+                setErrorMessage(null);
+              }}
+              className={`flex flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-xs font-bold transition-all ${
+                paymentMode === 'upi'
+                  ? 'bg-white text-primary shadow-sm ring-1 ring-black/5'
+                  : 'text-brandText-muted hover:text-brandText hover:bg-white/50'
+              }`}
+            >
+              <QrCode className="h-4 w-4 flex-shrink-0" />
+              <span className="text-center leading-tight">Direct UPI / QR</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPaymentMode('cash');
+                setErrorMessage(null);
+              }}
+              className={`flex flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-xs font-bold transition-all ${
+                paymentMode === 'cash'
+                  ? 'bg-white text-emerald-700 shadow-sm ring-1 ring-black/5'
+                  : 'text-brandText-muted hover:text-brandText hover:bg-white/50'
+              }`}
+            >
+              <Banknote className="h-4 w-4 flex-shrink-0 text-emerald-600" />
+              <span className="text-center leading-tight">Paid in Cash</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
