@@ -35,6 +35,7 @@ export default {
       },
       fontFamily: {
         outfit: ['Outfit', 'sans-serif'],
+        poppins: ['Poppins', 'sans-serif'],
       },
       minHeight: {
         14: '3.5rem',

@@ -1,36 +1,37 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowRight, ChevronRight, Sparkles } from 'lucide-react';
+import { ArrowRight, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { hideSplashScreen } from '../../utils/appBridge';
 
 interface OnboardingCarouselProps {
   onComplete: () => void;
 }
 
 interface SlideData {
-  src: string;
+  svg: string;
+  fallback: string;
   title: string;
   subtitle: string;
-  alt: string;
 }
 
 const TENANT_SLIDES: SlideData[] = [
   {
-    src: '/slides/slide-2.jpg',
-    title: 'Feel at home',
-    subtitle: 'Your room and PG details, always handy.',
-    alt: 'Feel at home slide',
+    svg: '/slides/slide-1.svg',
+    fallback: '/slides/slide-1.jpg',
+    title: 'Your PG, in your pocket',
+    subtitle: 'Room details, notices and food menu in one place.',
   },
   {
-    src: '/slides/slide-1.jpg',
-    title: 'Rent made simple',
-    subtitle: 'Pay rent and view your payment history.',
-    alt: 'Rent made simple slide',
+    svg: '/slides/slide-2.svg',
+    fallback: '/slides/slide-2.jpg',
+    title: 'Pay rent in seconds',
+    subtitle: 'Pay online or submit UPI proof, and get instant receipts.',
   },
   {
-    src: '/slides/slide-3.jpg',
-    title: 'Stay connected',
-    subtitle: 'Raise complaints and receive PG updates.',
-    alt: 'Stay connected slide',
+    svg: '/slides/slide-3.svg',
+    fallback: '/slides/slide-3.jpg',
+    title: 'Raise requests easily',
+    subtitle: 'Complaints, night out and guest passes in a few taps.',
   },
 ];
 
@@ -40,8 +41,14 @@ export const OnboardingCarousel: React.FC<OnboardingCarouselProps> = ({ onComple
   const startX = useRef<number | null>(null);
   const currentX = useRef<number | null>(null);
 
+  // Hide native splash screen once React mounts
+  useEffect(() => {
+    hideSplashScreen();
+  }, []);
+
   const finishOnboarding = (targetPath?: string) => {
     localStorage.setItem('pgease_onboarding_completed', 'true');
+    localStorage.setItem('pgease_onboarding_carousel_seen', '1');
     onComplete();
     if (targetPath) {
       navigate(targetPath);
@@ -91,19 +98,21 @@ export const OnboardingCarousel: React.FC<OnboardingCarouselProps> = ({ onComple
   const handleTouchEnd = () => {
     if (startX.current === null || currentX.current === null) return;
     const diff = startX.current - currentX.current;
-    if (diff > 40 && currentSlide < TENANT_SLIDES.length - 1) {
+    if (diff > 45 && currentSlide < TENANT_SLIDES.length - 1) {
       nextSlide();
-    } else if (diff < -40 && currentSlide > 0) {
+    } else if (diff < -45 && currentSlide > 0) {
       prevSlide();
     }
     startX.current = null;
     currentX.current = null;
   };
 
+  const isLast = currentSlide === TENANT_SLIDES.length - 1;
+
   return (
-    <div className="fixed inset-0 z-50 bg-[#00382e] flex items-center justify-center overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-[#F9FAFB] flex items-center justify-center select-none overflow-hidden font-poppins">
       <div
-        className="relative w-full h-[100dvh] max-w-md mx-auto bg-[#004d40] flex flex-col justify-between overflow-hidden sm:rounded-3xl sm:h-[92dvh] sm:shadow-2xl sm:border sm:border-white/10"
+        className="relative w-full h-[100dvh] max-w-md mx-auto bg-white flex flex-col justify-between overflow-hidden sm:rounded-3xl sm:h-[92dvh] sm:shadow-2xl sm:border sm:border-gray-100"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -111,29 +120,29 @@ export const OnboardingCarousel: React.FC<OnboardingCarouselProps> = ({ onComple
         onMouseMove={handleTouchMove}
         onMouseUp={handleTouchEnd}
       >
-        {/* Floating Top Bar */}
+        {/* Top Floating Bar with Skip */}
         <div
-          className="absolute top-0 inset-x-0 z-30 flex items-center justify-between px-5 pt-4 pb-2"
-          style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
+          className="absolute top-0 inset-x-0 z-30 flex items-center justify-between px-6 pt-4 pb-2"
+          style={{ paddingTop: 'max(1.25rem, env(safe-area-inset-top))' }}
         >
-          <div className="flex items-center gap-2 rounded-full bg-black/35 backdrop-blur-md px-3 py-1.5 border border-white/15">
-            <div className="h-4 w-4 rounded bg-primary flex items-center justify-center text-white text-[9px] font-bold">
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-6 rounded-lg bg-[#008080] flex items-center justify-center text-white text-[11px] font-bold">
               PG
             </div>
-            <span className="text-[11px] font-bold tracking-wider text-white uppercase">PG Ease</span>
+            <span className="text-xs font-bold tracking-wider text-[#1F2937] uppercase">PG Ease</span>
           </div>
 
           <button
             type="button"
             onClick={() => finishOnboarding('/login')}
-            className="rounded-full bg-black/40 hover:bg-black/60 active:scale-95 backdrop-blur-md px-4 py-1.5 text-xs font-semibold text-white border border-white/20 shadow-sm transition-all"
+            className="px-3.5 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 active:scale-95 text-xs font-semibold text-[#4B5563] transition-colors"
           >
             Skip
           </button>
         </div>
 
         {/* Slides Track */}
-        <div className="relative flex-1 w-full h-full overflow-hidden">
+        <div className="relative flex-1 w-full h-full overflow-hidden flex flex-col justify-between pt-16 pb-28">
           <div
             className="flex h-full w-full transition-transform duration-300 ease-out"
             style={{ transform: `translateX(-${currentSlide * 100}%)` }}
@@ -141,23 +150,39 @@ export const OnboardingCarousel: React.FC<OnboardingCarouselProps> = ({ onComple
             {TENANT_SLIDES.map((slide) => (
               <div
                 key={slide.title}
-                className="relative h-full w-full shrink-0 basis-full flex items-center justify-center overflow-hidden select-none bg-[#004d40]"
+                className="relative h-full w-full shrink-0 basis-full flex flex-col items-center justify-between px-6 pt-4 pb-2 select-none"
               >
-                <img
-                  src={slide.src}
-                  alt={slide.alt}
-                  className="w-full h-full object-cover select-none pointer-events-none"
-                  draggable={false}
-                />
+                {/* Top 50-55%: Custom Vector Illustration */}
+                <div className="w-full flex-1 max-h-[52vh] flex items-center justify-center">
+                  <img
+                    src={slide.svg}
+                    alt={slide.title}
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = slide.fallback;
+                    }}
+                    className="w-full h-full max-h-[300px] object-contain pointer-events-none drop-shadow-sm"
+                    draggable={false}
+                  />
+                </div>
+
+                {/* Middle: Title & Subtitle */}
+                <div className="w-full text-center mt-3 mb-2 px-2 flex flex-col items-center">
+                  <h2 className="text-2xl font-semibold text-[#1F2937] tracking-tight leading-snug">
+                    {slide.title}
+                  </h2>
+                  <p className="mt-2 text-sm font-normal text-[#4B5563] leading-relaxed max-w-xs">
+                    {slide.subtitle}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Floating Bottom Navigation & Controls */}
+        {/* Bottom Navigation & Controls */}
         <div
-          className="absolute bottom-0 inset-x-0 z-30 flex flex-col items-center gap-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent pt-12 pb-6 px-6"
-          style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
+          className="absolute bottom-0 inset-x-0 z-30 flex flex-col items-center gap-5 bg-gradient-to-t from-white via-white/95 to-transparent pt-6 pb-6 px-6"
+          style={{ paddingBottom: 'max(1.75rem, env(safe-area-inset-bottom))' }}
         >
           {/* Pagination Dots */}
           <div className="flex items-center gap-2">
@@ -171,53 +196,27 @@ export const OnboardingCarousel: React.FC<OnboardingCarouselProps> = ({ onComple
               >
                 <span
                   className={`block h-2 rounded-full transition-all duration-300 ${
-                    i === currentSlide ? 'w-7 bg-white' : 'w-2 bg-white/40 hover:bg-white/70'
+                    i === currentSlide ? 'w-7 bg-[#008080]' : 'w-2 bg-gray-200 hover:bg-gray-300'
                   }`}
                 />
               </button>
             ))}
           </div>
 
-          {/* Action Buttons */}
-          <div className="w-full flex flex-col gap-2.5">
-            {currentSlide < TENANT_SLIDES.length - 1 ? (
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => finishOnboarding('/login')}
-                  className="flex-1 py-3 text-white/80 hover:text-white text-sm font-semibold text-center transition-colors"
-                >
-                  Sign In
-                </button>
-                <button
-                  type="button"
-                  onClick={nextSlide}
-                  className="flex-[1.5] py-3.5 px-5 rounded-full bg-white text-[#004d40] font-bold text-sm shadow-xl hover:bg-gray-100 transition-all flex items-center justify-center gap-2 active:scale-95"
-                >
-                  <span>Next</span>
-                  <ChevronRight className="w-4 h-4 stroke-[2.5]" />
-                </button>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-2.5 w-full">
-                <button
-                  type="button"
-                  onClick={() => finishOnboarding('/login')}
-                  className="w-full py-4 rounded-full bg-white text-[#004d40] font-extrabold text-base shadow-2xl hover:bg-gray-100 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-                >
-                  <Sparkles className="w-4 h-4 text-emerald-600" />
-                  <span>Get Started</span>
-                  <ArrowRight className="w-4 h-4 stroke-[2.5]" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => finishOnboarding('/search')}
-                  className="w-full py-2 text-white/90 hover:text-white text-xs font-medium text-center transition-colors"
-                >
-                  Looking for a room? <span className="underline font-bold text-white">Explore PGs</span>
-                </button>
-              </div>
-            )}
+          {/* Primary Action Button (Teal #008080, min 48dp target) */}
+          <div className="w-full flex items-center gap-3">
+            <button
+              type="button"
+              onClick={nextSlide}
+              className="w-full h-[52px] rounded-2xl bg-[#008080] hover:bg-[#006e6e] active:scale-[0.98] text-white font-semibold text-base shadow-md flex items-center justify-center gap-2 transition-all"
+            >
+              <span>{isLast ? 'Get Started' : 'Next'}</span>
+              {isLast ? (
+                <ArrowRight className="w-5 h-5 stroke-[2.5]" />
+              ) : (
+                <ChevronRight className="w-5 h-5 stroke-[2.5]" />
+              )}
+            </button>
           </div>
         </div>
       </div>

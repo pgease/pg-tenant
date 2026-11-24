@@ -39,6 +39,19 @@ export function isAppMode(): boolean {
   return storedAppMode;
 }
 
+export async function hideSplashScreen(): Promise<void> {
+  if (typeof window === 'undefined') return;
+  try {
+    const w = window as any;
+    if (w.Capacitor?.Plugins?.SplashScreen?.hide) {
+      await w.Capacitor.Plugins.SplashScreen.hide({ fadeOutDuration: 250 });
+    }
+  } catch (err) {
+    /* ignore */
+  }
+}
+
+
 /**
  * Initializes the PGEaseBridge and handles Android back button via history popstate
  */
