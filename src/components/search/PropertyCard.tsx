@@ -6,6 +6,9 @@ import {
   CheckCircle2,
   Bookmark,
   Building,
+  Phone,
+  MessageCircle,
+  Utensils,
 } from 'lucide-react';
 import { type PropertyListItem, searchService } from '../../services/searchService';
 import { useAuth } from '../../context/AuthContext';
@@ -21,7 +24,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
 }) => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const [isSaved, setIsSaved] = useState<boolean>(property.isBookmarked || false);
+  const [isSaved, setIsSaved] = useState<boolean>(property.isBookmarked ?? true);
 
   const coverPhoto = property.photos && property.photos.length > 0 ? property.photos[0] : null;
 
@@ -58,6 +61,16 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
     navigate(`/pg/${targetSlugOrId}`);
   };
 
+  const phoneDigits = property.mobileContactNumber ? property.mobileContactNumber.replace(/\D/g, '') : '';
+  const cleanPhone = phoneDigits.length >= 10 ? phoneDigits.slice(-10) : '';
+
+  const hasFood =
+    (property.facilities && property.facilities.some((f: string) => f.toLowerCase().includes('food') || f.toLowerCase().includes('meal'))) ||
+    (property.amenities && property.amenities.some((a: any) => {
+      const n = (typeof a === 'string' ? a : a.name || '').toLowerCase();
+      return n.includes('food') || n.includes('meal') || n.includes('mess') || n.includes('dining');
+    }));
+
   const tags =
     property.facilities && property.facilities.length > 0
       ? property.facilities
@@ -71,7 +84,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
       className="group cursor-pointer rounded-2xl border border-gray-100 bg-white p-3 shadow-card-soft hover:shadow-md hover:border-teal-100 transition-all active:scale-[0.99] flex gap-3"
     >
       {/* 1. Square Thumbnail Image */}
-      <div className="relative h-28 w-28 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100 flex items-center justify-center">
+      <div className="relative h-32 w-28 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100 flex items-center justify-center">
         {coverPhoto ? (
           <img
             src={coverPhoto}
@@ -96,6 +109,13 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         >
           <Bookmark className="h-3.5 w-3.5" fill={isSaved ? 'currentColor' : 'none'} />
         </button>
+
+        {/* Food Badge Overlay */}
+        {hasFood && (
+          <span className="absolute bottom-1.5 left-1.5 inline-flex items-center gap-0.5 rounded-md bg-emerald-600/90 text-[9px] font-bold text-white px-1.5 py-0.5 backdrop-blur-xs">
+            <Utensils className="h-2.5 w-2.5" /> Food
+          </span>
+        )}
       </div>
 
       {/* 2. Details */}
@@ -141,28 +161,59 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           )}
         </div>
 
-        {/* Price & View Button Row */}
-        <div className="flex items-center justify-between border-t border-gray-50 pt-2 mt-1">
-          <div className="flex items-baseline gap-0.5">
+        {/* Price & Action Row */}
+        <div className="flex items-center justify-between border-t border-gray-50 pt-2 mt-1 gap-2">
+          <div className="flex items-baseline gap-0.5 min-w-0">
             {startingPrice > 0 ? (
               <>
-                <span className="text-xs sm:text-sm font-black text-brandText">
+                <span className="text-xs sm:text-sm font-black text-brandText truncate">
                   ₹{startingPrice.toLocaleString('en-IN')}
                 </span>
-                <span className="text-[10px] text-gray-400 font-medium">/month</span>
+                <span className="text-[10px] text-gray-400 font-medium">/mo</span>
               </>
             ) : (
               <span className="text-xs font-bold text-gray-500">Contact for rent</span>
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={handleCardClick}
-            className="rounded-xl border border-gray-200 bg-white px-3.5 py-1 text-xs font-bold text-brandText shadow-sm hover:border-primary hover:text-primary active:scale-95 transition-all"
-          >
-            View
-          </button>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {cleanPhone ? (
+              <>
+                <a
+                  href={`tel:+91${cleanPhone}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    void searchService.recordContactClick(property.id, 'call');
+                  }}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-teal-200 bg-teal-50 text-teal-800 hover:bg-teal-100 active:scale-95 transition-all"
+                  title="Call PG Owner"
+                >
+                  <Phone className="h-3.5 w-3.5" />
+                </a>
+                <a
+                  href={`https://wa.me/91${cleanPhone}?text=${encodeURIComponent(`Hi, I am interested in ${property.name} shortlisted from PG Ease.`)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    void searchService.recordContactClick(property.id, 'whatsapp');
+                  }}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 active:scale-95 transition-all"
+                  title="WhatsApp Enquiry"
+                >
+                  <MessageCircle className="h-3.5 w-3.5" />
+                </a>
+              </>
+            ) : null}
+
+            <button
+              type="button"
+              onClick={handleCardClick}
+              className="rounded-xl border border-gray-200 bg-white px-3 py-1 text-xs font-bold text-brandText shadow-xs hover:border-primary hover:text-primary active:scale-95 transition-all"
+            >
+              Details
+            </button>
+          </div>
         </div>
       </div>
     </div>
