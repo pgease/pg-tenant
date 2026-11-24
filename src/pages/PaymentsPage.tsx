@@ -21,6 +21,7 @@ import { tenantService, type RentCollectionDetails, type OtherDueItem } from '..
 import { ListSkeleton } from '../components/ui/ListSkeleton';
 import { InlineError } from '../components/ui/InlineError';
 import { RentPaymentModal } from '../components/my-pg/RentPaymentModal';
+import { formatDateToDDMMYYYY } from '../utils/dateUtils';
 
 export const PaymentsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -163,13 +164,13 @@ export const PaymentsPage: React.FC = () => {
 
   const formatDueDate = (dateStr?: string) => {
     if (dateStr) {
-      const d = new Date(dateStr);
-      if (!isNaN(d.getTime())) {
-        return `Due by ${d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+      const formatted = formatDateToDDMMYYYY(dateStr);
+      if (formatted) {
+        return `Due by ${formatted}`;
       }
     }
     if (propertyDetails?.nextRentDueDate) {
-      return `Due by ${new Date(propertyDetails.nextRentDueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+      return `Due by ${formatDateToDDMMYYYY(propertyDetails.nextRentDueDate)}`;
     }
     if (dues?.lineItems?.rent?.dueDay) {
       return `Due on ${dues.lineItems.rent.dueDay} of month`;
@@ -657,7 +658,7 @@ export const PaymentsPage: React.FC = () => {
                     <div>
                       <h4 className="text-xs font-bold text-brandText">{tx.title || 'Rent Collection'}</h4>
                       <p className="text-[11px] text-gray-400">
-                        {tx.formattedDate || (tx.date ? new Date(tx.date).toLocaleDateString('en-IN') : 'Recent')}
+                        {tx.formattedDate || (tx.date ? formatDateToDDMMYYYY(tx.date) : 'Recent')}
                       </p>
                     </div>
                   </div>

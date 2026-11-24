@@ -243,15 +243,15 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
       </div>
 
       {/* Verified Listings Guarantee Banner */}
-      <div className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-teal-50 to-emerald-50/60 p-3 border border-teal-100/80 shadow-sm">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100/80 text-primary flex-shrink-0">
+      <div className="flex items-start sm:items-center gap-3 rounded-2xl bg-gradient-to-r from-teal-50 to-emerald-50/60 dark:from-teal-950/40 dark:to-emerald-950/30 p-3 sm:p-3.5 border border-teal-100/80 dark:border-teal-800/40 shadow-sm">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100/80 dark:bg-teal-900/60 text-primary dark:text-teal-300 shrink-0 mt-0.5 sm:mt-0">
           <Crosshair className="h-5 w-5" />
         </div>
-        <div className="min-w-0">
-          <p className="text-xs font-bold text-teal-900 flex items-center gap-1">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs sm:text-sm font-bold text-teal-900 dark:text-teal-100 flex items-center gap-1">
             PG Ease Verified Stays
           </p>
-          <p className="text-[11px] text-teal-700/90 truncate">
+          <p className="text-[11px] sm:text-xs font-medium text-teal-700/90 dark:text-teal-300/90 leading-relaxed break-words whitespace-normal mt-0.5">
             Zero brokerage, verified amenities & direct PG owner connect
           </p>
         </div>

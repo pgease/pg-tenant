@@ -16,6 +16,7 @@ import { tenantService } from '../services/tenantService';
 import { useAuth } from '../context/AuthContext';
 import { ListSkeleton } from '../components/ui/ListSkeleton';
 import { InlineError } from '../components/ui/InlineError';
+import { formatDateToDDMMYYYY } from '../utils/dateUtils';
 
 interface TransactionItem {
   id: string;
@@ -38,13 +39,7 @@ interface TransactionItem {
 }
 
 function formatDDMMYYYY(dateVal: string | Date | null | undefined): string {
-  if (!dateVal) return '—';
-  const d = new Date(dateVal);
-  if (isNaN(d.getTime())) return '—';
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
+  return formatDateToDDMMYYYY(dateVal) || '—';
 }
 
 export const TransactionHistoryPage: React.FC = () => {

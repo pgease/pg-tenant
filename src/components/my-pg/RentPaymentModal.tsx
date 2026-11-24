@@ -22,6 +22,8 @@ import {
   Zap,
 } from 'lucide-react';
 import { type RentCollectionDetails, tenantService } from '../../services/tenantService';
+import { NativeDatePicker } from '../common/NativeDatePicker';
+import { formatDateToDDMMYYYY, getKolkataTodayYYYYMMDD } from '../../utils/dateUtils';
 
 interface RentPaymentModalProps {
   isOpen: boolean;
@@ -106,7 +108,7 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
   // Cash payment state
   const [cashAmount, setCashAmount] = useState<number | string>('');
   const [cashRecipient, setCashRecipient] = useState('');
-  const [cashDate, setCashDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
+  const [cashDate, setCashDate] = useState<string>(() => getKolkataTodayYYYYMMDD(0));
   const [cashReceiptFile, setCashReceiptFile] = useState<File | null>(null);
   const [cashNotes, setCashNotes] = useState('');
 
@@ -199,7 +201,7 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
     setUtrNumber('');
     setScreenshotFile(null);
     setCashRecipient('');
-    setCashDate(new Date().toISOString().split('T')[0]);
+    setCashDate(getKolkataTodayYYYYMMDD(0));
     setCashReceiptFile(null);
     setCashNotes('');
 
@@ -353,7 +355,8 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
         setUploading(false);
       }
 
-      const handoverDetail = `Cash of ₹${amount.toLocaleString('en-IN')} handed over to ${cashRecipient.trim()} on ${cashDate || new Date().toISOString().split('T')[0]} for ${getSelectedPurposeText()}.`;
+      const formattedCashDate = formatDateToDDMMYYYY(cashDate) || formatDateToDDMMYYYY(getKolkataTodayYYYYMMDD(0));
+      const handoverDetail = `Cash of ₹${amount.toLocaleString('en-IN')} handed over to ${cashRecipient.trim()} on ${formattedCashDate} for ${getSelectedPurposeText()}.`;
       const finalNote = cashNotes.trim() ? `${handoverDetail} Note: ${cashNotes.trim()}` : handoverDetail;
 
       await tenantService.submitManualPayment({
@@ -1044,15 +1047,13 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
                         <Calendar className="h-3.5 w-3.5 text-emerald-600" />
                         <span>Date of Cash Handover</span>
                       </label>
-                      <div className="relative">
-                        <input
-                          type="date"
-                          placeholder="dd/mm/yyyy"
-                          value={cashDate}
-                          onChange={(e) => setCashDate(e.target.value)}
-                          className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-3.5 py-2.5 text-xs font-medium text-brandText focus:border-emerald-600 focus:bg-white focus:outline-none"
-                        />
-                      </div>
+                      <NativeDatePicker
+                        value={cashDate}
+                        onChange={setCashDate}
+                        max={getKolkataTodayYYYYMMDD(0)}
+                        placeholder="dd/mm/yyyy"
+                        className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-3.5 py-2.5 text-xs font-medium text-brandText focus-within:border-emerald-600 focus-within:bg-white"
+                      />
                     </div>
 
                     {/* Optional Paper Receipt Slip */}

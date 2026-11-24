@@ -18,6 +18,8 @@ import {
   type GuestRequest,
   type NightOutRequest,
 } from '../../services/tenantService';
+import { NativeDatePicker } from '../common/NativeDatePicker';
+import { formatDateToDDMMYYYY, getKolkataTodayYYYYMMDD } from '../../utils/dateUtils';
 
 function pad(value: number): string {
   return String(value).padStart(2, '0');
@@ -424,11 +426,11 @@ export const GuestNightOutModal: React.FC<GuestNightOutModalProps> = ({
                       <div className="flex flex-wrap items-center gap-3 text-[11px] text-brandText-muted">
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3 w-3 text-gray-400" />
-                          Arrival: <strong className="text-gray-700">{req.expectedArrival}</strong>
+                          Arrival: <strong className="text-gray-700">{formatDateToDDMMYYYY(req.expectedArrival)}</strong>
                         </span>
                         {req.expectedDeparture && req.expectedDeparture !== req.expectedArrival && (
                           <span>
-                            Dep: <strong className="text-gray-700">{req.expectedDeparture}</strong>
+                            Dep: <strong className="text-gray-700">{formatDateToDDMMYYYY(req.expectedDeparture)}</strong>
                           </span>
                         )}
                       </div>
@@ -575,13 +577,13 @@ export const GuestNightOutModal: React.FC<GuestNightOutModalProps> = ({
                   <label className="block text-[11px] font-bold text-gray-700 mb-1">
                     Expected Arrival *
                   </label>
-                  <input
-                    type="date"
+                  <NativeDatePicker
+                    value={expectedArrival}
+                    onChange={setExpectedArrival}
+                    min={getKolkataTodayYYYYMMDD(0)}
                     placeholder="dd/mm/yyyy"
                     required
-                    value={expectedArrival}
-                    onChange={(e) => setExpectedArrival(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-brandText focus:border-primary focus:outline-none"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-brandText focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20"
                   />
                 </div>
 
@@ -589,12 +591,12 @@ export const GuestNightOutModal: React.FC<GuestNightOutModalProps> = ({
                   <label className="block text-[11px] font-bold text-gray-700 mb-1">
                     Expected Departure
                   </label>
-                  <input
-                    type="date"
-                    placeholder="dd/mm/yyyy"
+                  <NativeDatePicker
                     value={expectedDeparture}
-                    onChange={(e) => setExpectedDeparture(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-brandText focus:border-primary focus:outline-none"
+                    onChange={setExpectedDeparture}
+                    min={expectedArrival || getKolkataTodayYYYYMMDD(0)}
+                    placeholder="dd/mm/yyyy"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-brandText focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20"
                   />
                 </div>
               </div>

@@ -7,6 +7,8 @@ import {
   XCircle,
 } from 'lucide-react';
 import { tenantService } from '../../services/tenantService';
+import { NativeDatePicker } from '../common/NativeDatePicker';
+import { formatDateToDDMMYYYY, getKolkataTodayYYYYMMDD } from '../../utils/dateUtils';
 
 interface NoticePeriodModalProps {
   isOpen: boolean;
@@ -32,23 +34,33 @@ export const NoticePeriodModal: React.FC<NoticePeriodModalProps> = ({
   const [remarks, setRemarks] = useState('');
 
   const isUnderNotice = Boolean(noticeData && (noticeData.status === 'UNDER_NOTICE' || noticeData.noticeRaisedOn));
+  const noticeDays = Number(noticeData?.noticePeriodDays || noticeData?.roomTenant?.noticePeriodDays) || 30;
+  const minVacateDate = getKolkataTodayYYYYMMDD(noticeDays);
 
   useEffect(() => {
     if (isOpen) {
       setError(null);
       setSuccessMsg(null);
-      // Default vacate date: 30 days from today
-      const defaultDate = new Date();
-      defaultDate.setDate(defaultDate.getDate() + 30);
-      setVacateOn(defaultDate.toISOString().split('T')[0]);
+      // Default vacate date: noticeDays from today in Asia/Kolkata
+      setVacateOn(minVacateDate);
     }
-  }, [isOpen]);
+  }, [isOpen, minVacateDate]);
 
   if (!isOpen) return null;
 
   const handleRaiseNotice = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!vacateOn) {
+      setError('Please select your expected vacate date.');
+      return;
+    }
+    if (vacateOn < minVacateDate) {
+      setError(`Expected vacate date must be at least ${noticeDays} days in advance (${formatDateToDDMMYYYY(minVacateDate)}).`);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -142,9 +154,9 @@ export const NoticePeriodModal: React.FC<NoticePeriodModalProps> = ({
               <p className="text-base font-bold">
                 {isUnderNotice ? 'UNDER NOTICE' : 'ACTIVE OCCUPANCY'}
               </p>
-              {isUnderNotice && noticeData?.scheduledMoveOutDate && (
+              {isUnderNotice && (noticeData?.scheduledMoveOutDate || noticeData?.vacateOn) && (
                 <p className="text-xs font-semibold mt-0.5">
-                  Scheduled Move-Out: {noticeData.scheduledMoveOutDate}
+                  Scheduled Move-Out: {formatDateToDDMMYYYY(noticeData.scheduledMoveOutDate || noticeData.vacateOn)}
                 </p>
               )}
             </div>
@@ -161,7 +173,7 @@ export const NoticePeriodModal: React.FC<NoticePeriodModalProps> = ({
           {/* Policy Info */}
           <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-3 text-xs text-brandText-muted space-y-1">
             <p className="font-semibold text-brandText">Notice Period Policy:</p>
-            <p>• Minimum 30 days mandatory notice before vacating bed.</p>
+            <p>• Minimum {noticeDays} days mandatory notice before vacating bed.</p>
             <p>• Security deposit will be refunded after room inspection and electricity settlement.</p>
           </div>
 
@@ -204,18 +216,19 @@ export const NoticePeriodModal: React.FC<NoticePeriodModalProps> = ({
 
               <div>
                 <label className="block text-xs font-semibold text-brandText-muted mb-1">
-                  Expected Vacate Date (Minimum 30 days ahead)
+                  Expected Vacate Date (Minimum {noticeDays} days ahead)
                 </label>
-                <div className="relative">
-                  <input
-                    type="date"
-                    placeholder="dd/mm/yyyy"
-                    required
-                    value={vacateOn}
-                    onChange={(e) => setVacateOn(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-semibold text-brandText focus:border-primary focus:outline-none"
-                  />
-                </div>
+                <NativeDatePicker
+                  value={vacateOn}
+                  onChange={setVacateOn}
+                  placeholder="dd/mm/yyyy"
+                  min={minVacateDate}
+                  required
+                  className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-semibold text-brandText focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20"
+                />
+                <p className="text-[10px] text-gray-400 mt-1">
+                  Earliest allowed checkout is {formatDateToDDMMYYYY(minVacateDate)}.
+                </p>
               </div>
 
               <div>

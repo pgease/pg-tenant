@@ -973,13 +973,13 @@ export const HomePage: React.FC = () => {
         onClick={() => navigate('/search')}
         className="cursor-pointer rounded-2xl border border-gray-100 bg-gradient-to-r from-gray-50 via-teal-50/40 to-white p-4 shadow-xs flex items-center justify-between hover:border-teal-200 transition-all active:scale-[0.99] tap-target"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#008080]/10 text-[#008080] shrink-0">
             <Search className="h-5 w-5" />
           </div>
-          <div>
-            <h4 className="text-xs font-bold text-gray-900">Relocating to another city?</h4>
-            <p className="text-[11px] text-gray-500 mt-0.5">
+          <div className="min-w-0 flex-1">
+            <h4 className="text-xs font-bold text-gray-900 break-words">Relocating to another city?</h4>
+            <p className="text-[11px] text-gray-500 mt-0.5 break-words leading-relaxed">
               Explore 5,000+ verified PGs & hostels with Zero Brokerage
             </p>
           </div>

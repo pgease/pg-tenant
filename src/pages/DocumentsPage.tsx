@@ -14,6 +14,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { tenantService } from '../services/tenantService';
 import { useAuth } from '../context/AuthContext';
+import { formatDateToDDMMYYYY } from '../utils/dateUtils';
 
 export const DocumentsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -153,7 +154,7 @@ export const DocumentsPage: React.FC = () => {
               </div>
               {kycData?.verifiedAt && (
                 <div className="col-span-2 text-[10px] text-gray-400 pt-1">
-                  Verified on {new Date(kycData.verifiedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  Verified on {formatDateToDDMMYYYY(kycData.verifiedAt)}
                 </div>
               )}
             </div>
@@ -243,7 +244,7 @@ export const DocumentsPage: React.FC = () => {
                       <h4 className="text-xs font-bold text-brandText">{doc.title || 'Room Lease Agreement'}</h4>
                       <p className="text-[11px] text-gray-400">
                         {doc.startDate
-                          ? `Valid from ${new Date(doc.startDate).toLocaleDateString('en-IN')}`
+                          ? `Valid from ${formatDateToDDMMYYYY(doc.startDate)}`
                           : 'Active Tenancy'}
                       </p>
                     </div>

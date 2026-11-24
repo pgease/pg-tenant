@@ -8,6 +8,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { tenantService } from '../../services/tenantService';
+import { formatDateToDDMMYYYY } from '../../utils/dateUtils';
 
 interface AgreementsKycModalProps {
   isOpen: boolean;
@@ -169,7 +170,7 @@ export const AgreementsKycModal: React.FC<AgreementsKycModalProps> = ({
                   <div>
                     <h4 className="text-xs font-bold text-brandText">{agr.title || 'PG Tenancy Agreement'}</h4>
                     <p className="text-[11px] text-brandText-muted mt-0.5">
-                      Valid through: {agr.endDate || 'Active Stay'}
+                      Valid through: {agr.endDate ? formatDateToDDMMYYYY(agr.endDate) : 'Active Stay'}
                     </p>
                   </div>
                   {agr.pdfUrl && (

@@ -16,6 +16,8 @@ import { useNavigate } from 'react-router-dom';
 import { tenantService } from '../services/tenantService';
 import { inventoryService, type TenantCheckoutSummary } from '../services/inventoryService';
 import { useAuth } from '../context/AuthContext';
+import { NativeDatePicker } from '../components/common/NativeDatePicker';
+import { formatDateToDDMMYYYY, getKolkataTodayYYYYMMDD } from '../utils/dateUtils';
 
 export const NoticePage: React.FC = () => {
   const navigate = useNavigate();
@@ -95,10 +97,17 @@ export const NoticePage: React.FC = () => {
     loadNotice();
   }, []);
 
+  const noticeDays = Number(propertyDetails?.roomTenant?.noticePeriodDays) || 30;
+  const minVacateDate = getKolkataTodayYYYYMMDD(noticeDays);
+
   const handleRaiseNotice = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!vacateDate) {
       alert('Please select expected vacate date.');
+      return;
+    }
+    if (vacateDate < minVacateDate) {
+      alert(`Expected vacate date must be at least ${noticeDays} days in advance (${formatDateToDDMMYYYY(minVacateDate)}).`);
       return;
     }
 
@@ -169,7 +178,7 @@ export const NoticePage: React.FC = () => {
         </button>
 
         <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-primary">
-          30-Day Policy
+          {noticeDays}-Day Policy
         </span>
       </div>
 
@@ -198,13 +207,13 @@ export const NoticePage: React.FC = () => {
             <div>
               <span className="text-[10px] text-gray-500 block font-semibold">NOTICE SERVED</span>
               <span className="font-bold text-gray-900">
-                {noticeStartedDate ? new Date(noticeStartedDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recently'}
+                {noticeStartedDate ? formatDateToDDMMYYYY(noticeStartedDate) : 'Recently'}
               </span>
             </div>
             <div>
               <span className="text-[10px] text-gray-500 block font-semibold">SCHEDULED VACATE</span>
               <span className="font-bold text-amber-900 underline">
-                {vacateDateVal ? new Date(vacateDateVal).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Scheduled'}
+                {vacateDateVal ? formatDateToDDMMYYYY(vacateDateVal) : 'Scheduled'}
               </span>
             </div>
           </div>
@@ -395,15 +404,20 @@ export const NoticePage: React.FC = () => {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-gray-700 block mb-1">Expected Vacate Date</label>
-            <input
-              type="date"
-              placeholder="dd/mm/yyyy"
+            <label className="text-xs font-bold text-gray-700 block mb-1">
+              Expected Vacate Date <span className="font-normal text-gray-500">(Min. {noticeDays} days notice)</span>
+            </label>
+            <NativeDatePicker
               value={vacateDate}
-              onChange={(e) => setVacateDate(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 px-3 py-2 text-xs font-medium text-brandText focus:border-primary focus:outline-none"
+              onChange={setVacateDate}
+              placeholder="dd/mm/yyyy"
+              min={minVacateDate}
               required
+              className="w-full rounded-xl border border-gray-200 px-3 py-2 text-xs font-medium text-brandText bg-white focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20"
             />
+            <p className="text-[10px] text-gray-400 mt-1">
+              Earliest allowed vacate date is {formatDateToDDMMYYYY(minVacateDate)} based on your PG notice rules.
+            </p>
           </div>
 
           <div>

@@ -24,20 +24,14 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { ListSkeleton } from '../components/ui/ListSkeleton';
 import { InlineError } from '../components/ui/InlineError';
+import { NativeDatePicker } from '../components/common/NativeDatePicker';
+import {
+  formatDateTimeToDDMMYYYY,
+  getKolkataTodayYYYYMMDD,
+} from '../utils/dateUtils';
 
 function formatDDMMYYYY(dateVal: string | Date | null | undefined): string {
-  if (!dateVal) return '—';
-  const d = new Date(dateVal);
-  if (isNaN(d.getTime())) return '—';
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = d.getFullYear();
-  let hours = d.getHours();
-  const minutes = String(d.getMinutes()).padStart(2, '0');
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12;
-  hours = hours ? hours : 12;
-  return `${day}/${month}/${year}, ${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
+  return formatDateTimeToDDMMYYYY(dateVal);
 }
 
 
@@ -55,15 +49,16 @@ export const GuestsPage: React.FC = () => {
   const [successMsg, setSuccessMsg] = useState('');
   const [formError, setFormError] = useState('');
 
-  // Form Fields
+  // Form Fields (Asia/Kolkata timezone default)
+  const todayKolkata = getKolkataTodayYYYYMMDD(0);
   const [guestName, setGuestName] = useState('');
   const [guestPhone, setGuestPhone] = useState('');
   const [guestGender, setGuestGender] = useState<'Male' | 'Female' | 'Other'>('Male');
   const [relationship, setRelationship] = useState('Friend');
   const [numberOfGuests, setNumberOfGuests] = useState(1);
-  const [arrivalDate, setArrivalDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [arrivalDate, setArrivalDate] = useState(todayKolkata);
   const [arrivalTime, setArrivalTime] = useState('18:00');
-  const [departureDate, setDepartureDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [departureDate, setDepartureDate] = useState(todayKolkata);
   const [departureTime, setDepartureTime] = useState('21:00');
   const [purpose, setPurpose] = useState('Personal visit');
 
@@ -237,14 +232,14 @@ export const GuestsPage: React.FC = () => {
 
       {/* Tenancy & Information Banner */}
       <div className="rounded-2xl border border-teal-100 bg-gradient-to-br from-teal-500/10 via-teal-500/5 to-white p-4 shadow-sm flex items-center justify-between">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1 pr-2">
           <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
             Visitor Management
           </span>
-          <h2 className="text-base sm:text-lg font-bold text-brandText mt-0.5 truncate">
+          <h2 className="text-base sm:text-lg font-bold text-brandText mt-0.5 break-words">
             Guest Passes & Visitor Log
           </h2>
-          <p className="text-xs text-teal-800 font-medium mt-0.5">
+          <p className="text-xs text-teal-800 font-medium mt-0.5 break-words">
             {propertyDetails?.property?.name || 'Verified PG Residence'}
           </p>
         </div>
@@ -357,13 +352,13 @@ export const GuestsPage: React.FC = () => {
 
             <div className="space-y-1">
               <label className="text-xs font-semibold text-gray-700">Expected Arrival Date *</label>
-              <input
-                type="date"
+              <NativeDatePicker
                 value={arrivalDate}
-                onChange={(e) => setArrivalDate(e.target.value)}
+                onChange={setArrivalDate}
+                min={todayKolkata}
                 placeholder="dd/mm/yyyy"
                 required
-                className="w-full h-11 rounded-xl border border-gray-200 bg-white px-3.5 text-xs text-brandText focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary shadow-xs"
+                className="w-full h-11 rounded-xl border border-gray-200 bg-white px-3.5 text-xs text-brandText focus-within:border-primary focus-within:ring-1 focus-within:ring-primary shadow-xs"
               />
             </div>
 
@@ -380,12 +375,12 @@ export const GuestsPage: React.FC = () => {
 
             <div className="space-y-1">
               <label className="text-xs font-semibold text-gray-700">Expected Departure Date</label>
-              <input
-                type="date"
+              <NativeDatePicker
                 value={departureDate}
-                onChange={(e) => setDepartureDate(e.target.value)}
+                onChange={setDepartureDate}
+                min={arrivalDate || todayKolkata}
                 placeholder="dd/mm/yyyy"
-                className="w-full h-11 rounded-xl border border-gray-200 bg-white px-3.5 text-xs text-brandText focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary shadow-xs"
+                className="w-full h-11 rounded-xl border border-gray-200 bg-white px-3.5 text-xs text-brandText focus-within:border-primary focus-within:ring-1 focus-within:ring-primary shadow-xs"
               />
             </div>
 

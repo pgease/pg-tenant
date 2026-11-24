@@ -17,30 +17,19 @@ import { tenantService, type NightOutRequest } from '../services/tenantService';
 import { useAuth } from '../context/AuthContext';
 import { ListSkeleton } from '../components/ui/ListSkeleton';
 import { InlineError } from '../components/ui/InlineError';
+import { NativeDatePicker } from '../components/common/NativeDatePicker';
+import {
+  formatDateToDDMMYYYY,
+  formatDateTimeToDDMMYYYY,
+  getKolkataTodayYYYYMMDD,
+} from '../utils/dateUtils';
 
 function formatDDMMYYYY(dateVal: string | Date | null | undefined): string {
-  if (!dateVal) return '—';
-  const d = new Date(dateVal);
-  if (isNaN(d.getTime())) return '—';
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = d.getFullYear();
-  let hours = d.getHours();
-  const minutes = String(d.getMinutes()).padStart(2, '0');
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12;
-  hours = hours ? hours : 12;
-  return `${day}/${month}/${year}, ${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
+  return formatDateTimeToDDMMYYYY(dateVal);
 }
 
 function formatDateOnly(dateVal: string | Date | null | undefined): string {
-  if (!dateVal) return '—';
-  const d = new Date(dateVal);
-  if (isNaN(d.getTime())) return '—';
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
+  return formatDateToDDMMYYYY(dateVal) || '—';
 }
 
 export const NightOutPage: React.FC = () => {
@@ -57,14 +46,12 @@ export const NightOutPage: React.FC = () => {
   const [successMsg, setSuccessMsg] = useState('');
   const [formError, setFormError] = useState('');
 
-  // Form Fields
-  const [leaveDate, setLeaveDate] = useState(() => new Date().toISOString().split('T')[0]);
+  // Form Fields (Asia/Kolkata timezone default)
+  const todayKolkata = getKolkataTodayYYYYMMDD(0);
+  const tomorrowKolkata = getKolkataTodayYYYYMMDD(1);
+  const [leaveDate, setLeaveDate] = useState(todayKolkata);
   const [leaveTime, setLeaveTime] = useState('21:00');
-  const [returnDate, setReturnDate] = useState(() => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
-  });
+  const [returnDate, setReturnDate] = useState(tomorrowKolkata);
   const [returnTime, setReturnTime] = useState('08:00');
   const [reason, setReason] = useState('');
   const [destinationAddress, setDestinationAddress] = useState('');
@@ -279,16 +266,14 @@ export const NightOutPage: React.FC = () => {
               Departure Date & Time <span className="text-rose-500">*</span>
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <div className="relative">
-                <input
-                  type="date"
-                  placeholder="dd/mm/yyyy"
-                  value={leaveDate}
-                  onChange={(e) => setLeaveDate(e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50/50 p-2.5 text-xs font-medium text-brandText focus:border-indigo-600 focus:bg-white focus:outline-none"
-                  required
-                />
-              </div>
+              <NativeDatePicker
+                value={leaveDate}
+                onChange={setLeaveDate}
+                min={todayKolkata}
+                placeholder="dd/mm/yyyy"
+                required
+                className="w-full rounded-xl border border-gray-200 bg-gray-50/50 p-2.5 text-xs font-medium text-brandText focus-within:border-indigo-600 focus-within:bg-white"
+              />
               <div className="relative">
                 <input
                   type="time"
@@ -307,16 +292,14 @@ export const NightOutPage: React.FC = () => {
               Expected Return Date & Time <span className="text-rose-500">*</span>
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <div className="relative">
-                <input
-                  type="date"
-                  placeholder="dd/mm/yyyy"
-                  value={returnDate}
-                  onChange={(e) => setReturnDate(e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50/50 p-2.5 text-xs font-medium text-brandText focus:border-indigo-600 focus:bg-white focus:outline-none"
-                  required
-                />
-              </div>
+              <NativeDatePicker
+                value={returnDate}
+                onChange={setReturnDate}
+                min={leaveDate || todayKolkata}
+                placeholder="dd/mm/yyyy"
+                required
+                className="w-full rounded-xl border border-gray-200 bg-gray-50/50 p-2.5 text-xs font-medium text-brandText focus-within:border-indigo-600 focus-within:bg-white"
+              />
               <div className="relative">
                 <input
                   type="time"
