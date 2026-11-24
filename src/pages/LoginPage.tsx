@@ -299,7 +299,7 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-[100dvh] bg-[#FFFFFF] flex flex-col justify-between overflow-x-hidden font-poppins select-none">
+    <div className="relative min-h-[100dvh] bg-[#FFFFFF] flex flex-col justify-between overflow-x-hidden overflow-y-auto font-poppins select-none" style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}>
       {/* Top 320dp Soft Gradient from #E6F3F3 to #FFFFFF */}
       <div className="absolute top-0 inset-x-0 h-[320px] bg-gradient-to-b from-[#E6F3F3] to-[#FFFFFF] pointer-events-none" />
 
@@ -335,9 +335,9 @@ export const LoginPage: React.FC = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="relative z-10 flex-1 flex flex-col items-center px-6 pt-4 pb-8 max-w-md mx-auto w-full">
+      <div className="relative z-10 flex-1 flex flex-col items-center px-6 pt-1 pb-4 max-w-md mx-auto w-full">
         {/* Logo: 96dp Teal (#008080) Circle with White Mark Inside (60dp tall, centered, NO white box) */}
-        <div className="flex h-[96px] w-[96px] items-center justify-center rounded-full bg-[#008080] shadow-md mb-6">
+        <div className="flex h-[96px] w-[96px] items-center justify-center rounded-full bg-[#008080] shadow-md mb-3 sm:mb-5 shrink-0">
           <img
             src="/brand/pgease-mark-white.svg"
             alt="PG Ease"
@@ -346,15 +346,15 @@ export const LoginPage: React.FC = () => {
         </div>
 
         {/* Title and Subtitle: Truly Centered */}
-        <div className="w-full text-center mb-7">
-          <h1 className="text-[24px] font-semibold text-[#1F2937] leading-[34px] tracking-tight w-full text-center">
+        <div className="w-full text-center mb-3 sm:mb-5 shrink-0">
+          <h1 className="text-[22px] sm:text-[24px] font-semibold text-[#1F2937] leading-[30px] sm:leading-[34px] tracking-tight w-full text-center">
             {step === 'phone'
               ? 'Welcome to PG Ease'
               : step === 'otp'
               ? 'Verify 4-Digit Code'
               : 'Complete Your Profile 🎉'}
           </h1>
-          <p className="mt-1.5 text-[14px] font-normal text-[#6B7280] leading-[22px] max-w-[300px] mx-auto text-center">
+          <p className="mt-1 text-[13px] sm:text-[14px] font-normal text-[#6B7280] leading-[20px] sm:leading-[22px] max-w-[300px] mx-auto text-center">
             {step === 'phone'
               ? 'Enter your mobile number to sign in or get started.'
               : step === 'otp'
@@ -364,7 +364,7 @@ export const LoginPage: React.FC = () => {
         </div>
 
         {/* Form Container */}
-        <div className="w-full space-y-5">
+        <div className="w-full space-y-3.5 sm:space-y-4">
           {/* Error Alert */}
           {error && (
             <div className="flex items-start gap-2 rounded-[12px] bg-red-50 p-3 border border-red-200 text-red-700 animate-shake">
@@ -407,7 +407,6 @@ export const LoginPage: React.FC = () => {
                     setPhone(clean);
                     if (error) setError(null);
                   }}
-                  autoFocus
                   className="w-full bg-transparent pl-3 text-sm font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none tracking-wide"
                 />
               </div>
