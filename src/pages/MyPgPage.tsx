@@ -219,9 +219,10 @@ export const MyPgPage: React.FC = () => {
             <form onSubmit={handleManualLink} className="space-y-3">
               <input
                 type="text"
+                maxLength={20}
                 placeholder="e.g. PG-4892"
                 value={inviteCode}
-                onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                onChange={(e) => setInviteCode(e.target.value.slice(0, 20).toUpperCase())}
                 autoFocus
                 className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:border-[#008080] focus:outline-none uppercase tracking-widest text-center"
               />

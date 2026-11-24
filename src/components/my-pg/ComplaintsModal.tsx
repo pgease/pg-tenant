@@ -240,15 +240,21 @@ export const ComplaintsModal: React.FC<ComplaintsModalProps> = ({ isOpen, onClos
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-brandText-muted mb-1">
-                  Issue Title / Subject
-                </label>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-xs font-semibold text-brandText-muted">
+                    Issue Title / Subject
+                  </label>
+                  <span className={`text-[10px] tabular-nums font-mono ${subject.length >= 100 ? "text-red-500 font-bold" : "text-gray-400"}`}>
+                    {subject.length}/100
+                  </span>
+                </div>
                 <input
                   type="text"
+                  maxLength={100}
                   required
                   placeholder="e.g. Bathroom tap leaking, WiFi disconnects"
                   value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
+                  onChange={(e) => setSubject(e.target.value.slice(0, 100))}
                   className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-semibold text-brandText focus:border-primary focus:outline-none"
                 />
               </div>
@@ -290,15 +296,21 @@ export const ComplaintsModal: React.FC<ComplaintsModalProps> = ({ isOpen, onClos
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-brandText-muted mb-1">
-                  Describe the Issue
-                </label>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-xs font-semibold text-brandText-muted">
+                    Describe the Issue
+                  </label>
+                  <span className={`text-[10px] tabular-nums font-mono ${description.length >= 254 ? "text-red-500 font-bold" : "text-gray-400"}`}>
+                    {description.length}/254
+                  </span>
+                </div>
                 <textarea
                   rows={3}
+                  maxLength={254}
                   required
                   placeholder="Explain when it started and what is needed..."
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={(e) => setDescription(e.target.value.slice(0, 254))}
                   className="w-full rounded-xl border border-gray-200 bg-white p-3 text-xs text-brandText focus:border-primary focus:outline-none resize-none"
                 />
               </div>

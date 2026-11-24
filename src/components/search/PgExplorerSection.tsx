@@ -130,9 +130,10 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
         <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
         <input
           type="text"
+          maxLength={100}
           placeholder="Search by location, PG name..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => setSearchQuery(e.target.value.slice(0, 100))}
           className="w-full rounded-2xl border border-gray-200 bg-white pl-11 pr-11 py-3 text-xs font-semibold text-brandText placeholder:text-gray-400 focus:border-primary focus:outline-none transition-all shadow-sm"
         />
         <button

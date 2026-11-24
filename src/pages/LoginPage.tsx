@@ -585,15 +585,29 @@ export const LoginPage: React.FC = () => {
                 <div className="flex items-center rounded-2xl border border-gray-200 bg-white px-3.5 py-2.5 shadow-sm focus-within:border-[#008080] focus-within:ring-2 focus-within:ring-[#008080]/10 transition-all">
                   <input
                     type="text"
+                    maxLength={100}
                     placeholder="Enter your full name (e.g. Rahul Sharma)"
                     value={fullName}
                     onChange={(e) => {
-                      setFullName(e.target.value);
+                      setFullName(e.target.value.slice(0, 100));
                       if (error) setError(null);
+                    }}
+                    onPaste={(e) => {
+                      const text = e.clipboardData.getData("text");
+                      if (fullName.length + text.length > 100) {
+                        e.preventDefault();
+                        const allowed = 100 - fullName.length;
+                        setFullName((prev) => (prev + text.slice(0, Math.max(0, allowed))).slice(0, 100));
+                      }
                     }}
                     autoFocus
                     className="w-full bg-transparent text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:outline-none tracking-wide"
                   />
+                </div>
+                <div className="flex justify-end pr-1">
+                  <span className={`text-[11px] tabular-nums font-mono ${fullName.length >= 100 ? "text-red-500 font-bold" : "text-gray-400"}`}>
+                    {fullName.length}/100
+                  </span>
                 </div>
               </div>
 

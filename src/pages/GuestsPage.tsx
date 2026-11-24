@@ -275,11 +275,17 @@ export const GuestsPage: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-gray-700">Guest Name *</label>
+              <div className="flex justify-between items-center">
+                <label className="text-xs font-semibold text-gray-700">Guest Name *</label>
+                <span className={`text-[10px] tabular-nums font-mono ${guestName.length >= 100 ? "text-red-500 font-bold" : "text-gray-400"}`}>
+                  {guestName.length}/100
+                </span>
+              </div>
               <input
                 type="text"
+                maxLength={100}
                 value={guestName}
-                onChange={(e) => setGuestName(e.target.value)}
+                onChange={(e) => setGuestName(e.target.value.slice(0, 100))}
                 placeholder="e.g. Rahul Sharma"
                 required
                 className="w-full h-11 rounded-xl border border-gray-200 bg-white px-3.5 text-xs text-brandText focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary shadow-xs"
@@ -340,11 +346,17 @@ export const GuestsPage: React.FC = () => {
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-gray-700">Purpose of Visit</label>
+              <div className="flex justify-between items-center">
+                <label className="text-xs font-semibold text-gray-700">Purpose of Visit</label>
+                <span className={`text-[10px] tabular-nums font-mono ${purpose.length >= 254 ? "text-red-500 font-bold" : "text-gray-400"}`}>
+                  {purpose.length}/254
+                </span>
+              </div>
               <input
                 type="text"
+                maxLength={254}
                 value={purpose}
-                onChange={(e) => setPurpose(e.target.value)}
+                onChange={(e) => setPurpose(e.target.value.slice(0, 254))}
                 placeholder="e.g. Study, Family visit, Weekend stay"
                 className="w-full h-11 rounded-xl border border-gray-200 bg-white px-3.5 text-xs text-brandText focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary shadow-xs"
               />

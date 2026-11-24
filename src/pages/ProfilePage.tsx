@@ -878,12 +878,18 @@ export const ProfilePage: React.FC = () => {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-gray-600 block mb-1">Full Name</label>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-xs font-semibold text-gray-600">Full Name</label>
+                  <span className={`text-[10px] tabular-nums font-mono ${name.length >= 100 ? "text-red-500 font-bold" : "text-gray-400"}`}>
+                    {name.length}/100
+                  </span>
+                </div>
                 <input
                   type="text"
+                  maxLength={100}
                   value={name}
                   disabled={isSavingProfile}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => setName(e.target.value.slice(0, 100))}
                   className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-brandText focus:border-[#008080] focus:outline-none"
                   placeholder="Your full name"
                 />
@@ -893,9 +899,10 @@ export const ProfilePage: React.FC = () => {
                 <label className="text-xs font-semibold text-gray-600 block mb-1">Email Address</label>
                 <input
                   type="email"
+                  maxLength={100}
                   value={email}
                   disabled={isSavingProfile}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value.slice(0, 100))}
                   className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-brandText focus:border-[#008080] focus:outline-none"
                   placeholder="e.g. resident@example.com"
                 />
@@ -990,11 +997,17 @@ export const ProfilePage: React.FC = () => {
                   ))}
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-gray-600 block mb-1">Feedback</label>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="text-xs font-semibold text-gray-600">Feedback</label>
+                    <span className={`text-[10px] tabular-nums font-mono ${feedback.length >= 254 ? "text-red-500 font-bold" : "text-gray-400"}`}>
+                      {feedback.length}/254
+                    </span>
+                  </div>
                   <textarea
                     rows={3}
+                    maxLength={254}
                     value={feedback}
-                    onChange={(e) => setFeedback(e.target.value)}
+                    onChange={(e) => setFeedback(e.target.value.slice(0, 254))}
                     placeholder="Tell us about food, WiFi, cleanliness, or amenities..."
                     className="w-full rounded-xl border border-gray-200 p-2.5 text-xs text-brandText focus:border-[#008080] focus:outline-none"
                   />

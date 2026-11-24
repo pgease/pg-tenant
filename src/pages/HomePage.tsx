@@ -801,15 +801,23 @@ export const HomePage: React.FC = () => {
               </button>
             </div>
             <form onSubmit={handleSaveName} className="space-y-3">
-              <input
-                type="text"
-                placeholder="Enter your name"
-                value={nameInput}
-                onChange={(e) => setNameInput(e.target.value)}
-                autoFocus
-                className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 focus:border-[#008080] focus:outline-none"
-              />
-              <p className="text-[11px] text-gray-400">Your PG owner will see this change</p>
+              <div>
+                <input
+                  type="text"
+                  maxLength={100}
+                  placeholder="Enter your name"
+                  value={nameInput}
+                  onChange={(e) => setNameInput(e.target.value.slice(0, 100))}
+                  autoFocus
+                  className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 focus:border-[#008080] focus:outline-none"
+                />
+                <div className="flex justify-between items-center mt-1 px-1">
+                  <p className="text-[11px] text-gray-400">Your PG owner will see this change</p>
+                  <span className={`text-[10px] tabular-nums font-mono ${nameInput.length >= 100 ? "text-red-500 font-bold" : "text-gray-400"}`}>
+                    {nameInput.length}/100
+                  </span>
+                </div>
+              </div>
               <div className="flex gap-2 pt-2">
                 <button
                   type="button"

@@ -232,14 +232,20 @@ export const NoticePeriodModal: React.FC<NoticePeriodModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-brandText-muted mb-1">
-                  Remarks / Notes for Owner (Optional)
-                </label>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-xs font-semibold text-brandText-muted">
+                    Remarks / Notes for Owner (Optional)
+                  </label>
+                  <span className={`text-[10px] tabular-nums font-mono ${remarks.length >= 254 ? "text-red-500 font-bold" : "text-gray-400"}`}>
+                    {remarks.length}/254
+                  </span>
+                </div>
                 <textarea
                   rows={2}
+                  maxLength={254}
                   placeholder="Any specific instructions or forwarding notes..."
                   value={remarks}
-                  onChange={(e) => setRemarks(e.target.value)}
+                  onChange={(e) => setRemarks(e.target.value.slice(0, 254))}
                   className="w-full rounded-xl border border-gray-200 bg-white p-3 text-xs text-brandText focus:border-primary focus:outline-none resize-none"
                 />
               </div>

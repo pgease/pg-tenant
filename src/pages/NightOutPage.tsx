@@ -314,13 +314,19 @@ export const NightOutPage: React.FC = () => {
 
           {/* Reason */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-700 block">
-              Reason for Night Out <span className="text-rose-500">*</span>
-            </label>
+            <div className="flex justify-between items-center">
+              <label className="text-xs font-bold text-gray-700">
+                Reason for Night Out <span className="text-rose-500">*</span>
+              </label>
+              <span className={`text-[10px] tabular-nums font-mono ${reason.length >= 254 ? "text-red-500 font-bold" : "text-gray-400"}`}>
+                {reason.length}/254
+              </span>
+            </div>
             <input
               type="text"
+              maxLength={254}
               value={reason}
-              onChange={(e) => setReason(e.target.value)}
+              onChange={(e) => setReason(e.target.value.slice(0, 254))}
               placeholder="e.g. Visiting home, exam prep, office late shift, family function"
               className="w-full rounded-xl border border-gray-200 bg-gray-50/50 p-2.5 text-xs font-medium text-brandText focus:border-indigo-600 focus:bg-white focus:outline-none"
               required
@@ -329,13 +335,19 @@ export const NightOutPage: React.FC = () => {
 
           {/* Destination Address */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-700 block">
-              Destination Address / City (Optional)
-            </label>
+            <div className="flex justify-between items-center">
+              <label className="text-xs font-bold text-gray-700">
+                Destination Address / City (Optional)
+              </label>
+              <span className={`text-[10px] tabular-nums font-mono ${destinationAddress.length >= 254 ? "text-red-500 font-bold" : "text-gray-400"}`}>
+                {destinationAddress.length}/254
+              </span>
+            </div>
             <input
               type="text"
+              maxLength={254}
               value={destinationAddress}
-              onChange={(e) => setDestinationAddress(e.target.value)}
+              onChange={(e) => setDestinationAddress(e.target.value.slice(0, 254))}
               placeholder="e.g. Pune, Flat 402 Green Acres, HSR Layout"
               className="w-full rounded-xl border border-gray-200 bg-gray-50/50 p-2.5 text-xs font-medium text-brandText focus:border-indigo-600 focus:bg-white focus:outline-none"
             />

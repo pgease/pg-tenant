@@ -1082,14 +1082,20 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
 
                     {/* Additional Notes */}
                     <div>
-                      <label className="block text-[11px] font-semibold text-brandText-muted mb-1">
-                        Additional Note <span className="font-normal">(Optional)</span>
-                      </label>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="text-[11px] font-semibold text-brandText-muted">
+                          Additional Note <span className="font-normal">(Optional)</span>
+                        </label>
+                        <span className={`text-[10px] tabular-nums font-mono ${cashNotes.length >= 254 ? "text-red-500 font-bold" : "text-gray-400"}`}>
+                          {cashNotes.length}/254
+                        </span>
+                      </div>
                       <textarea
                         rows={2}
+                        maxLength={254}
                         placeholder="e.g. Paid in full at reception desk during room inspection."
                         value={cashNotes}
-                        onChange={(e) => setCashNotes(e.target.value)}
+                        onChange={(e) => setCashNotes(e.target.value.slice(0, 254))}
                         className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-3.5 py-2 text-xs font-medium text-brandText focus:border-emerald-600 focus:bg-white focus:outline-none resize-none"
                       />
                     </div>

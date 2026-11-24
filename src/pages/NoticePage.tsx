@@ -437,11 +437,17 @@ export const NoticePage: React.FC = () => {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-gray-700 block mb-1">Remarks or Feedback</label>
+            <div className="flex justify-between items-center mb-1">
+              <label className="text-xs font-bold text-gray-700">Remarks or Feedback</label>
+              <span className={`text-[10px] tabular-nums font-mono ${remarks.length >= 254 ? "text-red-500 font-bold" : "text-gray-400"}`}>
+                {remarks.length}/254
+              </span>
+            </div>
             <textarea
               rows={3}
+              maxLength={254}
               value={remarks}
-              onChange={(e) => setRemarks(e.target.value)}
+              onChange={(e) => setRemarks(e.target.value.slice(0, 254))}
               placeholder="Any additional information for the property manager..."
               className="w-full rounded-xl border border-gray-200 p-2.5 text-xs font-medium text-brandText focus:border-primary focus:outline-none"
             />
@@ -493,14 +499,23 @@ export const NoticePage: React.FC = () => {
             </p>
 
             <form onSubmit={handleDispute} className="space-y-3">
-              <textarea
-                rows={3}
-                placeholder="e.g. The almirah key was already bent when I moved in, please check move-in photos."
-                value={disputeText}
-                onChange={(e) => setDisputeText(e.target.value)}
-                className="w-full rounded-2xl border border-gray-200 p-3 text-xs focus:border-teal-600 focus:outline-none"
-                required
-              />
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-xs font-bold text-gray-700">Clarification Details</label>
+                  <span className={`text-[10px] tabular-nums font-mono ${disputeText.length >= 254 ? "text-red-500 font-bold" : "text-gray-400"}`}>
+                    {disputeText.length}/254
+                  </span>
+                </div>
+                <textarea
+                  rows={3}
+                  maxLength={254}
+                  placeholder="e.g. The almirah key was already bent when I moved in, please check move-in photos."
+                  value={disputeText}
+                  onChange={(e) => setDisputeText(e.target.value.slice(0, 254))}
+                  className="w-full rounded-2xl border border-gray-200 p-3 text-xs focus:border-teal-600 focus:outline-none"
+                  required
+                />
+              </div>
 
               <div className="flex items-center gap-2">
                 <button

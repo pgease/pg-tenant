@@ -173,12 +173,18 @@ export const ComplaintsPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-gray-700 block mb-1">Subject</label>
+            <div className="flex justify-between items-center mb-1">
+              <label className="text-xs font-bold text-gray-700">Subject</label>
+              <span className={`text-[10px] tabular-nums font-mono ${subject.length >= 100 ? "text-red-500 font-bold" : "text-gray-400"}`}>
+                {subject.length}/100
+              </span>
+            </div>
             <input
               type="text"
+              maxLength={100}
               placeholder="e.g. Bathroom tap leaking, WiFi router blinking red"
               value={subject}
-              onChange={(e) => setSubject(e.target.value)}
+              onChange={(e) => setSubject(e.target.value.slice(0, 100))}
               className="w-full rounded-xl border border-gray-200 px-3 py-2 text-xs font-medium text-brandText placeholder:text-gray-400 focus:border-primary focus:outline-none"
               required
             />
@@ -215,12 +221,18 @@ export const ComplaintsPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-gray-700 block mb-1">Description</label>
+            <div className="flex justify-between items-center mb-1">
+              <label className="text-xs font-bold text-gray-700">Description</label>
+              <span className={`text-[10px] tabular-nums font-mono ${description.length >= 254 ? "text-red-500 font-bold" : "text-gray-400"}`}>
+                {description.length}/254
+              </span>
+            </div>
             <textarea
               rows={3}
+              maxLength={254}
               placeholder="Provide specific details such as room area, how long the issue has persisted, etc."
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => setDescription(e.target.value.slice(0, 254))}
               className="w-full rounded-xl border border-gray-200 p-3 text-xs font-medium text-brandText placeholder:text-gray-400 focus:border-primary focus:outline-none"
               required
             />
