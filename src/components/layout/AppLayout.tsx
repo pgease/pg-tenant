@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { BottomTabBar } from './BottomTabBar';
 import { MobileDrawer } from './MobileDrawer';
@@ -29,6 +29,7 @@ export const AppLayout: React.FC = () => {
   });
   const [hasUnread, setHasUnread] = useState<boolean>(false);
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
+  const mainRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -41,6 +42,8 @@ export const AppLayout: React.FC = () => {
 
   useEffect(() => {
     setDrawerOpen(false);
+    mainRef.current?.scrollTo(0, 0);
+    window.scrollTo(0, 0);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -239,21 +242,38 @@ export const AppLayout: React.FC = () => {
               )}
 
               <div className="flex min-w-0 flex-1 items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => navigate('/')}
-                  className="hidden min-[400px]:flex h-11 shrink-0 items-center"
-                  aria-label="PG Ease"
-                >
-                  <img
-                    src="/assets/pgease-full-brand-logo.png"
-                    alt=""
-                    className="h-6 w-auto object-contain"
-                  />
-                </button>
-                <h1 className="min-w-0 truncate text-base font-bold text-brandText">
-                  {isHome ? 'PG Ease' : getHeaderTitle()}
-                </h1>
+                {isHome ? (
+                  <button
+                    type="button"
+                    onClick={() => navigate('/')}
+                    className="flex h-11 shrink-0 items-center"
+                    aria-label="PG Ease"
+                  >
+                    <img
+                      src="/assets/pgease-full-brand-logo.png"
+                      alt="PG Ease"
+                      className="h-6 w-auto object-contain"
+                    />
+                  </button>
+                ) : (
+                  <div className="flex min-w-0 items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => navigate('/')}
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg overflow-hidden"
+                      aria-label="Home"
+                    >
+                      <img
+                        src="/assets/pgease-logo-icon.png"
+                        alt="PG Ease"
+                        className="h-6 w-6 object-contain rounded-md"
+                      />
+                    </button>
+                    <h1 className="min-w-0 truncate text-base font-bold text-brandText">
+                      {getHeaderTitle()}
+                    </h1>
+                  </div>
+                )}
               </div>
 
               <button
@@ -272,6 +292,7 @@ export const AppLayout: React.FC = () => {
           )}
 
           <main
+            ref={mainRef}
             className={`flex-1 overflow-x-hidden overflow-y-auto ${
               !location.pathname.startsWith('/login') ? 'px-4 py-4 sm:px-5' : ''
             } ${!hideTabBar ? 'pb-tabbar lg:pb-8' : 'pb-safe'}`}
