@@ -4,7 +4,7 @@ import { tabItems } from '../../navigation/appMenu';
 
 export const BottomTabBar: React.FC = () => {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 mx-auto max-w-md border-t border-gray-100 bg-white/95 backdrop-blur-md pb-safe shadow-tab-bar lg:hidden">
+    <nav className="sticky bottom-0 z-30 w-full border-t border-gray-100 bg-white/95 backdrop-blur-md pb-safe shadow-tab-bar shrink-0">
       <div className="flex items-stretch justify-around px-1 pt-1">
         {tabItems.map((tab) => {
           const Icon = tab.icon;
@@ -22,8 +22,8 @@ export const BottomTabBar: React.FC = () => {
               {({ isActive }) => (
                 <>
                   <span
-                    className={`flex h-7 w-10 items-center justify-center rounded-full ${
-                      isActive ? 'bg-primary-50' : ''
+                    className={`flex h-7 w-10 items-center justify-center rounded-full transition-colors ${
+                      isActive ? 'bg-[#E6F3F3]' : ''
                     }`}
                   >
                     <Icon className="h-5 w-5" strokeWidth={isActive ? 2.4 : 1.8} />

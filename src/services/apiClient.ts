@@ -45,11 +45,13 @@ export const handleUnauthorizedRedirect = () => {
   }
 };
 
-// Request interceptor to attach JWT token
+// Request interceptor to attach JWT token (skip for public search & details)
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    const url = config.url || '';
+    const isPublic = url.includes('/public/') || url.startsWith('/properties/public');
     const token = localStorage.getItem('pgease_tenant_token');
-    if (token && config.headers) {
+    if (token && config.headers && !isPublic) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -63,12 +65,16 @@ apiClient.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
 
-    // Do not intercept login or OTP verification errors as session expirations
+    // Do not intercept login, OTP verification, or public search errors as session expirations
     const isAuthRoute =
       originalRequest?.url?.includes('/tenants/otp/verify') ||
       originalRequest?.url?.includes('/tenants/otp/request');
 
-    if (error.response?.status === 401 && !isAuthRoute) {
+    const isPublicRoute =
+      originalRequest?.url?.includes('/properties/public') ||
+      originalRequest?.url?.includes('/public/');
+
+    if (error.response?.status === 401 && !isAuthRoute && !isPublicRoute) {
       const refreshToken = localStorage.getItem('pgease_tenant_refresh_token');
 
       // If no refresh token, already retried, or refresh token endpoint itself returned 401

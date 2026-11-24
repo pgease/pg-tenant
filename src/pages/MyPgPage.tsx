@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
+  Building2,
   Wifi,
   FileText,
   Utensils,
@@ -182,6 +183,36 @@ export const MyPgPage: React.FC = () => {
       setLinking(false);
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="pt-12 pb-16 text-center space-y-4 animate-fade-in">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-teal-50 text-[#008080] shadow-sm border border-teal-100">
+          <Building2 className="h-7 w-7" />
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-gray-900">Sign In to View Your PG Stay</h2>
+          <p className="text-xs text-gray-500 mt-1 max-w-xs mx-auto leading-relaxed">
+            Please log in with your registered phone number to view your room, roommates, food menu and Wi-Fi.
+          </p>
+        </div>
+        <div className="flex gap-2.5 justify-center max-w-xs mx-auto pt-2">
+          <button
+            onClick={() => navigate('/login')}
+            className="flex-1 rounded-xl bg-[#008080] py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#005F5F] transition-all"
+          >
+            Sign In with OTP
+          </button>
+          <button
+            onClick={() => navigate('/search')}
+            className="flex-1 rounded-xl border border-gray-200 bg-white py-2.5 text-xs font-bold text-[#1F2937] shadow-sm hover:bg-gray-50 transition-all"
+          >
+            Explore PGs
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5 pt-1 pb-6 animate-fade-in">

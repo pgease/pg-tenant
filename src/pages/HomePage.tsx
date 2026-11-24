@@ -142,9 +142,9 @@ export const HomePage: React.FC = () => {
   if (!isLinkedTenant) {
     return (
       <div className="space-y-4 pt-1 pb-6 animate-fade-in">
-        {/* Top Header */}
-        <div className="flex items-center justify-between pt-1">
-          <div>
+        {/* Top Header / Welcome block */}
+        <div className="flex items-center justify-between pt-1 px-1">
+          <div className="min-w-0 pr-2">
             <p className="text-xs font-medium text-gray-500">Welcome to PG Ease,</p>
             <button
               type="button"
@@ -156,14 +156,14 @@ export const HomePage: React.FC = () => {
                   navigate('/login');
                 }
               }}
-              className="flex items-center gap-1.5 text-base font-black text-[#008080] tracking-tight hover:underline text-left mt-0.5"
+              className="flex items-center gap-1.5 text-base font-black text-[#008080] tracking-tight hover:underline text-left mt-0.5 truncate"
             >
               <span>{displayName}</span>
-              {isAuthenticated && <Pencil className="h-3.5 w-3.5 text-[#008080]" />}
+              {isAuthenticated && <Pencil className="h-3.5 w-3.5 text-[#008080] shrink-0" />}
             </button>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 shrink-0">
             {isAuthenticated ? (
               <button
                 type="button"
@@ -183,7 +183,7 @@ export const HomePage: React.FC = () => {
             ) : (
               <button
                 onClick={() => navigate('/login')}
-                className="rounded-xl bg-[#008080] px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-[#006b6b]"
+                className="rounded-xl bg-[#008080] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#005F5F] active:scale-95 transition-all"
               >
                 Sign In
               </button>
@@ -192,16 +192,16 @@ export const HomePage: React.FC = () => {
         </div>
 
         {/* Discovery Hero Banner (Clean, mascot-free) */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#006666] via-[#004d4d] to-[#003333] p-5 text-white shadow-xl shadow-teal-900/15">
-          <div className="flex items-center justify-between gap-4">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#006666] via-[#004d4d] to-[#003333] p-4 sm:p-5 text-white shadow-xl shadow-teal-900/15">
+          <div className="flex items-center justify-between gap-3 sm:gap-4">
             <div className="space-y-1.5 flex-1 min-w-0">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 px-2.5 py-0.5 text-[10px] font-bold text-emerald-300">
                 PG Ease Verified Stays
               </span>
-              <h2 className="text-lg font-black tracking-tight leading-snug">
+              <h2 className="text-base sm:text-lg font-black tracking-tight leading-snug">
                 Find Your Perfect PG & Hostel
               </h2>
-              <p className="text-xs text-white/80 leading-relaxed">
+              <p className="text-[11px] sm:text-xs text-white/80 leading-relaxed line-clamp-2">
                 Zero brokerage, verified amenities & direct PG owner connect.
               </p>
               <button
@@ -212,8 +212,8 @@ export const HomePage: React.FC = () => {
                 <ArrowRight className="h-3.5 w-3.5" />
               </button>
             </div>
-            <div className="flex-shrink-0 flex items-center justify-center w-20 h-20 rounded-2xl bg-white/10 border border-white/20 text-white backdrop-blur-md">
-              <Building2 className="w-10 h-10 text-teal-200" />
+            <div className="flex-shrink-0 flex items-center justify-center w-14 h-14 sm:w-20 sm:h-20 rounded-2xl bg-white/10 border border-white/20 text-white backdrop-blur-md">
+              <Building2 className="w-7 h-7 sm:w-10 sm:h-10 text-teal-200" />
             </div>
           </div>
         </div>

@@ -13,7 +13,6 @@ import {
 import { PropertyCard } from './PropertyCard';
 import { FilterDrawer } from './FilterDrawer';
 import { ListSkeleton } from '../ui/ListSkeleton';
-import { InlineError } from '../ui/InlineError';
 
 const CITIES = ['All', 'Delhi NCR', 'Noida', 'Bangalore', 'Kolkata', 'Lucknow', 'Kota'];
 
@@ -147,12 +146,12 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
       </div>
 
       {/* 2. Filter Pills Row */}
-      <div className="flex items-center gap-1.5 overflow-x-auto overscroll-x-contain no-scrollbar py-1">
+      <div className="flex items-center gap-2 overflow-x-auto overscroll-x-contain no-scrollbar py-1 px-0.5">
         {/* Filters button */}
         <button
           type="button"
           onClick={() => setShowFilters(true)}
-          className="flex-shrink-0 flex items-center gap-1 rounded-full border border-teal-200 bg-teal-50/70 px-3 py-1.5 text-xs font-bold text-teal-800 transition-all active:scale-95 whitespace-nowrap"
+          className="flex-shrink-0 flex items-center gap-1 rounded-full border border-teal-200 bg-teal-50/70 px-3.5 py-1.5 text-xs font-bold text-teal-800 transition-all active:scale-95 whitespace-nowrap min-w-fit"
         >
           <Filter className="h-3 w-3 text-primary" />
           <span>Filters</span>
@@ -162,7 +161,7 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
         <button
           type="button"
           onClick={handleNearMeToggle}
-          className={`flex-shrink-0 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 whitespace-nowrap ${
+          className={`flex-shrink-0 flex items-center gap-1 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 whitespace-nowrap min-w-fit ${
             isNearMe
               ? 'bg-primary text-white shadow-sm'
               : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
@@ -176,7 +175,7 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
         <button
           type="button"
           onClick={() => setUnder10k(!under10k)}
-          className={`flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 whitespace-nowrap ${
+          className={`flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 whitespace-nowrap min-w-fit ${
             under10k
               ? 'bg-primary text-white shadow-sm'
               : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
@@ -189,7 +188,7 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
         <button
           type="button"
           onClick={() => setWithFood(!withFood)}
-          className={`flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 whitespace-nowrap ${
+          className={`flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 whitespace-nowrap min-w-fit ${
             withFood
               ? 'bg-primary text-white shadow-sm'
               : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
@@ -202,7 +201,7 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
         <button
           type="button"
           onClick={() => setAcRooms(!acRooms)}
-          className={`flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 whitespace-nowrap ${
+          className={`flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 whitespace-nowrap min-w-fit ${
             acRooms
               ? 'bg-primary text-white shadow-sm'
               : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
@@ -219,7 +218,7 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
               key={city}
               type="button"
               onClick={() => setSelectedCity(city)}
-              className={`flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 whitespace-nowrap ${
+              className={`flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 whitespace-nowrap min-w-fit ${
                 isSelected
                   ? 'bg-teal-700 text-white shadow-sm'
                   : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
@@ -231,32 +230,15 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
         })}
       </div>
 
-      {/* 3. Results Count Indicator */}
-      <div className="px-1 text-xs text-gray-500 font-medium">
-        {loading ? (
-          <span>Searching PGs...</span>
-        ) : (
+      {/* 3. Results Count Indicator (Shown ONLY after successful load when items exist) */}
+      {!loading && !loadError && properties.length > 0 && (
+        <div className="px-1 text-xs text-gray-500 font-medium">
           <span>
             {properties.length} {properties.length === 1 ? 'PG' : 'PGs'} found in{' '}
             {selectedCity === 'All' ? 'All Cities' : selectedCity}
           </span>
-        )}
-      </div>
-
-      {/* Verified Listings Guarantee Banner */}
-      <div className="flex items-start sm:items-center gap-3 rounded-2xl bg-gradient-to-r from-teal-50 to-emerald-50/60 dark:from-teal-950/40 dark:to-emerald-950/30 p-3 sm:p-3.5 border border-teal-100/80 dark:border-teal-800/40 shadow-sm">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100/80 dark:bg-teal-900/60 text-primary dark:text-teal-300 shrink-0 mt-0.5 sm:mt-0">
-          <Crosshair className="h-5 w-5" />
         </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-xs sm:text-sm font-bold text-teal-900 dark:text-teal-100 flex items-center gap-1">
-            PG Ease Verified Stays
-          </p>
-          <p className="text-[11px] sm:text-xs font-medium text-teal-700/90 dark:text-teal-300/90 leading-relaxed break-words whitespace-normal mt-0.5">
-            Zero brokerage, verified amenities & direct PG owner connect
-          </p>
-        </div>
-      </div>
+      )}
 
       {/* 4. Properties List Feed */}
       {loading ? (
@@ -265,16 +247,33 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
           <p className="text-center text-xs font-semibold text-gray-500">Loading verified properties...</p>
         </div>
       ) : loadError ? (
-        <InlineError message="Could not load PGs. Check your connection and try again." onRetry={loadProperties} />
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 text-center space-y-3 shadow-xs">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-[#008080] border border-teal-100">
+            <SearchIcon className="h-6 w-6 text-[#008080]" />
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-[#1F2937]">Could not load PGs</h4>
+            <p className="text-xs text-gray-500 mt-1 max-w-xs mx-auto">
+              Please check your connection and try again.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={loadProperties}
+            className="inline-flex items-center justify-center rounded-xl bg-[#008080] hover:bg-[#005F5F] px-5 py-2 text-xs font-bold text-white shadow-xs transition-colors active:scale-95 cursor-pointer"
+          >
+            Try again
+          </button>
+        </div>
       ) : properties.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-teal-200 bg-teal-50/30 p-8 text-center space-y-3">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-100/80 text-primary">
             <SearchIcon className="h-7 w-7" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-brandText">No PGs Found</h3>
+            <h3 className="text-sm font-bold text-brandText">No PGs listed here yet</h3>
             <p className="text-xs text-brandText-muted mt-1 max-w-xs mx-auto leading-relaxed">
-              No matching properties found with these specific filters. Try selecting 'All' or clearing filters!
+              No matching properties found with these filters. Try selecting 'All' or clearing filters.
             </p>
           </div>
           <button
