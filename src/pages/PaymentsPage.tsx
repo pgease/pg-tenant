@@ -1,27 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import {
   Clock,
-  CheckCircle2,
   CreditCard,
-  ChevronRight,
-  Smartphone,
   ShieldCheck,
   Home,
   Zap,
-  Sparkles,
-  FileText,
   Tag,
-  Wifi,
-  UserCheck,
   Receipt,
+  Download,
+  FileText,
+  Check,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { tenantService, type RentCollectionDetails, type OtherDueItem } from '../services/tenantService';
-import { ListSkeleton } from '../components/ui/ListSkeleton';
-import { InlineError } from '../components/ui/InlineError';
 import { RentPaymentModal } from '../components/my-pg/RentPaymentModal';
 import { formatDateToDDMMYYYY } from '../utils/dateUtils';
+
+type CategoryTab = 'all' | 'rent' | 'deposit' | 'utilities' | 'other';
 
 export const PaymentsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -29,30 +25,32 @@ export const PaymentsPage: React.FC = () => {
 
   const [dues, setDues] = useState<RentCollectionDetails | null>(null);
   const [transactions, setTransactions] = useState<any[]>([]);
-  const [totalPaid, setTotalPaid] = useState<number>(0);
   const [loading, setLoading] = useState(true);
-  const [historyError, setHistoryError] = useState(false);
   const [showPayModal, setShowPayModal] = useState(false);
   const [modalInitialItem, setModalInitialItem] = useState<'all' | 'rent' | 'security' | 'dues'>('all');
   const [modalPreselectedDueId, setModalPreselectedDueId] = useState<string | null>(null);
+  const [selectedCategoryTab, setSelectedCategoryTab] = useState<CategoryTab>('all');
+  const [downloadingReceiptId, setDownloadingReceiptId] = useState<string | null>(null);
 
   const loadPaymentData = async () => {
     setLoading(true);
     try {
       if (isAuthenticated && isLinkedTenant) {
-        let historyFailed = false;
-        const [duesRes, historyRes] = await Promise.all([
-          tenantService.getRentDues().catch(() => null),
-          tenantService.getRentHistory(1, 20).catch(() => {
-            historyFailed = true;
-            return { transactions: [], totalAmountPaid: 0 };
-          }),
+        const [duesRes, historyRes] = await Promise.allSettled([
+          tenantService.getRentDues(),
+          tenantService.getRentHistory(1, 20),
         ]);
-        setHistoryError(historyFailed);
-        setDues(duesRes);
-        const txList = historyRes.transactions || historyRes.history || (Array.isArray(historyRes) ? historyRes : []);
-        setTransactions(txList);
-        setTotalPaid(historyRes.totalAmountPaid || txList.reduce((acc: number, t: any) => acc + (Number(t.amount) || 0), 0));
+
+        if (duesRes.status === 'fulfilled' && duesRes.value) {
+          setDues(duesRes.value);
+        }
+        if (historyRes.status === 'fulfilled' && historyRes.value) {
+          const txList =
+            historyRes.value.transactions ||
+            historyRes.value.history ||
+            (Array.isArray(historyRes.value) ? historyRes.value : []);
+          setTransactions(txList);
+        }
       }
     } catch (err) {
       console.error('Failed to load payment data:', err);
@@ -98,17 +96,7 @@ export const PaymentsPage: React.FC = () => {
 
   // Miscellaneous and Other Dues
   const otherDuesList: OtherDueItem[] = dues?.lineItems?.miscellaneous?.otherDues || [];
-  const linesList = dues?.lines || [];
 
-  const miscTotal = Number(
-    dues?.lineItems?.miscellaneous?.otherDuesAmount ??
-    dues?.lineItems?.miscellaneous?.amount ??
-    dues?.breakdown?.miscellaneous ??
-    0
-  );
-
-  // Accurate Outstanding Balance calculation:
-  // Note: dues.summary.balanceDue takes precedence to avoid top-level totalPayable=0 quirks
   const balanceDue = dues?.summary?.balanceDue !== undefined
     ? Number(dues.summary.balanceDue)
     : dues?.summary?.totalPayable !== undefined
@@ -117,44 +105,11 @@ export const PaymentsPage: React.FC = () => {
     ? Number(dues.payable)
     : Number(dues?.totalPayable || 0);
 
-  const totalBilled = Number(
-    dues?.summary?.totalBilled ?? (monthlyRent + securityDepositAmount + miscTotal)
-  );
-
-  const amountPaidInPeriod = Number(
-    dues?.summary?.amountPaid ?? (totalBilled > balanceDue ? totalBilled - balanceDue : 0)
-  );
-
-  const isAllCleared = dues?.status?.toLowerCase() === 'paid' || (balanceDue === 0 && dues !== null);
-
-  // Unified breakdown list of individual other dues
-  const detailedDuesList = otherDuesList.length > 0
-    ? otherDuesList.map((item) => ({
-        id: item.id,
-        title: item.title || item.dueType || 'Extra Charge',
-        type: item.dueType || 'Extra Due',
-        amount: Number(item.amount || item.balance || 0),
-        balance: Number(item.balance !== undefined ? item.balance : item.amount || 0),
-        dueDate: item.dueDate || dues?.nextDueDate,
-        createdAt: item.createdAt,
-        description: item.description,
-        isPaid: Boolean(item.isPaid || (item.balance !== undefined && item.balance === 0)),
-      }))
-    : linesList.length > 0
-    ? linesList.map((line) => ({
-        id: line.id,
-        title: line.label || 'Stay Due',
-        type: line.category || line.type || 'Stay Charge',
-        amount: Number(line.amount || 0),
-        balance: Number(line.balance ?? line.amount ?? 0),
-        dueDate: dues?.nextDueDate,
-        createdAt: undefined,
-        description: '',
-        isPaid: Boolean(line.balance === 0),
-      }))
-    : [];
-
-  const pendingDuesCount = detailedDuesList.filter((d) => !d.isPaid).length;
+  const duesStatus = (dues?.status || (balanceDue > 0 ? 'DUE' : 'PAID')).toUpperCase();
+  const nextDueDateVal = (dues as any)?.nextDueDate;
+  const nextDueText = nextDueDateVal
+    ? formatDateToDDMMYYYY(nextDueDateVal)
+    : '1st of month';
 
   const openPaymentForItem = (item: 'all' | 'rent' | 'security' | 'dues', dueId?: string) => {
     setModalInitialItem(item);
@@ -162,49 +117,45 @@ export const PaymentsPage: React.FC = () => {
     setShowPayModal(true);
   };
 
-  const formatDueDate = (dateStr?: string) => {
-    if (dateStr) {
-      const formatted = formatDateToDDMMYYYY(dateStr);
-      if (formatted) {
-        return `Due by ${formatted}`;
+  const handleDownloadReceipt = async (tx: any) => {
+    const id = tx.id;
+    if (!id) return;
+    setDownloadingReceiptId(id);
+    try {
+      if (tx.receiptUrl) {
+        window.open(tx.receiptUrl, '_blank', 'noopener');
+        return;
       }
+      const receipt = await tenantService.getPaymentReceipt(id);
+      if (receipt?.receiptUrl || receipt?.url) {
+        window.open(receipt.receiptUrl || receipt.url, '_blank', 'noopener');
+      } else {
+        alert(`Receipt #${receipt?.receiptNumber || tx.receiptNumber || id.slice(0, 8)} is verified.`);
+      }
+    } catch {
+      alert('Could not download receipt at this time.');
+    } finally {
+      setDownloadingReceiptId(null);
     }
-    if (propertyDetails?.nextRentDueDate) {
-      return `Due by ${formatDateToDDMMYYYY(propertyDetails.nextRentDueDate)}`;
-    }
-    if (dues?.lineItems?.rent?.dueDay) {
-      return `Due on ${dues.lineItems.rent.dueDay} of month`;
-    }
-    return 'Due on 1st of month';
-  };
-
-  const getDueCategoryIcon = (type: string) => {
-    const t = type.toLowerCase();
-    if (t.includes('wifi') || t.includes('internet')) return <Wifi className="h-4 w-4 text-blue-600" />;
-    if (t.includes('join') || t.includes('onboard') || t.includes('admin')) return <UserCheck className="h-4 w-4 text-emerald-600" />;
-    if (t.includes('laundry') || t.includes('wash')) return <Sparkles className="h-4 w-4 text-indigo-600" />;
-    if (t.includes('electric') || t.includes('power') || t.includes('meter')) return <Zap className="h-4 w-4 text-amber-600" />;
-    if (t.includes('deposit') || t.includes('caution')) return <ShieldCheck className="h-4 w-4 text-teal-600" />;
-    return <Tag className="h-4 w-4 text-teal-600" />;
   };
 
   if (!isAuthenticated) {
     return (
-      <div className="pt-8 pb-12 text-center space-y-4 animate-fade-in">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-teal-50 text-primary shadow-sm">
+      <div className="pt-12 pb-16 text-center space-y-4 animate-fade-in">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-teal-50 text-[#008080] shadow-sm">
           <CreditCard className="h-7 w-7" />
         </div>
         <div>
-          <h2 className="text-base font-bold text-brandText">Sign In to View Payments</h2>
+          <h2 className="text-base font-bold text-gray-900">Sign In to View Payments</h2>
           <p className="text-xs text-gray-500 mt-1 max-w-xs mx-auto">
-            Please log in with your mobile OTP to check monthly rent dues, pay online via UPI, and download tax receipts.
+            Please log in with your phone to view rent dues, pay online, and download receipts.
           </p>
         </div>
         <button
           onClick={() => navigate('/login')}
-          className="rounded-xl bg-primary px-6 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-primary-dark"
+          className="rounded-xl bg-[#008080] px-6 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#006666]"
         >
-          Sign In with Mobile OTP
+          Sign In
         </button>
       </div>
     );
@@ -212,27 +163,27 @@ export const PaymentsPage: React.FC = () => {
 
   if (!isLinkedTenant) {
     return (
-      <div className="pt-8 pb-12 text-center space-y-4 animate-fade-in">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-teal-50 text-primary shadow-sm">
+      <div className="pt-12 pb-16 text-center space-y-4 animate-fade-in">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-teal-50 text-[#008080] shadow-sm">
           <CreditCard className="h-7 w-7" />
         </div>
         <div>
-          <h2 className="text-base font-bold text-brandText">No Active PG Stay Linked</h2>
+          <h2 className="text-base font-bold text-gray-900">No Active PG Stay Linked</h2>
           <p className="text-xs text-gray-500 mt-1 max-w-xs mx-auto leading-relaxed">
-            Your monthly rent dues, online UPI settlements, and payment receipts will appear here once your PG manager adds your phone number to their property.
+            Your monthly rent dues and receipts will appear here once your PG manager adds your phone number.
           </p>
         </div>
         <div className="flex gap-2 justify-center max-w-xs mx-auto pt-2">
           <button
             onClick={() => checkTenancy()}
             disabled={isCheckingTenancy}
-            className="flex-1 rounded-xl border border-teal-200 bg-white py-2.5 text-xs font-bold text-primary shadow-sm hover:bg-teal-50 active:scale-95 transition-all"
+            className="flex-1 rounded-xl border border-teal-200 bg-white py-2.5 text-xs font-bold text-[#008080] shadow-sm hover:bg-teal-50"
           >
             {isCheckingTenancy ? 'Syncing...' : 'Sync Status'}
           </button>
           <button
             onClick={() => navigate('/search')}
-            className="flex-1 rounded-xl bg-primary py-2.5 text-xs font-bold text-white shadow-sm hover:bg-primary-dark active:scale-95 transition-all"
+            className="flex-1 rounded-xl bg-[#008080] py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#006666]"
           >
             Find PGs
           </button>
@@ -241,8 +192,18 @@ export const PaymentsPage: React.FC = () => {
     );
   }
 
+  if (loading) {
+    return (
+      <div className="space-y-4 pt-1 pb-8 animate-fade-in">
+        <div className="h-44 rounded-3xl bg-slate-200/70 animate-pulse" />
+        <div className="h-40 rounded-2xl bg-slate-200/70 animate-pulse" />
+        <div className="h-56 rounded-2xl bg-slate-200/70 animate-pulse" />
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-5 pt-1 pb-6 animate-fade-in">
+    <div className="space-y-5 pt-1 pb-8 animate-fade-in">
       {/* Payment Modal */}
       <RentPaymentModal
         isOpen={showPayModal}
@@ -257,432 +218,359 @@ export const PaymentsPage: React.FC = () => {
         }}
       />
 
-      {/* 1. Top Metric Cards (Live Backend Data) */}
-      <div className="grid grid-cols-1 min-[420px]:grid-cols-3 gap-2.5">
-        {/* Total Billed in Period */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-3.5 shadow-sm">
-          <span className="text-[11px] font-semibold leading-tight text-gray-500 block">Total Invoiced</span>
-          <p className="text-base font-black text-brandText mt-0.5 break-anywhere">
-            ₹{totalBilled.toLocaleString('en-IN')}
-          </p>
-          <span className="text-[10px] text-gray-400 font-medium">Period total</span>
-        </div>
-
-        {/* Outstanding Due */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-3.5 shadow-sm">
-          <span className={`text-[11px] font-semibold leading-tight block ${balanceDue > 0 ? 'text-red-500' : 'text-emerald-600'}`}>
-            {balanceDue > 0 ? 'Outstanding Due' : 'All Cleared'}
-          </span>
-          <p className={`text-base font-black mt-0.5 break-anywhere ${balanceDue > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
-            ₹{balanceDue.toLocaleString('en-IN')}
-          </p>
-          <span className="text-[10px] text-gray-400 font-medium">
-            {balanceDue > 0 ? `${pendingDuesCount > 0 ? `${pendingDuesCount} item(s) due` : 'Pending'}` : 'Zero balance'}
-          </span>
-        </div>
-
-        {/* Total Cleared */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-3.5 shadow-sm">
-          <span className="text-[11px] font-semibold leading-tight text-emerald-600 block">Amount Paid</span>
-          <p className="text-base font-black text-brandText mt-0.5 break-anywhere">
-            ₹{(totalPaid || amountPaidInPeriod).toLocaleString('en-IN')}
-          </p>
-          <span className="text-[10px] text-gray-400 font-medium">Cleared to date</span>
-        </div>
-      </div>
-
-      {/* 2. Amount Due Main Hero Card */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary via-primary to-primary-dark p-6 text-white shadow-xl shadow-primary/20">
+      {/* ==================================================================== */}
+      {/* 1. OUTSTANDING BALANCE SUMMARY (T5)                                   */}
+      {/* ==================================================================== */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#006666] via-[#004d4d] to-[#003333] p-6 text-white shadow-xl shadow-teal-900/15">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-bold tracking-wide uppercase">
-                {dues?.period?.label || 'Current Period'}
+                {dues?.period?.label || 'Current Cycle'}
               </span>
-              <span className="text-xs text-white/80">
-                {propertyDetails?.property?.name || dues?.property?.name || 'My PG Stay'}
+              <span className="text-xs text-teal-100/90 truncate max-w-[200px]">
+                {propertyDetails?.property?.name || 'Active Stay'}
               </span>
             </div>
 
-            <div className="pt-0.5">
-              <span className="text-xs font-medium text-white/80">
-                {isAllCleared ? 'Current Month Status' : 'Net Outstanding Balance'}
-              </span>
-              <h2 className="text-3xl font-black tracking-tight mt-0.5">
-                ₹{balanceDue.toLocaleString('en-IN')}
-              </h2>
-            </div>
+            <span className="text-xs font-medium text-teal-100/80 block pt-1">
+              Outstanding Balance
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white tabular-nums">
+              ₹{balanceDue.toLocaleString('en-IN')}
+            </h2>
 
-            <p className="text-xs text-white/85 flex items-center gap-1.5 pt-0.5">
-              <span>Monthly Rent: ₹{monthlyRent.toLocaleString('en-IN')}</span>
-              <span>•</span>
-              <span>{isAllCleared ? 'All dues cleared ✓' : formatDueDate()}</span>
+            <p className="text-xs text-teal-100/90 flex items-center gap-1.5 pt-0.5">
+              <Clock className="h-3.5 w-3.5 text-teal-300" />
+              <span>Due by {nextDueText}</span>
+              {balanceDue === 0 && <span className="text-emerald-300 font-bold ml-1">· All Clear ✓</span>}
             </p>
           </div>
 
           <button
+            type="button"
             onClick={() => openPaymentForItem('all')}
-            className="flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3.5 text-xs font-black text-primary shadow-lg hover:bg-gray-50 active:scale-95 transition-all tap-target shrink-0"
+            className="flex items-center justify-center gap-2 rounded-2xl bg-white px-6 py-3.5 text-xs font-black text-[#008080] shadow-lg hover:bg-teal-50 active:scale-95 transition-all shrink-0 cursor-pointer"
           >
-            <CreditCard className="h-4 w-4 text-primary" />
-            <span>{isAllCleared ? 'Make Advance Payment' : `Pay ₹${balanceDue.toLocaleString('en-IN')} Now`}</span>
+            <CreditCard className="h-4 w-4 text-[#008080]" />
+            <span>{balanceDue > 0 ? `Pay All (₹${balanceDue.toLocaleString('en-IN')})` : 'Advance Payment'}</span>
           </button>
         </div>
-
-        {/* Last payment reference banner if present */}
-        {dues?.paymentInfo?.paymentMethod && (
-          <div className="mt-4 pt-3 border-t border-white/15 flex flex-wrap items-center justify-between gap-2 text-[11px] text-white/90">
-            <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-300" />
-              <span>
-                Last payment of ₹{amountPaidInPeriod.toLocaleString('en-IN')} received via{' '}
-                <strong className="uppercase">{dues.paymentInfo.paymentMethod}</strong>
-                {dues.paymentInfo.paidAt ? ` on ${new Date(dues.paymentInfo.paidAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}` : ''}
-              </span>
-            </span>
-            {dues.paymentInfo.reference && (
-              <span className="font-mono text-[10px] bg-white/15 px-2 py-0.5 rounded-md">
-                Ref: {dues.paymentInfo.reference}
-              </span>
-            )}
-          </div>
-        )}
       </div>
 
-      {/* 3. Itemized Stay Bills & Charges (Rent, Security, Utilities) */}
-      <div className="space-y-3">
+      {/* ==================================================================== */}
+      {/* 2. ITEMISED DUES LIST (T5: Rent, Electricity, Maint, Deposit)        */}
+      {/* ==================================================================== */}
+      <div className="space-y-2.5">
         <div className="flex items-center justify-between px-1">
-          <h3 className="text-xs font-bold text-brandText uppercase tracking-wider flex items-center gap-1.5">
-            <Sparkles className="h-3.5 w-3.5 text-primary" />
-            Stay Bills & Categories
+          <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
+            <Receipt className="h-4 w-4 text-[#008080]" />
+            <span>Itemised Dues</span>
           </h3>
-          <span className="text-[10px] text-gray-400 font-medium">Click to pay specific bill</span>
+          <span className="text-[11px] text-gray-500 font-medium">Due by {nextDueText}</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {/* Card 1: Monthly Room Rent */}
-          <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm flex flex-col justify-between space-y-3">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-primary">
-                  <Home className="h-5 w-5" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-brandText">Monthly Room Rent</h4>
-                  <p className="text-[11px] text-gray-400">{formatDueDate()}</p>
-                </div>
+        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm divide-y divide-gray-100">
+          {/* 1. Monthly Room Rent */}
+          <div className="flex items-center justify-between p-4 hover:bg-slate-50/50 transition-colors">
+            <div className="flex items-center gap-3 min-w-0 pr-2">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-[#008080]">
+                <Home className="h-5 w-5" />
               </div>
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                isRentPaid ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
-              }`}>
-                {isRentPaid ? 'PAID ✓' : 'UNPAID'}
-              </span>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm font-bold text-gray-900 truncate">Room Rent</p>
+                <p className="text-[11px] text-gray-500 truncate">Monthly accommodation charges</p>
+              </div>
             </div>
 
-            <div className="pt-1 border-t border-gray-50 flex items-center justify-between">
-              <div>
-                <span className="text-[10px] text-gray-400 block">Amount</span>
-                <span className="text-base font-black text-brandText">
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="text-right">
+                <span className="block text-sm sm:text-base font-black text-gray-900 tabular-nums">
                   ₹{monthlyRent.toLocaleString('en-IN')}
                 </span>
-              </div>
-              <button
-                onClick={() => openPaymentForItem('rent')}
-                className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all shadow-xs ${
-                  isRentPaid
-                    ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    : 'bg-primary text-white hover:bg-primary-dark active:scale-95'
-                }`}
-              >
-                {isRentPaid ? 'Receipt / Paid' : 'Pay Rent'}
-              </button>
-            </div>
-          </div>
-
-          {/* Card 2: Security Deposit */}
-          <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm flex flex-col justify-between space-y-3">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                  <ShieldCheck className="h-5 w-5" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-brandText">Security Deposit</h4>
-                  <p className="text-[11px] text-gray-400">Refundable caution deposit</p>
-                </div>
-              </div>
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                isSecurityPaid ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
-              }`}>
-                {isSecurityPaid ? 'SECURED ✓' : 'PENDING'}
-              </span>
-            </div>
-
-            <div className="pt-1 border-t border-gray-50 flex items-center justify-between">
-              <div>
-                <span className="text-[10px] text-gray-400 block">Deposit Amount</span>
-                <span className="text-base font-black text-brandText">
-                  ₹{securityDepositAmount.toLocaleString('en-IN')}
+                <span
+                  className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-bold ${
+                    isRentPaid
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : balanceDue > 0 && duesStatus === 'OVERDUE'
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-amber-100 text-amber-800'
+                  }`}
+                >
+                  {isRentPaid ? 'Paid' : balanceDue > 0 && duesStatus === 'OVERDUE' ? 'Overdue' : 'Pending'}
                 </span>
               </div>
-              <button
-                onClick={() => openPaymentForItem('security')}
-                className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all shadow-xs ${
-                  isSecurityPaid
-                    ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    : 'bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95'
-                }`}
-              >
-                {isSecurityPaid ? 'Deposit Status' : 'Pay Deposit'}
-              </button>
+
+              {!isRentPaid && (
+                <button
+                  type="button"
+                  onClick={() => openPaymentForItem('rent')}
+                  className="rounded-xl bg-[#008080] hover:bg-[#006666] text-white px-3 py-1.5 text-xs font-bold transition-all shadow-xs"
+                >
+                  Pay
+                </button>
+              )}
             </div>
           </div>
 
-          {/* Card 3: Utilities, Electricity & Extra Dues */}
-          <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm flex flex-col justify-between space-y-3">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+          {/* 2. Security Deposit */}
+          <div className="flex items-center justify-between p-4 hover:bg-slate-50/50 transition-colors">
+            <div className="flex items-center gap-3 min-w-0 pr-2">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm font-bold text-gray-900 truncate">Security Deposit</p>
+                <p className="text-[11px] text-gray-500 truncate">Refundable caution deposit</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="text-right">
+                <span className="block text-sm sm:text-base font-black text-gray-900 tabular-nums">
+                  ₹{securityDepositAmount.toLocaleString('en-IN')}
+                </span>
+                <span
+                  className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-bold ${
+                    isSecurityPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                  }`}
+                >
+                  {isSecurityPaid ? 'Paid' : 'Pending'}
+                </span>
+              </div>
+
+              {!isSecurityPaid && securityDepositAmount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => openPaymentForItem('security')}
+                  className="rounded-xl bg-[#008080] hover:bg-[#006666] text-white px-3 py-1.5 text-xs font-bold transition-all shadow-xs"
+                >
+                  Pay
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* 3. Electricity & Utilities */}
+          {otherDuesList.map((due) => (
+            <div key={due.id} className="flex items-center justify-between p-4 hover:bg-slate-50/50 transition-colors">
+              <div className="flex items-center gap-3 min-w-0 pr-2">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
                   <Zap className="h-5 w-5" />
                 </div>
-                <div>
-                  <h4 className="text-xs font-bold text-brandText">Utilities & Extra Dues</h4>
-                  <p className="text-[11px] text-gray-400">
-                    {pendingDuesCount > 0 ? `${pendingDuesCount} pending charge(s)` : 'Wifi, laundry & add-ons'}
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-bold text-gray-900 truncate">
+                    {due.title || due.dueType || 'Utilities & Maintenance'}
+                  </p>
+                  <p className="text-[11px] text-gray-500 truncate">
+                    {due.dueDate ? `Due ${formatDateToDDMMYYYY(due.dueDate)}` : 'Utility charge'}
                   </p>
                 </div>
               </div>
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                miscTotal === 0 || balanceDue === 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
-              }`}>
-                {miscTotal === 0 || balanceDue === 0 ? 'CLEARED' : 'DUE'}
+
+              <div className="flex items-center gap-3 shrink-0">
+                <div className="text-right">
+                  <span className="block text-sm sm:text-base font-black text-gray-900 tabular-nums">
+                    ₹{Number(due.amount || 0).toLocaleString('en-IN')}
+                  </span>
+                  <span
+                    className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-bold ${
+                      due.isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                    }`}
+                  >
+                    {due.isPaid ? 'Paid' : 'Pending'}
+                  </span>
+                </div>
+
+                {!due.isPaid && (
+                  <button
+                    type="button"
+                    onClick={() => openPaymentForItem('dues', due.id)}
+                    className="rounded-xl bg-[#008080] hover:bg-[#006666] text-white px-3 py-1.5 text-xs font-bold transition-all shadow-xs"
+                  >
+                    Pay
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {otherDuesList.length === 0 && (
+            <div className="flex items-center justify-between p-4 text-xs text-gray-500">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-500">
+                  <Zap className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="font-bold text-gray-800">Electricity & Maintenance</p>
+                  <p className="text-[11px] text-gray-400">Included in rent or no pending meter charges</p>
+                </div>
+              </div>
+              <span className="rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5">
+                Cleared
               </span>
             </div>
+          )}
+        </div>
+      </div>
 
-            <div className="pt-1 border-t border-gray-50 flex items-center justify-between">
+      {/* ==================================================================== */}
+      {/* 3. CATEGORISED BILLS TAB / ACCORDION (T5)                             */}
+      {/* ==================================================================== */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
+            <Tag className="h-4 w-4 text-[#008080]" />
+            <span>Bills by Category</span>
+          </h3>
+        </div>
+
+        {/* Category Pills */}
+        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          {[
+            { id: 'all' as const, label: 'All Bills' },
+            { id: 'rent' as const, label: 'Rent' },
+            { id: 'deposit' as const, label: 'Security Deposit' },
+            { id: 'utilities' as const, label: 'Utilities & Extra' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setSelectedCategoryTab(tab.id)}
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${
+                selectedCategoryTab === tab.id
+                  ? 'bg-[#008080] text-white shadow-xs'
+                  : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab Content Cards */}
+        <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm space-y-3">
+          {(selectedCategoryTab === 'all' || selectedCategoryTab === 'rent') && (
+            <div className="flex items-center justify-between py-2 border-b border-gray-50">
               <div>
-                <span className="text-[10px] text-gray-400 block">Pending Charges</span>
-                <span className="text-base font-black text-brandText">
-                  ₹{miscTotal.toLocaleString('en-IN')}
+                <p className="text-xs font-bold text-gray-900">Monthly Room Rent</p>
+                <p className="text-[11px] text-gray-400">Due monthly on {nextDueText}</p>
+              </div>
+              <div className="text-right">
+                <span className="font-black text-gray-900 text-sm tabular-nums">
+                  ₹{monthlyRent.toLocaleString('en-IN')}
                 </span>
+                <p className="text-[10px] font-bold text-emerald-600">{isRentPaid ? 'Settled' : 'Unpaid'}</p>
               </div>
-              <button
-                onClick={() => openPaymentForItem('dues')}
-                className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all shadow-xs ${
-                  miscTotal === 0 || balanceDue === 0
-                    ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    : 'bg-amber-600 text-white hover:bg-amber-700 active:scale-95'
-                }`}
-              >
-                {miscTotal === 0 || balanceDue === 0 ? 'No Dues' : `Pay ₹${miscTotal}`}
-              </button>
             </div>
-          </div>
-        </div>
-      </div>
+          )}
 
-      {/* 4. DEDICATED SECTION: DETAILED BREAKDOWN OF INDIVIDUAL DUES */}
-      {detailedDuesList.length > 0 && (
-        <div className="space-y-3 pt-1">
-          <div className="flex items-center justify-between px-1">
-            <div>
-              <h3 className="text-xs font-bold text-brandText uppercase tracking-wider flex items-center gap-1.5">
-                <Receipt className="h-3.5 w-3.5 text-teal-600" />
-                Itemized Dues Breakdown ({detailedDuesList.length})
-              </h3>
-              <p className="text-[11px] text-gray-400">
-                Detailed list of utility fees, internet, laundry, and property services for your stay.
-              </p>
+          {(selectedCategoryTab === 'all' || selectedCategoryTab === 'deposit') && (
+            <div className="flex items-center justify-between py-2 border-b border-gray-50">
+              <div>
+                <p className="text-xs font-bold text-gray-900">Refundable Security Deposit</p>
+                <p className="text-[11px] text-gray-400">One-time security deposit held</p>
+              </div>
+              <div className="text-right">
+                <span className="font-black text-gray-900 text-sm tabular-nums">
+                  ₹{securityDepositAmount.toLocaleString('en-IN')}
+                </span>
+                <p className="text-[10px] font-bold text-emerald-600">{isSecurityPaid ? 'Held in Vault' : 'Pending'}</p>
+              </div>
             </div>
+          )}
 
-            {balanceDue > 0 && (
-              <button
-                onClick={() => openPaymentForItem('dues')}
-                className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
-              >
-                <span>Pay All (₹{miscTotal.toLocaleString('en-IN')})</span>
-                <ChevronRight className="h-3.5 w-3.5" />
-              </button>
-            )}
-          </div>
-
-          <div className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden divide-y divide-gray-100">
-            {detailedDuesList.map((due) => (
-              <div
-                key={due.id}
-                className="p-3.5 flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between hover:bg-gray-50/60 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-50 text-gray-700 shrink-0">
-                    {getDueCategoryIcon(due.type)}
+          {(selectedCategoryTab === 'all' || selectedCategoryTab === 'utilities') && (
+            otherDuesList.length > 0 ? (
+              otherDuesList.map((d) => (
+                <div key={d.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-b-0">
+                  <div>
+                    <p className="text-xs font-bold text-gray-900">{d.title || d.dueType}</p>
+                    <p className="text-[11px] text-gray-400">Meter / Utility split</p>
                   </div>
-
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-xs font-bold text-brandText">{due.title}</h4>
-                      <span className="rounded-md bg-gray-100 px-1.5 py-0.2 text-[9px] font-semibold text-gray-600 uppercase">
-                        {due.type}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-[11px] text-gray-400">
-                      <span>{formatDueDate(due.dueDate)}</span>
-                      {due.description && (
-                        <>
-                          <span>•</span>
-                          <span className="truncate max-w-[180px]">{due.description}</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <span className="text-xs font-black text-brandText block">
-                      ₹{due.amount.toLocaleString('en-IN')}
+                    <span className="font-black text-gray-900 text-sm tabular-nums">
+                      ₹{Number(d.amount).toLocaleString('en-IN')}
                     </span>
-                    <span className={`text-[10px] font-bold ${due.isPaid ? 'text-emerald-600' : 'text-red-500'}`}>
-                      {due.isPaid ? 'Paid ✓' : 'Due'}
-                    </span>
+                    <p className="text-[10px] font-bold text-amber-600">{d.isPaid ? 'Paid' : 'Due'}</p>
                   </div>
-
-                  {!due.isPaid && (
-                    <button
-                      onClick={() => openPaymentForItem('dues', due.id)}
-                      className="rounded-xl border border-teal-200 bg-teal-50 px-2.5 py-1 text-[11px] font-bold text-primary hover:bg-teal-100 active:scale-95 transition-all shadow-2xs"
-                    >
-                      Pay
-                    </button>
-                  )}
                 </div>
-              </div>
-            ))}
-
-            {/* Bill Summary Footer Row */}
-            <div className="bg-gray-50/80 px-4 py-3 flex items-center justify-between text-xs font-semibold text-gray-600">
-              <span className="flex items-center gap-1.5">
-                <FileText className="h-3.5 w-3.5 text-gray-400" />
-                <span>Total Utilities & Dues</span>
-              </span>
-              <span className="font-bold text-brandText text-sm">
-                ₹{miscTotal.toLocaleString('en-IN')}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 5. Section: Payment Methods */}
-      <div className="space-y-2.5">
-        <h3 className="text-xs font-bold text-brandText uppercase tracking-wider px-1">
-          Payment Modes
-        </h3>
-
-        <div className="grid grid-cols-2 gap-3">
-          {/* UPI Instant Gateway */}
-          <button
-            type="button"
-            onClick={() => setShowPayModal(true)}
-            className="flex flex-col items-center justify-center rounded-2xl border border-teal-100 bg-white p-4 shadow-sm hover:border-teal-300 active:scale-98 transition-all tap-target text-center"
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-50 text-primary mb-2">
-              <Smartphone className="h-5 w-5" />
-            </div>
-            <span className="text-xs font-bold text-brandText">UPI Instant</span>
-            <span className="text-[10px] text-gray-400 mt-0.5">GPay, PhonePe, Paytm, BHIM</span>
-          </button>
-
-          {/* Direct UPI / UTR */}
-          <button
-            type="button"
-            onClick={() => setShowPayModal(true)}
-            className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-4 shadow-sm hover:border-teal-200 active:scale-98 transition-all tap-target text-center"
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 text-gray-700 mb-2">
-              <CreditCard className="h-5 w-5" />
-            </div>
-            <span className="text-xs font-bold text-brandText">Direct Bank / UTR</span>
-            <span className="text-[10px] text-gray-400 mt-0.5">QR Standee & Cash Handover</span>
-          </button>
+              ))
+            ) : (
+              <p className="text-xs text-gray-400 py-1">No additional utility or electricity dues billed.</p>
+            )
+          )}
         </div>
       </div>
 
-      {/* 6. Section: Dynamic Transaction History */}
+      {/* ==================================================================== */}
+      {/* 4. PAYMENT HISTORY LIST WITH RECEIPT DOWNLOAD (T5)                    */}
+      {/* ==================================================================== */}
       <div className="space-y-2.5">
         <div className="flex items-center justify-between px-1">
-          <h3 className="text-xs font-bold text-brandText uppercase tracking-wider">
-            Transaction History ({transactions.length})
+          <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
+            <FileText className="h-4 w-4 text-[#008080]" />
+            <span>Payment History</span>
           </h3>
           <button
-            onClick={() => navigate('/transactions')}
-            className="text-xs font-semibold text-primary hover:underline flex items-center gap-0.5"
+            type="button"
+            onClick={() => navigate('/payments/history')}
+            className="text-[11px] font-bold text-[#008080] hover:underline"
           >
-            <span>Full Ledger</span>
-            <ChevronRight className="h-3.5 w-3.5" />
+            All receipts →
           </button>
         </div>
 
-        {loading ? (
-          <div className="space-y-2">
-            <ListSkeleton rows={2} />
-            <p className="text-center text-xs text-gray-400">Loading transactions...</p>
-          </div>
-        ) : historyError ? (
-          <InlineError message="Could not load transactions." onRetry={loadPaymentData} />
-        ) : transactions.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 p-6 text-center space-y-1.5">
-            <p className="text-xs font-semibold text-brandText">No Payment Transactions Recorded</p>
-            <p className="text-[11px] text-gray-400">
-              When rent payments are settled, your official receipts and transaction timestamps will appear here.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-2.5">
-            {transactions.map((tx) => {
-              const isSuccess = tx.status === 'SUCCESS' || tx.status === 'PAID' || tx.status === 'paid';
+        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm divide-y divide-gray-100">
+          {transactions.length > 0 ? (
+            transactions.slice(0, 5).map((tx) => {
+              const amount = Number(tx.amount || tx.rentAmount || 0);
+              const dateStr = tx.paidAt || tx.paymentDate || tx.createdAt;
+              const formattedDate = dateStr
+                ? new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                : 'Recent';
+              const mode = tx.paymentMethod || tx.method || 'Online UPI';
+
               return (
-                <div
-                  key={tx.id}
-                  onClick={() => navigate('/transactions')}
-                  className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm cursor-pointer hover:border-gray-200 active:scale-99 transition-all"
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`flex h-10 w-10 items-center justify-center rounded-full ${
-                        isSuccess ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
-                      }`}
-                    >
-                      {isSuccess ? <CheckCircle2 className="h-5 w-5" /> : <Clock className="h-5 w-5" />}
+                <div key={tx.id} className="flex items-center justify-between p-4 hover:bg-slate-50/50 transition-colors">
+                  <div className="flex items-center gap-3 min-w-0 pr-2">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+                      <Check className="h-4 w-4 stroke-[3]" />
                     </div>
-                    <div>
-                      <h4 className="text-xs font-bold text-brandText">{tx.title || 'Rent Collection'}</h4>
-                      <p className="text-[11px] text-gray-400">
-                        {tx.formattedDate || (tx.date ? formatDateToDDMMYYYY(tx.date) : 'Recent')}
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-gray-900 truncate">
+                        {tx.title || 'Rent Settlement'}
+                      </p>
+                      <p className="text-[11px] text-gray-500 truncate">
+                        {formattedDate} · <span className="uppercase font-semibold">{mode}</span>
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <div className="text-right">
-                      <p className="text-xs font-bold text-brandText">
-                        ₹{Number(tx.amount).toLocaleString('en-IN')}
-                      </p>
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                          isSuccess ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
-                        }`}
-                      >
-                        {tx.status}
-                      </span>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-gray-300" />
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-sm font-black text-emerald-700 tabular-nums">
+                      ₹{amount.toLocaleString('en-IN')}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadReceipt(tx)}
+                      disabled={downloadingReceiptId === tx.id}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-[#008080] hover:bg-teal-50 transition-colors"
+                      title="Download receipt PDF"
+                    >
+                      <Download className="h-4 w-4" />
+                    </button>
                   </div>
                 </div>
               );
-            })}
-          </div>
-        )}
+            })
+          ) : (
+            <div className="p-8 text-center text-xs text-gray-400">
+              No previous transactions recorded yet.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

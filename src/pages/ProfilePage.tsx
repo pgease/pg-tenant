@@ -2,10 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
 import {
-  User as UserIcon,
   LogOut,
   ChevronRight,
-  FileText,
   Bell,
   Star,
   Gift,
@@ -21,9 +19,24 @@ import {
   CheckCircle2,
   AlertCircle,
   Camera,
+  Home,
+  Users,
+  UtensilsCrossed,
+  Receipt,
+  CreditCard,
+  ShieldCheck,
+  Wrench,
+  Clock,
+  DoorOpen,
+  FileCheck,
+  FileSignature,
+  Globe,
+  Info,
+  Pencil,
+  MessageSquare,
+  BadgeCheck,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { menuPageServices } from '../navigation/appMenu';
 import { StaffModal } from '../components/my-pg/StaffModal';
 import { AmenitiesModal } from '../components/my-pg/AmenitiesModal';
 
@@ -129,6 +142,7 @@ export const ProfilePage: React.FC = () => {
       setIsSavingProfile(false);
     }
   };
+
   const phone = tenant?.phone
     ? tenant.phone.startsWith('+91')
       ? tenant.phone
@@ -158,85 +172,104 @@ export const ProfilePage: React.FC = () => {
     }
   };
 
-  return (
-    <div className="space-y-5 pt-1 pb-6 animate-fade-in">
-      {/* 1. Profile User Card (Dynamic from authenticated state) */}
-      <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3.5">
-            {/* Avatar Circle with Photo or Initials */}
-            <div className="relative group">
-              <input
-                id="tenant-profile-photo"
-                type="file"
-                ref={fileInputRef}
-                accept="image/*"
-                className="sr-only"
-                onChange={handlePhotoSelected}
-              />
-              <div className="relative flex h-14 w-14 items-center justify-center rounded-full border-2 border-primary bg-teal-50 font-bold text-primary text-lg overflow-hidden shrink-0 shadow-sm">
-                {isUploadingPhoto ? (
-                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                ) : tenantPhoto ? (
-                  <img
-                    src={tenantPhoto}
-                    alt={name || 'Tenant'}
-                    className="h-full w-full object-cover"
-                    crossOrigin="anonymous"
-                    onError={() => setImgError(true)}
-                  />
-                ) : (
-                  initials
-                )}
-              </div>
+  const tenantName = name || tenant?.name || (isAuthenticated ? 'PG Resident' : 'Guest Explorer');
+  const roomName = isLinkedTenant && propertyDetails?.room?.roomNumber
+    ? `Room ${propertyDetails.room.roomNumber}`
+    : isLinkedTenant
+    ? 'Allocated Room'
+    : 'Not linked to a PG';
+  const pgName = isLinkedTenant ? propertyDetails?.property?.name || 'PG Ease Stay' : 'Explore verified PGs';
 
-              {isAuthenticated && (
-                <label
-                  htmlFor="tenant-profile-photo"
-                  className="absolute -bottom-1 -left-1 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-primary text-white shadow-md hover:bg-primary-dark border-2 border-white"
-                  title="Upload profile photo"
-                >
-                  <Camera className="h-4 w-4" />
-                </label>
+  return (
+    <div className="space-y-5 pt-1 pb-8 animate-fade-in">
+      {/* Hidden file input for photo upload */}
+      <input
+        id="tenant-profile-photo-hidden"
+        type="file"
+        ref={fileInputRef}
+        accept="image/*"
+        className="sr-only"
+        onChange={handlePhotoSelected}
+      />
+
+      {/* T2 / T8 Header: 64dp Round Avatar, Name, Room + PG Name, Edit Profile Button */}
+      <div className="relative overflow-hidden rounded-3xl border border-gray-100 bg-white p-5 shadow-sm text-center">
+        <div className="flex flex-col items-center">
+          {/* 64dp Round Avatar with Camera Badge */}
+          <div className="relative mb-3 group">
+            <div className="relative flex h-16 w-16 items-center justify-center rounded-full border-2 border-white bg-[#008080] font-bold text-white text-xl shadow-md overflow-hidden shrink-0">
+              {isUploadingPhoto ? (
+                <Loader2 className="h-6 w-6 animate-spin text-white" />
+              ) : tenantPhoto ? (
+                <img
+                  src={tenantPhoto}
+                  alt={tenantName}
+                  className="h-full w-full object-cover"
+                  crossOrigin="anonymous"
+                  onError={() => setImgError(true)}
+                />
+              ) : (
+                initials
               )}
             </div>
 
-            <div>
-              <h2 className="text-base font-bold text-brandText tracking-tight">
-                {name || tenant?.name || (isAuthenticated ? 'PG Resident' : 'Guest Explorer')}
-              </h2>
-              {email ? (
-                <p className="text-xs text-gray-500 mt-0.5">{email}</p>
-              ) : null}
-              <p className="text-xs text-gray-500">
-                {phone || 'Sign in to access your stay'}
-              </p>
-            </div>
+            {isAuthenticated && (
+              <label
+                htmlFor="tenant-profile-photo-hidden"
+                className="absolute -bottom-1 -right-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-[#008080] text-white shadow-md border-2 border-white hover:bg-[#005F5F] transition-colors"
+                title="Upload profile photo"
+              >
+                <Camera className="h-3 w-3" />
+              </label>
+            )}
           </div>
 
-          {isAuthenticated ? (
-            <button
-              type="button"
-              onClick={() => setShowEditModal(true)}
-              className="rounded-xl border border-gray-200 bg-white px-3.5 py-1 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 active:scale-95 transition-all"
-            >
-              Edit
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => navigate('/login')}
-              className="rounded-xl bg-primary px-3.5 py-1 text-xs font-semibold text-white shadow-sm hover:bg-primary-dark"
-            >
-              Sign In
-            </button>
+          {/* Tenant Name */}
+          <h2 className="text-base font-bold text-brandText tracking-tight">
+            {tenantName}
+          </h2>
+
+          {/* Room Number & PG Name */}
+          <p className="text-xs font-semibold text-[#008080] mt-0.5">
+            {roomName}
+          </p>
+          <p className="text-xs text-gray-500 mt-0.5">
+            {pgName}
+          </p>
+
+          {phone && (
+            <p className="text-[11px] text-gray-400 font-mono mt-1">
+              {phone}
+            </p>
           )}
+
+          {/* Action Button: Edit Profile / Sign In */}
+          <div className="mt-3.5">
+            {isAuthenticated ? (
+              <button
+                type="button"
+                onClick={handleOpenEditModal}
+                className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50/80 px-4 py-1.5 text-xs font-semibold text-gray-700 shadow-2xs hover:bg-gray-100 active:scale-95 transition-all"
+              >
+                <Pencil className="h-3 w-3 text-gray-500" />
+                <span>Edit Profile</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                className="rounded-full bg-[#008080] px-5 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-[#006b6b]"
+              >
+                Sign In with OTP
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Dynamic Stay Info Row (Replaces static 4 Months/48K/2 Referrals) */}
+        {/* Dynamic Stay Info Strip */}
         <div className="mt-4 grid grid-cols-3 divide-x divide-gray-100 border-t border-gray-100 pt-3 text-center">
           <div>
-            <span className="block text-xs font-bold text-primary leading-tight line-clamp-2 px-1">
+            <span className="block text-xs font-bold text-[#008080] leading-tight line-clamp-1 px-1">
               {isLinkedTenant ? propertyDetails?.property?.name || 'Linked' : 'Not Linked'}
             </span>
             <span className="text-[10px] font-medium text-gray-400">Assigned PG</span>
@@ -253,237 +286,528 @@ export const ProfilePage: React.FC = () => {
           </div>
           <div>
             <span className="block text-xs font-bold text-teal-700 truncate px-1">
-              {isAuthenticated ? (isLinkedTenant ? 'Active' : 'Registered') : 'Guest'}
+              {isAuthenticated ? (isLinkedTenant ? 'Active Resident' : 'Registered') : 'Guest'}
             </span>
             <span className="text-[10px] font-medium text-gray-400">Status</span>
           </div>
         </div>
       </div>
 
-      <div className="space-y-1.5">
+      {/* T8: Group 1: My Stay */}
+      <div className="space-y-2">
         <h3 className="px-1 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-          PG Features & Services
+          My Stay
         </h3>
         <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm divide-y divide-gray-50">
-          {menuPageServices.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.to}
-                type="button"
-                onClick={() => navigate(item.to)}
-                className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
-              >
-                <div className="flex min-w-0 items-center gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-primary">
-                    <Icon className="h-4 w-4" />
-                  </div>
-                  <span className="text-xs sm:text-sm font-semibold text-brandText">{item.label}</span>
-                </div>
-                <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
-              </button>
-            );
-          })}
+          {/* Room Details */}
+          <button
+            type="button"
+            onClick={() => navigate('/my-pg')}
+            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#008080]">
+                <Home className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold text-brandText">Room Details</span>
+                <span className="block text-xs text-gray-500 truncate">
+                  {isLinkedTenant && propertyDetails?.room?.roomNumber
+                    ? `Room ${propertyDetails.room.roomNumber}, floor & bed info`
+                    : 'View room specifications & allocated bed'}
+                </span>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
+          </button>
+
+          {/* Roommates */}
+          <button
+            type="button"
+            onClick={() => navigate('/my-pg')}
+            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#008080]">
+                <Users className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold text-brandText">Roommates</span>
+                <span className="block text-xs text-gray-500 truncate">
+                  View your co-residents & contact details
+                </span>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
+          </button>
+
+          {/* Wi-Fi Details */}
+          <button
+            type="button"
+            onClick={() => navigate('/wifi')}
+            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#008080]">
+                <Wifi className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold text-brandText">Wi-Fi Details</span>
+                <span className="block text-xs text-gray-500 truncate">
+                  Network SSID name & Wi-Fi password
+                </span>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
+          </button>
+
+          {/* Food Menu */}
+          <button
+            type="button"
+            onClick={() => navigate('/food')}
+            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#008080]">
+                <UtensilsCrossed className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold text-brandText">Food Menu</span>
+                <span className="block text-xs text-gray-500 truncate">
+                  Today's meals & weekly mess schedule
+                </span>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
+          </button>
         </div>
       </div>
 
-      {/* 2. ACCOUNT Section */}
-      <div className="space-y-1.5">
+      {/* T8: Group 2: Payments & Dues */}
+      <div className="space-y-2">
         <h3 className="px-1 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-          Account
+          Payments & Dues
         </h3>
         <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm divide-y divide-gray-50">
-          {/* Edit Profile */}
+          {/* Rent Receipts */}
           <button
             type="button"
-            onClick={() => (isAuthenticated ? handleOpenEditModal() : navigate('/login'))}
-            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors tap-target"
+            onClick={() => navigate('/payments/history')}
+            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
           >
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-primary">
-                <UserIcon className="h-4 w-4" />
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#008080]">
+                <Receipt className="h-5 w-5" />
               </div>
-              <span className="text-xs sm:text-sm font-semibold text-brandText">Edit Profile</span>
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold text-brandText">Rent Receipts</span>
+                <span className="block text-xs text-gray-500 truncate">
+                  Download past rent receipts & tax invoices
+                </span>
+              </div>
             </div>
-            <ChevronRight className="h-4 w-4 text-gray-400" />
+            <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
           </button>
 
-          {/* Documents -> Dedicated Page */}
+          {/* Payment Methods */}
+          <button
+            type="button"
+            onClick={() => navigate('/payments')}
+            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#008080]">
+                <CreditCard className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold text-brandText">Payment Methods</span>
+                <span className="block text-xs text-gray-500 truncate">
+                  UPI, debit card & net banking payment gateways
+                </span>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
+          </button>
+
+          {/* Security Deposit */}
+          <button
+            type="button"
+            onClick={() => navigate('/payments')}
+            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#008080]">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold text-brandText">Security Deposit</span>
+                <span className="block text-xs text-gray-500 truncate">
+                  Deposit balance & refund tracking
+                </span>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
+          </button>
+        </div>
+      </div>
+
+      {/* T8: Group 3: Services */}
+      <div className="space-y-2">
+        <h3 className="px-1 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+          Services
+        </h3>
+        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm divide-y divide-gray-50">
+          {/* Maintenance Requests */}
+          <button
+            type="button"
+            onClick={() => navigate('/complaints')}
+            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#008080]">
+                <Wrench className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold text-brandText">Maintenance Requests</span>
+                <span className="block text-xs text-gray-500 truncate">
+                  Raise repair tickets & track resolution status
+                </span>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
+          </button>
+
+          {/* Notice Period */}
+          <button
+            type="button"
+            onClick={() => navigate('/notice-period')}
+            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#008080]">
+                <Clock className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold text-brandText">Notice Period</span>
+                <span className="block text-xs text-gray-500 truncate">
+                  Vacate intimation & checkout schedule
+                </span>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
+          </button>
+
+          {/* Gate Pass */}
+          <button
+            type="button"
+            onClick={() => navigate('/guests')}
+            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#008080]">
+                <DoorOpen className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold text-brandText">Gate Pass</span>
+                <span className="block text-xs text-gray-500 truncate">
+                  Guest entry approval & night-out passes
+                </span>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
+          </button>
+        </div>
+      </div>
+
+      {/* T8: Group 4: Documents */}
+      <div className="space-y-2">
+        <h3 className="px-1 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+          Documents
+        </h3>
+        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm divide-y divide-gray-50">
+          {/* Aadhaar KYC */}
           <button
             type="button"
             onClick={() => navigate('/documents')}
-            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors tap-target"
+            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
           >
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-primary">
-                <FileText className="h-4 w-4" />
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#008080]">
+                <BadgeCheck className="h-5 w-5" />
               </div>
-              <span className="text-xs sm:text-sm font-semibold text-brandText">Documents & KYC</span>
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold text-brandText">Aadhaar KYC</span>
+                <span className="block text-xs text-gray-500 truncate">
+                  Verify your identity with DigiLocker
+                </span>
+              </div>
             </div>
-            <ChevronRight className="h-4 w-4 text-gray-400" />
+            <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
           </button>
 
-          {/* Notifications -> Dedicated Page */}
+          {/* Rental Agreement */}
           <button
             type="button"
-            onClick={() => navigate('/notifications')}
-            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors tap-target"
+            onClick={() => navigate('/documents')}
+            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
           >
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-primary">
-                <Bell className="h-4 w-4" />
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#008080]">
+                <FileSignature className="h-5 w-5" />
               </div>
-              <span className="text-xs sm:text-sm font-semibold text-brandText">Notifications</span>
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold text-brandText">Rental Agreement</span>
+                <span className="block text-xs text-gray-500 truncate">
+                  Digital stay agreement & e-sign status
+                </span>
+              </div>
             </div>
-            <ChevronRight className="h-4 w-4 text-gray-400" />
+            <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
+          </button>
+
+          {/* Police Verification */}
+          <button
+            type="button"
+            onClick={() => navigate('/documents')}
+            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#008080]">
+                <FileCheck className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold text-brandText">Police Verification</span>
+                <span className="block text-xs text-gray-500 truncate">
+                  Tenant verification form & compliance status
+                </span>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
           </button>
         </div>
       </div>
 
-      {/* 3. PG Section */}
-      <div className="space-y-1.5">
+      {/* T8: Group 5: App Settings */}
+      <div className="space-y-2">
         <h3 className="px-1 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-          PG Stay
+          App Settings
         </h3>
         <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm divide-y divide-gray-50">
+          {/* Notifications */}
+          <button
+            type="button"
+            onClick={() => navigate('/notifications')}
+            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#008080]">
+                <Bell className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold text-brandText">Notifications</span>
+                <span className="block text-xs text-gray-500 truncate">
+                  Due alerts, gate passes & notice board reminders
+                </span>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
+          </button>
+
+          {/* Language */}
+          <button
+            type="button"
+            onClick={() => setShowSettingsModal(true)}
+            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#008080]">
+                <Globe className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold text-brandText">Language</span>
+                <span className="block text-xs text-gray-500 truncate">
+                  English (India)
+                </span>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
+          </button>
+
+          {/* App Version */}
+          <button
+            type="button"
+            onClick={() => setShowSettingsModal(true)}
+            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#008080]">
+                <Info className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold text-brandText">App Version</span>
+                <span className="block text-xs text-gray-500 truncate">
+                  v1.0.5 (Build 6) • Latest release
+                </span>
+              </div>
+            </div>
+            <span className="rounded-full bg-teal-50 px-2.5 py-0.5 text-[10px] font-bold text-[#008080]">
+              v1.0.5
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {/* T8: Group 6: Help & Support */}
+      <div className="space-y-2">
+        <h3 className="px-1 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+          Help & Support
+        </h3>
+        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm divide-y divide-gray-50">
+          {/* Contact Warden / Manager */}
+          <button
+            type="button"
+            onClick={() => setShowStaffModal(true)}
+            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#008080]">
+                <Phone className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold text-brandText">Contact Warden / Manager</span>
+                <span className="block text-xs text-gray-500 truncate">
+                  Hostel manager, supervisor & caretaker contacts
+                </span>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
+          </button>
+
+          {/* Support WhatsApp */}
+          <button
+            type="button"
+            onClick={() => window.open('https://wa.me/918126749964', '_blank')}
+            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#008080]">
+                <MessageSquare className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold text-brandText">Support WhatsApp</span>
+                <span className="block text-xs text-gray-500 truncate">
+                  Chat directly with the PG Ease team (+91 81267 49964)
+                </span>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
+          </button>
+
+          {/* FAQs */}
+          <button
+            type="button"
+            onClick={() => setShowFaqModal(true)}
+            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#008080]">
+                <HelpCircle className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold text-brandText">FAQs</span>
+                <span className="block text-xs text-gray-500 truncate">
+                  Payment questions, notice policy & app guide
+                </span>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
+          </button>
+
           {/* Rate Your PG */}
           <button
             type="button"
             onClick={() => setShowRateModal(true)}
-            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors tap-target"
+            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
           >
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-primary">
-                <Star className="h-4 w-4" />
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#008080]">
+                <Star className="h-5 w-5" />
               </div>
-              <span className="text-xs sm:text-sm font-semibold text-brandText">Rate Your PG</span>
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold text-brandText">Rate Your PG</span>
+                <span className="block text-xs text-gray-500 truncate">
+                  Share reviews and feedback about your stay
+                </span>
+              </div>
             </div>
-            <ChevronRight className="h-4 w-4 text-gray-400" />
+            <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
           </button>
 
           {/* Refer & Earn */}
           <button
             type="button"
             onClick={() => setShowReferModal(true)}
-            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors tap-target"
+            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
           >
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-primary">
-                <Gift className="h-4 w-4" />
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#008080]">
+                <Gift className="h-5 w-5" />
               </div>
-              <span className="text-xs sm:text-sm font-semibold text-brandText">Refer & Earn</span>
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold text-brandText">Refer & Earn</span>
+                <span className="block text-xs text-gray-500 truncate">
+                  Invite friends to PG Ease and earn rewards
+                </span>
+              </div>
             </div>
-            <ChevronRight className="h-4 w-4 text-gray-400" />
+            <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
           </button>
 
-          {/* Security & Rules */}
+          {/* House Rules & Amenities */}
           <button
             type="button"
             onClick={() => setShowSecurityModal(true)}
-            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors tap-target"
+            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors"
           >
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-primary">
-                <Shield className="h-4 w-4" />
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#008080]">
+                <Shield className="h-5 w-5" />
               </div>
-              <span className="text-xs sm:text-sm font-semibold text-brandText">House Rules & Security</span>
-            </div>
-            <ChevronRight className="h-4 w-4 text-gray-400" />
-          </button>
-
-          {/* WiFi Details */}
-          <button
-            type="button"
-            onClick={() => navigate('/wifi')}
-            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors tap-target"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-primary">
-                <Wifi className="h-4 w-4" />
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold text-brandText">House Rules & Facilities</span>
+                <span className="block text-xs text-gray-500 truncate">
+                  Curfew hours, visitor policies & verified amenities
+                </span>
               </div>
-              <span className="text-xs sm:text-sm font-semibold text-brandText">WiFi Credentials</span>
             </div>
-            <ChevronRight className="h-4 w-4 text-gray-400" />
+            <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
           </button>
         </div>
       </div>
 
-      {/* 4. SUPPORT Section */}
-      <div className="space-y-1.5">
-        <h3 className="px-1 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-          Support
-        </h3>
-        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm divide-y divide-gray-50">
-          {/* Contact PG Owner */}
-          <button
-            type="button"
-            onClick={() => setShowStaffModal(true)}
-            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors tap-target"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-primary">
-                <Phone className="h-4 w-4" />
-              </div>
-              <span className="text-xs sm:text-sm font-semibold text-brandText">Contact PG Staff</span>
-            </div>
-            <ChevronRight className="h-4 w-4 text-gray-400" />
-          </button>
-
-          {/* Help & FAQ */}
-          <button
-            type="button"
-            onClick={() => setShowFaqModal(true)}
-            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors tap-target"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-primary">
-                <HelpCircle className="h-4 w-4" />
-              </div>
-              <span className="text-xs sm:text-sm font-semibold text-brandText">Help & FAQ</span>
-            </div>
-            <ChevronRight className="h-4 w-4 text-gray-400" />
-          </button>
-
-          {/* Settings */}
-          <button
-            type="button"
-            onClick={() => setShowSettingsModal(true)}
-            className="flex w-full items-center justify-between p-3.5 text-left hover:bg-gray-50/80 active:bg-gray-100 transition-colors tap-target"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-primary">
-                <Settings className="h-4 w-4" />
-              </div>
-              <span className="text-xs sm:text-sm font-semibold text-brandText">Settings</span>
-            </div>
-            <ChevronRight className="h-4 w-4 text-gray-400" />
-          </button>
-        </div>
-      </div>
-
-      {/* 5. Log Out / Sign In Button */}
+      {/* T8: Logout Button (Red, destructive, confirm dialog) */}
       <div className="pt-2">
         <button
           type="button"
           onClick={() => {
             if (isAuthenticated) {
-              if (window.confirm('Are you sure you want to log out?')) {
+              if (window.confirm('Are you sure you want to log out of PG Ease?')) {
                 logout();
               }
             } else {
               navigate('/login');
             }
           }}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200 bg-white py-3.5 text-sm font-semibold text-red-500 shadow-sm hover:bg-red-50 active:scale-98 transition-all tap-target"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200 bg-white py-3.5 text-sm font-semibold text-red-600 shadow-sm hover:bg-red-50 active:scale-98 transition-all"
         >
-          <LogOut className="h-4 w-4 text-red-500" />
+          <LogOut className="h-4 w-4 text-red-600" />
           <span>{isAuthenticated ? 'Log Out' : 'Sign In with OTP'}</span>
         </button>
       </div>
 
-      {/* 6. Footer */}
+      {/* Footer Branding */}
       <p className="text-center text-[11px] text-gray-400 font-medium">
-        PG Ease v1.0.0 • Made with ❤️ in India
+        PG Ease v1.0.5 • Made with ❤️ in India
       </p>
 
       {/* MODALS */}
@@ -527,9 +851,9 @@ export const ProfilePage: React.FC = () => {
             <div className="space-y-3">
               {/* Photo Upload in Edit Modal */}
               <div className="flex flex-col items-center justify-center py-1">
-                <div className="relative flex h-20 w-20 items-center justify-center rounded-full border-2 border-primary bg-teal-50 font-bold text-primary text-2xl overflow-hidden shadow-sm">
+                <div className="relative flex h-20 w-20 items-center justify-center rounded-full border-2 border-[#008080] bg-[#E6F3F3] font-bold text-[#008080] text-2xl overflow-hidden shadow-sm">
                   {isUploadingPhoto ? (
-                    <Loader2 className="h-7 w-7 animate-spin text-primary" />
+                    <Loader2 className="h-7 w-7 animate-spin text-[#008080]" />
                   ) : tenantPhoto ? (
                     <img
                       src={tenantPhoto}
@@ -546,7 +870,7 @@ export const ProfilePage: React.FC = () => {
                   type="button"
                   disabled={isUploadingPhoto}
                   onClick={() => fileInputRef.current?.click()}
-                  className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-teal-50/60 hover:bg-teal-100/70 px-3 py-1 text-xs font-bold text-primary transition-all active:scale-95"
+                  className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-[#E6F3F3] hover:bg-teal-100 px-3 py-1 text-xs font-bold text-[#008080] transition-all active:scale-95"
                 >
                   <Camera className="h-3.5 w-3.5" />
                   <span>{tenantPhoto ? 'Change Photo' : 'Upload Photo'}</span>
@@ -560,10 +884,10 @@ export const ProfilePage: React.FC = () => {
                   value={name}
                   disabled={isSavingProfile}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-brandText focus:border-primary focus:outline-none"
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-brandText focus:border-[#008080] focus:outline-none"
                   placeholder="Your full name"
                 />
-                <span className="text-[10px] text-gray-400 block mt-1">Your PG owner will see this change</span>
+                <span className="text-[10px] text-gray-400 block mt-1">Your PG manager will see this update</span>
               </div>
               <div>
                 <label className="text-xs font-semibold text-gray-600 block mb-1">Email Address</label>
@@ -572,7 +896,7 @@ export const ProfilePage: React.FC = () => {
                   value={email}
                   disabled={isSavingProfile}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-brandText focus:border-primary focus:outline-none"
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-brandText focus:border-[#008080] focus:outline-none"
                   placeholder="e.g. resident@example.com"
                 />
               </div>
@@ -585,7 +909,7 @@ export const ProfilePage: React.FC = () => {
                   className="w-full rounded-xl border border-gray-100 bg-gray-50 px-3 py-2 text-sm text-gray-500 cursor-not-allowed"
                 />
                 <span className="text-[10px] text-gray-400 block mt-1">
-                  Mobile number cannot be changed here. Contact your PG manager.
+                  Mobile number is linked to your account. Contact your PG manager for changes.
                 </span>
               </div>
             </div>
@@ -605,7 +929,7 @@ export const ProfilePage: React.FC = () => {
                 type="button"
                 disabled={isSavingProfile}
                 onClick={handleSaveProfile}
-                className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-primary py-2.5 text-xs font-bold text-white shadow-sm hover:bg-primary-dark disabled:opacity-60"
+                className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[#008080] py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#006b6b] disabled:opacity-60"
               >
                 {isSavingProfile ? (
                   <>
@@ -644,7 +968,7 @@ export const ProfilePage: React.FC = () => {
                     setRatingSubmitted(false);
                     setShowRateModal(false);
                   }}
-                  className="mt-3 rounded-xl bg-primary px-5 py-2 text-xs font-bold text-white"
+                  className="mt-3 rounded-xl bg-[#008080] px-5 py-2 text-xs font-bold text-white"
                 >
                   Done
                 </button>
@@ -672,13 +996,13 @@ export const ProfilePage: React.FC = () => {
                     value={feedback}
                     onChange={(e) => setFeedback(e.target.value)}
                     placeholder="Tell us about food, WiFi, cleanliness, or amenities..."
-                    className="w-full rounded-xl border border-gray-200 p-2.5 text-xs text-brandText focus:border-primary focus:outline-none"
+                    className="w-full rounded-xl border border-gray-200 p-2.5 text-xs text-brandText focus:border-[#008080] focus:outline-none"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={() => setRatingSubmitted(true)}
-                  className="w-full rounded-xl bg-primary py-2.5 text-xs font-bold text-white shadow-sm hover:bg-primary-dark"
+                  className="w-full rounded-xl bg-[#008080] py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#006b6b]"
                 >
                   Submit Review
                 </button>
@@ -699,7 +1023,7 @@ export const ProfilePage: React.FC = () => {
             </div>
 
             <div>
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-primary mb-2">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E6F3F3] text-[#008080] mb-2">
                 <Gift className="h-7 w-7" />
               </div>
               <h3 className="text-base font-black text-brandText">Refer PG Ease to Friends</h3>
@@ -711,10 +1035,10 @@ export const ProfilePage: React.FC = () => {
             <button
               type="button"
               onClick={handleShareReferral}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-xs font-bold text-white shadow-md shadow-primary/20 hover:bg-primary-dark"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#008080] py-3 text-xs font-bold text-white shadow-md shadow-teal-750/20 hover:bg-[#006b6b]"
             >
               <Share2 className="h-4 w-4" />
-              Share on WhatsApp
+              <span>Share on WhatsApp</span>
             </button>
           </div>
         </div>
@@ -745,7 +1069,7 @@ export const ProfilePage: React.FC = () => {
           <div className="w-full max-w-sm rounded-3xl bg-white p-5 shadow-xl space-y-4 max-h-[85vh] flex flex-col">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <HelpCircle className="h-5 w-5 text-primary" />
+                <HelpCircle className="h-5 w-5 text-[#008080]" />
                 <h3 className="text-base font-bold text-brandText">Help & FAQ</h3>
               </div>
               <button onClick={() => setShowFaqModal(false)} className="rounded-full p-1 text-gray-400 hover:bg-gray-100">
@@ -764,7 +1088,7 @@ export const ProfilePage: React.FC = () => {
               <div className="rounded-xl bg-gray-50 p-3">
                 <p className="font-bold text-brandText">How do I submit a maintenance request?</p>
                 <p className="mt-1 text-gray-500">
-                  Navigate to the Complaints page from Quick Actions. You can specify category and attach a photo.
+                  Navigate to Complaints from Services. You can specify category and describe the repair issue.
                 </p>
               </div>
 
@@ -793,7 +1117,7 @@ export const ProfilePage: React.FC = () => {
           <div className="w-full max-w-sm rounded-3xl bg-white p-5 shadow-xl space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Settings className="h-5 w-5 text-primary" />
+                <Settings className="h-5 w-5 text-[#008080]" />
                 <h3 className="text-base font-bold text-brandText">App Settings</h3>
               </div>
               <button onClick={() => setShowSettingsModal(false)} className="rounded-full p-1 text-gray-400 hover:bg-gray-100">
@@ -808,7 +1132,11 @@ export const ProfilePage: React.FC = () => {
               </div>
               <div className="flex items-center justify-between py-2 border-b border-gray-100">
                 <span className="font-semibold text-brandText">App Version</span>
-                <span className="text-gray-500">v1.0.0 (Tenant Build)</span>
+                <span className="text-[#008080] font-semibold">v1.0.5 (Build 6)</span>
+              </div>
+              <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                <span className="font-semibold text-brandText">Theme</span>
+                <span className="text-gray-500">Light Mode (Default)</span>
               </div>
             </div>
 
