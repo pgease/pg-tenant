@@ -116,16 +116,25 @@ export const PgDetailPage: React.FC = () => {
     );
   }
 
-  const photos =
-    Array.isArray(property.photos) && property.photos.length > 0
-      ? property.photos
+  const listing = (property as any).publicListingDetails || {};
+  const photoList = (Array.isArray(property.photos) && property.photos.length > 0)
+    ? property.photos
+    : (Array.isArray(listing.photos) && listing.photos.length > 0)
+      ? listing.photos
       : [];
+  const photos = photoList.map((item: any) => (typeof item === 'string' ? item : item?.url)).filter(Boolean);
 
-  const ownerPhone = property.mobileContactNumber || property.owner?.contactNumber;
-  const mapUrl =
-    property.latitude && property.longitude
+  const ownerPhone = property.mobileContactNumber || listing.contactNumber || property.owner?.contactNumber || property.owner?.mobileContactNumber || property.adminPhone;
+  const mapUrl = property.locationPin
+    ? property.locationPin
+    : property.latitude && property.longitude
       ? `https://maps.google.com/?q=${property.latitude},${property.longitude}`
       : `https://maps.google.com/?q=${encodeURIComponent(`${property.name} ${property.address || property.city || ''}`)}`;
+
+  const singlePrice = property.singleSharingPrice || listing.pricing?.single?.withFood || listing.pricing?.single?.withoutFood || property.startingPrice;
+  const doublePrice = property.doubleSharingPrice || listing.pricing?.double?.withFood || listing.pricing?.double?.withoutFood;
+  const triplePrice = property.tripleSharingPrice || listing.pricing?.triple?.withFood || listing.pricing?.triple?.withoutFood;
+  const fourPrice = property.fourSharingPrice || listing.pricing?.fourSharing?.withFood || listing.pricing?.fourSharing?.withoutFood;
 
   return (
     <div className="space-y-5 animate-fade-in pb-28">
@@ -253,38 +262,53 @@ export const PgDetailPage: React.FC = () => {
       </div>
 
       {/* 4. Room Sharing Rent Tiers */}
-      {(property.singleSharingPrice || property.doubleSharingPrice || property.tripleSharingPrice || property.fourSharingPrice) ? (
+      {(singlePrice || doublePrice || triplePrice || fourPrice) ? (
         <div className="rounded-3xl border border-gray-100 bg-white p-5 shadow-card-soft space-y-3">
-          <h3 className="text-xs font-bold text-brandText uppercase tracking-wider">
-            Rent by Sharing Type
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-brandText uppercase tracking-wider">
+              Rent by Sharing Type
+            </h3>
+            <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
+              Food Included
+            </span>
+          </div>
 
-          <div className="grid grid-cols-3 gap-2 text-center">
-            {property.singleSharingPrice ? (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+            {singlePrice ? (
               <div className="rounded-2xl bg-teal-50/60 p-3 border border-teal-100/60">
                 <span className="text-[11px] font-bold text-primary block">1 Sharing</span>
                 <p className="text-base font-black text-brandText mt-1">
-                  ₹{property.singleSharingPrice.toLocaleString('en-IN')}
+                  ₹{Number(singlePrice).toLocaleString('en-IN')}
                 </p>
                 <span className="text-[10px] text-brandText-muted block mt-0.5">per month</span>
               </div>
             ) : null}
 
-            {property.doubleSharingPrice ? (
+            {doublePrice ? (
               <div className="rounded-2xl bg-amber-50/60 p-3 border border-amber-100/60">
                 <span className="text-[11px] font-bold text-amber-700 block">2 Sharing</span>
                 <p className="text-base font-black text-brandText mt-1">
-                  ₹{property.doubleSharingPrice.toLocaleString('en-IN')}
+                  ₹{Number(doublePrice).toLocaleString('en-IN')}
                 </p>
                 <span className="text-[10px] text-brandText-muted block mt-0.5">per month</span>
               </div>
             ) : null}
 
-            {property.tripleSharingPrice ? (
+            {triplePrice ? (
               <div className="rounded-2xl bg-gray-50 p-3 border border-gray-100">
                 <span className="text-[11px] font-bold text-brandText block">3 Sharing</span>
                 <p className="text-base font-black text-brandText mt-1">
-                  ₹{property.tripleSharingPrice.toLocaleString('en-IN')}
+                  ₹{Number(triplePrice).toLocaleString('en-IN')}
+                </p>
+                <span className="text-[10px] text-brandText-muted block mt-0.5">per month</span>
+              </div>
+            ) : null}
+
+            {fourPrice ? (
+              <div className="rounded-2xl bg-indigo-50/60 p-3 border border-indigo-100/60">
+                <span className="text-[11px] font-bold text-indigo-700 block">4 Sharing</span>
+                <p className="text-base font-black text-brandText mt-1">
+                  ₹{Number(fourPrice).toLocaleString('en-IN')}
                 </p>
                 <span className="text-[10px] text-brandText-muted block mt-0.5">per month</span>
               </div>
