@@ -20,7 +20,13 @@ export const AppLayout: React.FC = () => {
 
   const [inAppMode, setInAppMode] = useState<boolean>(false);
   const [showSplash, setShowSplash] = useState<boolean>(false);
-  const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
+  const [showOnboarding, setShowOnboarding] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('pgease_onboarding_carousel_seen') !== '1';
+    } catch {
+      return false;
+    }
+  });
   const [hasUnread, setHasUnread] = useState<boolean>(false);
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 

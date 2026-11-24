@@ -5,7 +5,6 @@ import { authService } from '../services/authService';
 import {
   ArrowLeft,
   ArrowRight,
-  Shield,
   Smartphone,
   RotateCcw,
   AlertCircle,
@@ -300,82 +299,75 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-[100dvh] bg-[#F8FAFC] flex flex-col justify-between overflow-x-hidden font-poppins">
-      {/* Top Background Gradient Header with Circles */}
-      <div className="relative bg-gradient-to-b from-[#004D4D] via-[#006060] to-[#008080] pt-7 pb-20 px-6 text-white overflow-hidden">
-        {/* Soft Decorative Ambient Circles */}
-        <div className="absolute -top-12 -right-12 h-44 w-44 rounded-full bg-white/10 blur-xl pointer-events-none" />
-        <div className="absolute top-24 -left-14 h-40 w-40 rounded-full bg-white/5 blur-lg pointer-events-none" />
+    <div className="relative min-h-[100dvh] bg-[#FFFFFF] flex flex-col justify-between overflow-x-hidden font-poppins select-none">
+      {/* Top 320dp Soft Gradient from #E6F3F3 to #FFFFFF */}
+      <div className="absolute top-0 inset-x-0 h-[320px] bg-gradient-to-b from-[#E6F3F3] to-[#FFFFFF] pointer-events-none" />
 
-        {/* Top Header Row with Back Button */}
-        <div className="relative z-10 flex items-center justify-between mb-4">
-          <button
-            type="button"
-            onClick={() => {
-              if (step === 'onboarding') {
-                setStep('otp');
-              } else if (step === 'otp') {
-                setStep('phone');
-              } else {
-                handleSkipLogin();
-              }
-            }}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md hover:bg-white/25 active:scale-95 transition-all tap-target"
-            title="Go Back"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
+      {/* Top Navigation Row: Back Button and Skip */}
+      <div
+        className="relative z-20 flex items-center justify-between px-6 pt-4 pb-2"
+        style={{ paddingTop: 'max(1.25rem, env(safe-area-inset-top))' }}
+      >
+        <button
+          type="button"
+          onClick={() => {
+            if (step === 'onboarding') {
+              setStep('otp');
+            } else if (step === 'otp') {
+              setStep('phone');
+            } else {
+              handleSkipLogin();
+            }
+          }}
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-gray-700 shadow-xs border border-gray-200/60 hover:bg-white active:scale-95 transition-all"
+          title="Go Back"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </button>
 
-          <button
-            type="button"
-            onClick={handleSkipLogin}
-            className="text-xs font-semibold text-white/80 hover:text-white transition-colors"
-          >
-            Skip for now
-          </button>
-        </div>
-
-        {/* Brand App Icon & Title */}
-        <div className="relative z-10 flex flex-col items-center text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-md shadow-md p-3 mb-2.5 border border-white/20">
-            <img
-              src="/assets/pgease-logo-white-mark.png"
-              alt="PG Ease"
-              className="h-full w-full object-contain filter drop-shadow"
-            />
-          </div>
-
-          <h1 className="text-xl font-bold tracking-tight text-white font-poppins">PG Ease</h1>
-          <span className="mt-1 inline-flex items-center rounded-full bg-white/20 px-3 py-0.5 text-[11px] font-semibold text-white/95 backdrop-blur-md font-poppins">
-            Tenant App
-          </span>
-        </div>
+        <button
+          type="button"
+          onClick={handleSkipLogin}
+          className="text-xs font-semibold text-[#008080] hover:text-[#005F5F] transition-colors"
+        >
+          Skip for now
+        </button>
       </div>
 
-      {/* Floating White Login Card */}
-      <div className="relative z-20 -mt-10 px-5 flex-1 flex flex-col justify-between">
-        <div className="rounded-3xl bg-white p-6 shadow-xl border border-gray-100/80 space-y-5 animate-fade-in">
-          {/* Card Title */}
-          <div>
-            <h2 className="text-lg font-bold tracking-tight text-gray-900">
-              {step === 'phone'
-                ? 'Welcome to PG Ease'
-                : step === 'otp'
-                ? 'Verify 4-Digit Code'
-                : 'Complete Your Profile 🎉'}
-            </h2>
-            <p className="mt-1 text-xs text-gray-500 leading-relaxed">
-              {step === 'phone'
-                ? 'Enter your mobile number to sign in or get started.'
-                : step === 'otp'
-                ? `Enter the 4-digit verification code sent via ${channel === 'whatsapp' ? 'WhatsApp' : 'SMS'} to +91 ${phone}.`
-                : 'Tell us your name and how you plan to use PG Ease to personalize your experience.'}
-            </p>
-          </div>
+      {/* Main Content Area */}
+      <div className="relative z-10 flex-1 flex flex-col items-center px-6 pt-4 pb-8 max-w-md mx-auto w-full">
+        {/* Logo: 96dp Teal (#008080) Circle with White Mark Inside (60dp tall, centered, NO white box) */}
+        <div className="flex h-[96px] w-[96px] items-center justify-center rounded-full bg-[#008080] shadow-md mb-6">
+          <img
+            src="/brand/pgease-mark-white.svg"
+            alt="PG Ease"
+            className="h-[60px] w-auto object-contain"
+          />
+        </div>
 
+        {/* Title and Subtitle: Truly Centered */}
+        <div className="w-full text-center mb-7">
+          <h1 className="text-[24px] font-semibold text-[#1F2937] leading-[34px] tracking-tight w-full text-center">
+            {step === 'phone'
+              ? 'Welcome to PG Ease'
+              : step === 'otp'
+              ? 'Verify 4-Digit Code'
+              : 'Complete Your Profile 🎉'}
+          </h1>
+          <p className="mt-1.5 text-[14px] font-normal text-[#6B7280] leading-[22px] max-w-[300px] mx-auto text-center">
+            {step === 'phone'
+              ? 'Enter your mobile number to sign in or get started.'
+              : step === 'otp'
+              ? `Enter the 4-digit verification code sent via ${channel === 'whatsapp' ? 'WhatsApp' : 'SMS'} to +91 ${phone}.`
+              : 'Tell us your name and how you plan to use PG Ease to personalize your experience.'}
+          </p>
+        </div>
+
+        {/* Form Container */}
+        <div className="w-full space-y-5">
           {/* Error Alert */}
           {error && (
-            <div className="flex items-start gap-2 rounded-xl bg-red-50 p-3 border border-red-200 text-red-700 animate-shake">
+            <div className="flex items-start gap-2 rounded-[12px] bg-red-50 p-3 border border-red-200 text-red-700 animate-shake">
               <AlertCircle className="h-4 w-4 flex-shrink-0 text-red-500 mt-0.5" />
               <p className="text-xs font-medium leading-relaxed">{error}</p>
             </div>
@@ -383,7 +375,7 @@ export const LoginPage: React.FC = () => {
 
           {/* Success Message */}
           {successMessage && !error && (
-            <div className="flex items-center gap-2 rounded-xl bg-teal-50 p-3 border border-teal-200 text-teal-800">
+            <div className="flex items-center gap-2 rounded-[12px] bg-teal-50 p-3 border border-teal-200 text-teal-800">
               <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-[#008080]" />
               <p className="text-xs font-medium">{successMessage}</p>
             </div>
@@ -398,11 +390,9 @@ export const LoginPage: React.FC = () => {
               }}
               className="space-y-4"
             >
-              {/* Phone Input Box */}
-              <div className="flex items-center rounded-2xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus-within:border-[#008080] focus-within:ring-2 focus-within:ring-[#008080]/10 transition-all">
-                {/* Flag + Country Code Pill */}
-                <div className="flex items-center gap-1.5 rounded-xl bg-gray-50 border border-gray-200/80 px-2.5 py-1.5 text-xs font-bold text-gray-800 mr-2.5 flex-shrink-0">
-                  <span className="text-sm">🇮🇳</span>
+              {/* Phone Input Box: height 52, radius 12, border #D1D5DB, fill #F9FAFB, divider after +91 */}
+              <div className="flex items-center h-[52px] rounded-[12px] border border-[#D1D5DB] bg-[#F9FAFB] px-3 shadow-xs focus-within:border-[#008080] focus-within:bg-white transition-all">
+                <div className="flex items-center gap-1 text-sm font-semibold text-gray-800 pr-2.5 border-r border-[#D1D5DB] flex-shrink-0 select-none">
                   <span>+91</span>
                 </div>
 
@@ -418,7 +408,7 @@ export const LoginPage: React.FC = () => {
                     if (error) setError(null);
                   }}
                   autoFocus
-                  className="w-full bg-transparent text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:outline-none tracking-wide"
+                  className="w-full bg-transparent pl-3 text-sm font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none tracking-wide"
                 />
               </div>
 
@@ -454,11 +444,11 @@ export const LoginPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Submit Button */}
+              {/* Submit Button: height 52, radius 12, #008080 */}
               <button
                 type="submit"
                 disabled={loading || phone.replace(/\D/g, '').length !== 10}
-                className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#008080] py-3.5 text-sm font-bold text-white shadow-md shadow-[#008080]/25 hover:bg-[#006b6b] active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none tap-target"
+                className="w-full h-[52px] flex items-center justify-center gap-2 rounded-[12px] bg-[#008080] text-sm font-semibold text-white shadow-sm hover:bg-[#006e6e] active:scale-[0.98] transition-all disabled:opacity-40 disabled:pointer-events-none"
               >
                 {loading ? (
                   <>
@@ -469,26 +459,11 @@ export const LoginPage: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    {channel === 'whatsapp' ? (
-                      <WhatsAppIcon className="h-4 w-4" />
-                    ) : (
-                      <Smartphone className="h-4 w-4 text-white" />
-                    )}
-                    <span>
-                      {channel === 'whatsapp'
-                        ? 'Get Verification Code on WhatsApp'
-                        : 'Get Verification Code on SMS'}
-                    </span>
+                    <span>{channel === 'whatsapp' ? 'Get Verification Code on WhatsApp' : 'Get Verification Code on SMS'}</span>
                     <ArrowRight className="h-4 w-4" />
                   </>
                 )}
               </button>
-
-              {/* Security Guarantee Note */}
-              <div className="flex items-center justify-center gap-1.5 text-[11px] text-gray-500 pt-1">
-                <Shield className="h-3.5 w-3.5 text-gray-400" />
-                <span>Your information is strictly protected</span>
-              </div>
             </form>
           )}
 
@@ -510,7 +485,7 @@ export const LoginPage: React.FC = () => {
                     onChange={(e) => handleOtpChange(index, e.target.value)}
                     onKeyDown={(e) => handleOtpKeyDown(index, e)}
                     onPaste={handleOtpPaste}
-                    className="h-14 w-12 sm:w-14 rounded-2xl border-2 border-gray-200 bg-gray-50/50 text-center text-xl font-black text-gray-900 focus:border-[#008080] focus:bg-white focus:outline-none transition-all shadow-sm"
+                    className="h-[52px] w-[52px] rounded-[12px] border border-[#D1D5DB] bg-[#F9FAFB] text-center text-xl font-bold text-gray-900 focus:border-[#008080] focus:bg-white focus:outline-none transition-all shadow-xs"
                   />
                 ))}
               </div>
@@ -533,7 +508,7 @@ export const LoginPage: React.FC = () => {
                     type="button"
                     onClick={() => handleRequestOtp(channel)}
                     disabled={loading}
-                    className="flex items-center gap-1 font-bold text-[#008080] hover:underline"
+                    className="flex items-center gap-1 font-semibold text-[#008080] hover:underline"
                   >
                     <RotateCcw className="h-3 w-3" />
                     <span>Resend Code</span>
@@ -550,7 +525,7 @@ export const LoginPage: React.FC = () => {
                 type="button"
                 onClick={() => handleVerifyOtp()}
                 disabled={loading || otp.some((d) => d === '')}
-                className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#008080] py-3.5 text-sm font-bold text-white shadow-md shadow-[#008080]/25 hover:bg-[#006b6b] active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none tap-target"
+                className="w-full h-[52px] flex items-center justify-center gap-2 rounded-[12px] bg-[#008080] text-sm font-semibold text-white shadow-sm hover:bg-[#006e6e] active:scale-[0.98] transition-all disabled:opacity-40 disabled:pointer-events-none"
               >
                 {loading ? (
                   <>
