@@ -398,6 +398,7 @@ export const NoticePage: React.FC = () => {
             <label className="text-xs font-bold text-gray-700 block mb-1">Expected Vacate Date</label>
             <input
               type="date"
+              placeholder="dd/mm/yyyy"
               value={vacateDate}
               onChange={(e) => setVacateDate(e.target.value)}
               className="w-full rounded-xl border border-gray-200 px-3 py-2 text-xs font-medium text-brandText focus:border-primary focus:outline-none"

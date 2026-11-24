@@ -1047,6 +1047,7 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
                       <div className="relative">
                         <input
                           type="date"
+                          placeholder="dd/mm/yyyy"
                           value={cashDate}
                           onChange={(e) => setCashDate(e.target.value)}
                           className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-3.5 py-2.5 text-xs font-medium text-brandText focus:border-emerald-600 focus:bg-white focus:outline-none"

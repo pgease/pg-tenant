@@ -209,6 +209,7 @@ export const NoticePeriodModal: React.FC<NoticePeriodModalProps> = ({
                 <div className="relative">
                   <input
                     type="date"
+                    placeholder="dd/mm/yyyy"
                     required
                     value={vacateOn}
                     onChange={(e) => setVacateOn(e.target.value)}

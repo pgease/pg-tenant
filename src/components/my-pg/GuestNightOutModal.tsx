@@ -577,6 +577,7 @@ export const GuestNightOutModal: React.FC<GuestNightOutModalProps> = ({
                   </label>
                   <input
                     type="date"
+                    placeholder="dd/mm/yyyy"
                     required
                     value={expectedArrival}
                     onChange={(e) => setExpectedArrival(e.target.value)}
@@ -590,6 +591,7 @@ export const GuestNightOutModal: React.FC<GuestNightOutModalProps> = ({
                   </label>
                   <input
                     type="date"
+                    placeholder="dd/mm/yyyy"
                     value={expectedDeparture}
                     onChange={(e) => setExpectedDeparture(e.target.value)}
                     className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-brandText focus:border-primary focus:outline-none"
