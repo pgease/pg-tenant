@@ -148,6 +148,7 @@ export interface GuestRequest {
   numberOfGuests?: number;
   status: 'pending' | 'approved' | 'rejected';
   purpose?: string;
+  ownerRemarks?: string;
   createdAt: string;
 }
 
