@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Moon,
   ArrowLeft,
@@ -6,47 +6,41 @@ import {
   AlertCircle,
   Plus,
   Loader2,
+  Clock,
+  MapPin,
+  Phone,
+  ShieldCheck,
+  RefreshCw,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { tenantService, type NightOutRequest } from '../services/tenantService';
 import { useAuth } from '../context/AuthContext';
+import { ListSkeleton } from '../components/ui/ListSkeleton';
+import { InlineError } from '../components/ui/InlineError';
 
-function pad(value: number): string {
-  return String(value).padStart(2, '0');
+function formatDDMMYYYY(dateVal: string | Date | null | undefined): string {
+  if (!dateVal) return '—';
+  const d = new Date(dateVal);
+  if (isNaN(d.getTime())) return '—';
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  let hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  return `${day}/${month}/${year}, ${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
 }
 
-function dateKey(date: Date): string {
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
-
-const DATE_OPTIONS = Array.from({ length: 21 }, (_, index) => {
-  const date = new Date();
-  date.setHours(0, 0, 0, 0);
-  date.setDate(date.getDate() + index);
-  const when = date.toLocaleDateString('en-IN', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-  });
-  const label = index === 0 ? `Today · ${when}` : index === 1 ? `Tomorrow · ${when}` : when;
-  return { value: dateKey(date), label };
-});
-
-const TIME_OPTIONS = Array.from({ length: 48 }, (_, index) => {
-  const hours = Math.floor(index / 2);
-  const minutes = index % 2 === 0 ? '00' : '30';
-  const value = `${pad(hours)}:${minutes}`;
-  const label = new Date(2026, 0, 1, hours, Number(minutes)).toLocaleTimeString('en-IN', {
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-  return { value, label };
-});
-
-function combineWhen(day: string, time: string): Date | null {
-  if (!day || !time) return null;
-  const date = new Date(`${day}T${time}`);
-  return Number.isNaN(date.getTime()) ? null : date;
+function formatDateOnly(dateVal: string | Date | null | undefined): string {
+  if (!dateVal) return '—';
+  const d = new Date(dateVal);
+  if (isNaN(d.getTime())) return '—';
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
 }
 
 export const NightOutPage: React.FC = () => {
@@ -55,21 +49,30 @@ export const NightOutPage: React.FC = () => {
 
   const [nightOutList, setNightOutList] = useState<NightOutRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Form Drawer / View state
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
+  const [formError, setFormError] = useState('');
 
   // Form Fields
-  const [leaveDay, setLeaveDay] = useState(DATE_OPTIONS[0].value);
+  const [leaveDate, setLeaveDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [leaveTime, setLeaveTime] = useState('21:00');
-  const [returnDay, setReturnDay] = useState(DATE_OPTIONS[1]?.value || DATE_OPTIONS[0].value);
+  const [returnDate, setReturnDate] = useState(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
+  });
   const [returnTime, setReturnTime] = useState('08:00');
   const [reason, setReason] = useState('');
   const [destinationAddress, setDestinationAddress] = useState('');
   const [contactDuringStay, setContactDuringStay] = useState('');
   const [parentConsentConfirmed, setParentConsentConfirmed] = useState(false);
 
-  const [msg, setMsg] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
+  // Filter
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
 
   const loadData = async () => {
     if (!isAuthenticated) {
@@ -77,11 +80,13 @@ export const NightOutPage: React.FC = () => {
       return;
     }
     setLoading(true);
+    setError(null);
     try {
       const data = await tenantService.getNightOutRequests();
       setNightOutList(Array.isArray(data) ? data : []);
-    } catch (e) {
-      console.error('Failed to load night out requests:', e);
+    } catch (err: any) {
+      console.error('Failed to load night out requests:', err);
+      setError('Could not load night out requests. Please try again.');
       setNightOutList([]);
     } finally {
       setLoading(false);
@@ -94,57 +99,100 @@ export const NightOutPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMsg('');
+    setFormError('');
 
-    const leaveAt = combineWhen(leaveDay, leaveTime);
-    const returnAt = combineWhen(returnDay, returnTime);
-
-    if (!leaveAt || !returnAt) {
-      setErrorMsg('Please select valid departure and return date & time.');
+    if (!leaveDate || !leaveTime) {
+      setFormError('Please select departure date and time.');
+      return;
+    }
+    if (!returnDate || !returnTime) {
+      setFormError('Please select expected return date and time.');
       return;
     }
 
-    if (returnAt.getTime() <= leaveAt.getTime()) {
-      setErrorMsg('Return date and time must be after the departure date.');
+    const leaveDateTime = new Date(`${leaveDate}T${leaveTime}:00`);
+    const returnDateTime = new Date(`${returnDate}T${returnTime}:00`);
+
+    if (isNaN(leaveDateTime.getTime())) {
+      setFormError('Invalid departure date & time.');
+      return;
+    }
+    if (isNaN(returnDateTime.getTime())) {
+      setFormError('Invalid return date & time.');
+      return;
+    }
+
+    if (returnDateTime.getTime() <= leaveDateTime.getTime()) {
+      setFormError('Expected return date & time must be strictly after departure date & time.');
+      return;
+    }
+
+    if (!reason.trim()) {
+      setFormError('Please provide a reason for the overnight leave.');
+      return;
+    }
+
+    const cleanContact = contactDuringStay.replace(/\D/g, '');
+    if (cleanContact && cleanContact.length !== 10) {
+      setFormError('Please enter a valid 10-digit emergency contact number.');
       return;
     }
 
     setSubmitting(true);
     try {
-      const created = await tenantService.createNightOutRequest({
-        leaveDate: leaveAt.toISOString(),
-        returnDate: returnAt.toISOString(),
-        reason: reason.trim() || undefined,
+      const res: any = await tenantService.createNightOutRequest({
+        leaveDate: leaveDateTime.toISOString(),
+        returnDate: returnDateTime.toISOString(),
+        reason: reason.trim(),
         destinationAddress: destinationAddress.trim() || undefined,
-        contactDuringStay: contactDuringStay.trim() || undefined,
+        contactDuringStay: cleanContact ? `+91${cleanContact}` : undefined,
         parentConsentConfirmed,
       });
 
-      setMsg('Night out request recorded and submitted to property manager.');
+      setSuccessMsg('Night out intimation submitted to PG management.');
       setShowForm(false);
       setReason('');
       setDestinationAddress('');
       setContactDuringStay('');
       setParentConsentConfirmed(false);
 
-      if (created) {
-        setNightOutList((prev) => [created, ...prev]);
+      if (res?.data) {
+        setNightOutList((prev) => [res.data, ...prev]);
       } else {
         loadData();
       }
-      setTimeout(() => setMsg(''), 4500);
+
+      setTimeout(() => setSuccessMsg(''), 5000);
     } catch (err: any) {
-      const errText = err.response?.data?.message || err.message || 'Failed to submit night out request.';
-      setErrorMsg(Array.isArray(errText) ? errText[0] : errText);
+      const errText =
+        err.response?.data?.message || err.message || 'Failed to submit night out request.';
+      setFormError(Array.isArray(errText) ? errText[0] : errText);
     } finally {
       setSubmitting(false);
     }
   };
 
+  const filteredList = useMemo(() => {
+    return nightOutList.filter((item) => {
+      const st = (item.status || 'pending').toLowerCase();
+      if (statusFilter === 'all') return true;
+      return st === statusFilter;
+    });
+  }, [nightOutList, statusFilter]);
+
+  const counts = useMemo(() => {
+    return {
+      all: nightOutList.length,
+      pending: nightOutList.filter((n) => (n.status || 'pending').toLowerCase() === 'pending').length,
+      approved: nightOutList.filter((n) => (n.status || '').toLowerCase() === 'approved').length,
+      rejected: nightOutList.filter((n) => (n.status || '').toLowerCase() === 'rejected').length,
+    };
+  }, [nightOutList]);
+
   return (
-    <div className="space-y-4 pt-1 pb-6 animate-fade-in">
-      {/* Header */}
-      <div className="page-toolbar flex flex-wrap items-center justify-between gap-2">
+    <div className="space-y-4 pt-1 pb-10 animate-fade-in max-w-3xl mx-auto px-1 sm:px-0">
+      {/* Top Navigation */}
+      <div className="page-toolbar flex items-center justify-between gap-2">
         <button
           onClick={() => navigate(-1)}
           className="page-back flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-brandText tap-target"
@@ -153,141 +201,185 @@ export const NightOutPage: React.FC = () => {
           <span>Back</span>
         </button>
 
-        <button
-          onClick={() => {
-            setShowForm(!showForm);
-            setErrorMsg('');
-          }}
-          className="flex items-center gap-1.5 rounded-xl bg-indigo-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 active:scale-95 transition-all"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          <span>{showForm ? 'View Logs' : 'New Night Out'}</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={loadData}
+            title="Refresh"
+            className="flex h-8 w-8 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-primary' : ''}`} />
+          </button>
+
+          <button
+            onClick={() => {
+              setShowForm(!showForm);
+              setFormError('');
+            }}
+            className="flex items-center gap-1.5 rounded-xl bg-indigo-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 active:scale-95 transition-all"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            <span>{showForm ? 'View Logs' : 'New Night Out'}</span>
+          </button>
+        </div>
       </div>
 
-      {/* Banner */}
-      <div className="rounded-3xl bg-gradient-to-br from-indigo-800 via-indigo-900 to-slate-950 p-5 text-white shadow-lg space-y-1.5">
-        <div className="flex items-center gap-2">
-          <Moon className="h-5 w-5 text-indigo-300" />
-          <h2 className="text-base font-bold tracking-tight">Night Out Intimation</h2>
+      {/* Header Banner */}
+      <div className="rounded-3xl bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950 p-5 text-white shadow-lg space-y-2">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
+            <Moon className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="text-base font-bold tracking-tight">Night Out Intimation</h2>
+            <p className="text-[11px] text-indigo-200/80">
+              {propertyDetails?.property?.name || 'PG Management'} · Movement & Safety Register
+            </p>
+          </div>
         </div>
-        <p className="text-xs text-indigo-200/90 leading-relaxed">
-          Log late night stays, weekend departures, and overnight leaves for safety and security at{' '}
-          {propertyDetails?.property?.name || 'your PG'}.
+        <p className="text-xs text-indigo-200/90 leading-relaxed pt-1">
+          Log late night stays, weekend departures, and overnight leaves. Automatic notifications are dispatched to PG management for gate permissions.
         </p>
       </div>
 
-      {msg && (
+      {/* Success Notification */}
+      {successMsg && (
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3.5 text-xs font-semibold text-emerald-800 flex items-center gap-2">
           <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-emerald-600" />
-          <span>{msg}</span>
+          <span>{successMsg}</span>
         </div>
       )}
 
-      {errorMsg && (
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-3.5 text-xs font-semibold text-rose-800 flex items-center gap-2">
-          <AlertCircle className="h-4 w-4 flex-shrink-0 text-rose-600" />
-          <span>{errorMsg}</span>
-        </div>
-      )}
-
+      {/* Form or List View */}
       {showForm ? (
-        /* Night Out Form */
-        <form onSubmit={handleSubmit} className="rounded-2xl border border-gray-100 bg-white p-4.5 shadow-sm space-y-4">
-          <div className="flex items-center gap-2 border-b border-gray-100 pb-2.5">
-            <Moon className="h-4 w-4 text-indigo-600" />
-            <h3 className="text-sm font-bold text-brandText">Submit Night Out Request</h3>
+        <form onSubmit={handleSubmit} className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm space-y-4.5">
+          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+            <div className="flex items-center gap-2">
+              <Moon className="h-4 w-4 text-indigo-600" />
+              <h3 className="text-sm font-bold text-brandText">Submit Night Out Request</h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowForm(false)}
+              className="text-xs font-semibold text-gray-400 hover:text-gray-600"
+            >
+              Cancel
+            </button>
           </div>
 
-          {/* Departure */}
+          {formError && (
+            <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-700 flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 flex-shrink-0 text-rose-500" />
+              <span>{formError}</span>
+            </div>
+          )}
+
+          {/* Departure Date & Time */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-700 block">Departure Date & Time</label>
-            <div className="grid grid-cols-2 gap-2">
-              <select
-                value={leaveDay}
-                onChange={(e) => setLeaveDay(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-gray-50/50 p-2 text-xs font-medium text-brandText focus:border-indigo-600 focus:bg-white focus:outline-none"
-              >
-                {DATE_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-              <select
-                value={leaveTime}
-                onChange={(e) => setLeaveTime(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-gray-50/50 p-2 text-xs font-medium text-brandText focus:border-indigo-600 focus:bg-white focus:outline-none"
-              >
-                {TIME_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
+            <label className="text-xs font-bold text-gray-700 block">
+              Departure Date & Time <span className="text-rose-500">*</span>
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="relative">
+                <input
+                  type="date"
+                  placeholder="dd/mm/yyyy"
+                  value={leaveDate}
+                  onChange={(e) => setLeaveDate(e.target.value)}
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50/50 p-2.5 text-xs font-medium text-brandText focus:border-indigo-600 focus:bg-white focus:outline-none"
+                  required
+                />
+              </div>
+              <div className="relative">
+                <input
+                  type="time"
+                  value={leaveTime}
+                  onChange={(e) => setLeaveTime(e.target.value)}
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50/50 p-2.5 text-xs font-medium text-brandText focus:border-indigo-600 focus:bg-white focus:outline-none"
+                  required
+                />
+              </div>
             </div>
           </div>
 
-          {/* Return */}
+          {/* Expected Return Date & Time */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-700 block">Expected Return Date & Time</label>
-            <div className="grid grid-cols-2 gap-2">
-              <select
-                value={returnDay}
-                onChange={(e) => setReturnDay(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-gray-50/50 p-2 text-xs font-medium text-brandText focus:border-indigo-600 focus:bg-white focus:outline-none"
-              >
-                {DATE_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-              <select
-                value={returnTime}
-                onChange={(e) => setReturnTime(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-gray-50/50 p-2 text-xs font-medium text-brandText focus:border-indigo-600 focus:bg-white focus:outline-none"
-              >
-                {TIME_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
+            <label className="text-xs font-bold text-gray-700 block">
+              Expected Return Date & Time <span className="text-rose-500">*</span>
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="relative">
+                <input
+                  type="date"
+                  placeholder="dd/mm/yyyy"
+                  value={returnDate}
+                  onChange={(e) => setReturnDate(e.target.value)}
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50/50 p-2.5 text-xs font-medium text-brandText focus:border-indigo-600 focus:bg-white focus:outline-none"
+                  required
+                />
+              </div>
+              <div className="relative">
+                <input
+                  type="time"
+                  value={returnTime}
+                  onChange={(e) => setReturnTime(e.target.value)}
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50/50 p-2.5 text-xs font-medium text-brandText focus:border-indigo-600 focus:bg-white focus:outline-none"
+                  required
+                />
+              </div>
             </div>
           </div>
 
           {/* Reason */}
-          <div>
-            <label className="text-xs font-bold text-gray-700 block mb-1">Reason for Night Out</label>
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-gray-700 block">
+              Reason for Night Out <span className="text-rose-500">*</span>
+            </label>
             <input
               type="text"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="e.g. Visiting home, exam prep, office work, family trip"
-              className="w-full rounded-xl border border-gray-200 p-2.5 text-xs font-medium text-brandText focus:border-indigo-600 focus:outline-none"
+              placeholder="e.g. Visiting home, exam prep, office late shift, family function"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50/50 p-2.5 text-xs font-medium text-brandText focus:border-indigo-600 focus:bg-white focus:outline-none"
               required
             />
           </div>
 
-          {/* Destination */}
-          <div>
-            <label className="text-xs font-bold text-gray-700 block mb-1">Destination Address (Optional)</label>
+          {/* Destination Address */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-gray-700 block">
+              Destination Address / City (Optional)
+            </label>
             <input
               type="text"
               value={destinationAddress}
               onChange={(e) => setDestinationAddress(e.target.value)}
-              placeholder="City, locality, or home address"
-              className="w-full rounded-xl border border-gray-200 p-2.5 text-xs font-medium text-brandText focus:border-indigo-600 focus:outline-none"
+              placeholder="e.g. Pune, Flat 402 Green Acres, HSR Layout"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50/50 p-2.5 text-xs font-medium text-brandText focus:border-indigo-600 focus:bg-white focus:outline-none"
             />
           </div>
 
           {/* Emergency Contact */}
-          <div>
-            <label className="text-xs font-bold text-gray-700 block mb-1">Emergency Contact Number (Optional)</label>
-            <input
-              type="tel"
-              value={contactDuringStay}
-              onChange={(e) => setContactDuringStay(e.target.value)}
-              placeholder="e.g. 9876543210"
-              className="w-full rounded-xl border border-gray-200 p-2.5 text-xs font-medium text-brandText focus:border-indigo-600 focus:outline-none"
-            />
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-gray-700 block">
+              Emergency Contact Number (Optional)
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">
+                +91
+              </span>
+              <input
+                type="tel"
+                maxLength={10}
+                value={contactDuringStay}
+                onChange={(e) => setContactDuringStay(e.target.value)}
+                placeholder="10-digit mobile number"
+                className="w-full rounded-xl border border-gray-200 bg-gray-50/50 py-2.5 pr-3 pl-11 text-xs font-medium text-brandText focus:border-indigo-600 focus:bg-white focus:outline-none"
+              />
+            </div>
           </div>
 
           {/* Parent Consent Checkbox */}
-          <label className="flex items-start gap-2.5 pt-1 cursor-pointer">
+          <label className="flex items-start gap-2.5 pt-2 cursor-pointer rounded-xl bg-gray-50/70 p-3 border border-gray-100">
             <input
               type="checkbox"
               checked={parentConsentConfirmed}
@@ -295,117 +387,198 @@ export const NightOutPage: React.FC = () => {
               className="h-4 w-4 mt-0.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
             />
             <span className="text-xs text-gray-600 leading-snug">
-              I confirm that my parents/guardians are informed of this overnight leave.
+              I confirm that my parents/guardians are aware and have consented to this overnight leave.
             </span>
           </label>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50"
-          >
-            {submitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-            <span>{submitting ? 'Submitting...' : 'Submit Night Out Intimation'}</span>
-          </button>
+          {/* Action buttons */}
+          <div className="flex items-center gap-2 pt-2">
+            <button
+              type="button"
+              onClick={() => setShowForm(false)}
+              className="w-1/3 rounded-xl border border-gray-200 py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-2/3 flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50 transition-all"
+            >
+              {submitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              <span>{submitting ? 'Submitting...' : 'Submit Intimation'}</span>
+            </button>
+          </div>
         </form>
       ) : (
-        /* Night Out Logs List */
-        <div className="space-y-3">
-          <div className="flex items-center justify-between px-1">
-            <h3 className="text-xs font-bold text-brandText uppercase tracking-wider">
-              Recorded Movement Logs ({nightOutList.length})
-            </h3>
+        /* Logs List */
+        <div className="space-y-3.5">
+          {/* Status Filter Chips */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+            <button
+              onClick={() => setStatusFilter('all')}
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-colors ${
+                statusFilter === 'all'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              All ({counts.all})
+            </button>
+            <button
+              onClick={() => setStatusFilter('pending')}
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-colors ${
+                statusFilter === 'pending'
+                  ? 'bg-amber-500 text-white shadow-xs'
+                  : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              Pending ({counts.pending})
+            </button>
+            <button
+              onClick={() => setStatusFilter('approved')}
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-colors ${
+                statusFilter === 'approved'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              Approved ({counts.approved})
+            </button>
+            <button
+              onClick={() => setStatusFilter('rejected')}
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-colors ${
+                statusFilter === 'rejected'
+                  ? 'bg-rose-600 text-white shadow-xs'
+                  : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              Rejected ({counts.rejected})
+            </button>
           </div>
 
+          {/* Loading Skeleton */}
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-16">
-              <Loader2 className="h-7 w-7 animate-spin text-indigo-600 mb-2" />
-              <p className="text-xs font-medium text-gray-500">Loading night out requests...</p>
-            </div>
-          ) : nightOutList.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-gray-200 bg-gray-50/50 p-10 text-center space-y-2">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
-                <Moon className="h-6 w-6" />
+            <ListSkeleton rows={3} />
+          ) : error ? (
+            <InlineError message={error} onRetry={loadData} />
+          ) : filteredList.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-gray-200 bg-white p-10 text-center space-y-3 shadow-xs">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+                <Moon className="h-7 w-7" />
               </div>
-              <h3 className="text-sm font-bold text-brandText">No Night Out Logs</h3>
-              <p className="text-xs text-gray-400">
-                You haven't submitted any overnight leaves yet.
-              </p>
+              <div className="space-y-1">
+                <h3 className="text-sm font-bold text-brandText">
+                  {statusFilter === 'all' ? 'No Night Out Requests' : `No ${statusFilter} Requests`}
+                </h3>
+                <p className="text-xs text-gray-400 max-w-sm mx-auto">
+                  {statusFilter === 'all'
+                    ? "You haven't submitted any overnight leave or night out intimation yet."
+                    : `No night out requests currently marked as ${statusFilter}.`}
+                </p>
+              </div>
               <button
                 onClick={() => setShowForm(true)}
-                className="mt-2 inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-indigo-700"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-indigo-700"
               >
                 <Plus className="h-3.5 w-3.5" />
-                <span>Submit First Request</span>
+                <span>Submit Night Out Intimation</span>
               </button>
             </div>
           ) : (
-            nightOutList.map((item) => {
+            filteredList.map((item) => {
               const status = (item.status || 'pending').toLowerCase();
               const isApproved = status === 'approved';
               const isRejected = status === 'rejected';
 
-              const leaveFormatted = item.leaveDate
-                ? new Date(item.leaveDate).toLocaleString('en-IN', {
-                    day: 'numeric',
-                    month: 'short',
-                    hour: 'numeric',
-                    minute: '2-digit',
-                  })
-                : '—';
-
-              const returnFormatted = item.returnDate
-                ? new Date(item.returnDate).toLocaleString('en-IN', {
-                    day: 'numeric',
-                    month: 'short',
-                    hour: 'numeric',
-                    minute: '2-digit',
-                  })
-                : '—';
-
               return (
                 <div
                   key={item.id}
-                  className="rounded-2xl border border-gray-100 bg-white p-4 shadow-xs space-y-2.5"
+                  className="rounded-2xl border border-gray-100 bg-white p-4 shadow-xs space-y-3 transition-all hover:shadow-md"
                 >
+                  {/* Top Bar: Reason and Status */}
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
-                        <Moon className="h-4 w-4" />
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 shrink-0">
+                        <Moon className="h-4.5 w-4.5" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold text-brandText">
-                          {item.reason || 'Night Out Intimation'}
+                        <h4 className="text-xs font-bold text-brandText line-clamp-1">
+                          {item.reason || 'Overnight Leave'}
                         </h4>
                         <span className="text-[10px] text-gray-400">
-                          {item.destinationAddress || 'Standard Leave'}
+                          Submitted on {formatDateOnly(item.createdAt)}
                         </span>
                       </div>
                     </div>
 
                     <span
-                      className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider shrink-0 ${
+                      className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider shrink-0 ${
                         isApproved
-                          ? 'bg-emerald-50 text-emerald-700'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
                           : isRejected
-                          ? 'bg-rose-50 text-rose-700'
-                          : 'bg-amber-50 text-amber-700'
+                          ? 'bg-rose-50 text-rose-700 border border-rose-200/60'
+                          : 'bg-amber-50 text-amber-700 border border-amber-200/60'
                       }`}
                     >
                       {item.status || 'Pending'}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 bg-gray-50/70 p-2.5 rounded-xl border border-gray-100">
-                    <div>
-                      <span className="text-[10px] text-gray-400 block font-semibold">DEPARTURE</span>
-                      <span className="font-bold text-brandText">{leaveFormatted}</span>
+                  {/* Schedule Details Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs bg-gray-50/70 p-3 rounded-xl border border-gray-100">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                        <Clock className="h-3 w-3 text-indigo-500" />
+                        <span>DEPARTURE</span>
+                      </div>
+                      <span className="font-bold text-brandText block">
+                        {formatDDMMYYYY(item.leaveDate)}
+                      </span>
                     </div>
-                    <div>
-                      <span className="text-[10px] text-gray-400 block font-semibold">RETURN</span>
-                      <span className="font-bold text-brandText">{returnFormatted}</span>
+
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                        <Clock className="h-3 w-3 text-emerald-500" />
+                        <span>EXPECTED RETURN</span>
+                      </div>
+                      <span className="font-bold text-brandText block">
+                        {formatDDMMYYYY(item.returnDate)}
+                      </span>
                     </div>
                   </div>
+
+                  {/* Metadata: Destination, Contact, Parent consent */}
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-gray-600 pt-0.5">
+                    {item.destinationAddress && (
+                      <div className="flex items-center gap-1 text-[11px] bg-gray-100 px-2 py-0.5 rounded-lg text-gray-700">
+                        <MapPin className="h-3 w-3 text-gray-400" />
+                        <span>{item.destinationAddress}</span>
+                      </div>
+                    )}
+
+                    {item.contactDuringStay && (
+                      <div className="flex items-center gap-1 text-[11px] bg-gray-100 px-2 py-0.5 rounded-lg text-gray-700">
+                        <Phone className="h-3 w-3 text-gray-400" />
+                        <span>{item.contactDuringStay}</span>
+                      </div>
+                    )}
+
+                    {item.parentConsentConfirmed && (
+                      <div className="flex items-center gap-1 text-[11px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-lg font-medium">
+                        <ShieldCheck className="h-3 w-3 text-indigo-600" />
+                        <span>Guardian Informed</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Owner Remarks if rejected or approved with instructions */}
+                  {item.ownerRemarks && (
+                    <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-2.5 text-xs text-amber-900">
+                      <span className="font-bold">Manager Remarks: </span>
+                      <span>{item.ownerRemarks}</span>
+                    </div>
+                  )}
                 </div>
               );
             })

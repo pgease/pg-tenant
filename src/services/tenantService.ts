@@ -158,7 +158,10 @@ export interface NightOutRequest {
   returnDate: string;
   reason: string;
   destinationAddress?: string;
-  status: 'pending' | 'approved' | 'rejected';
+  contactDuringStay?: string;
+  parentConsentConfirmed?: boolean;
+  status: 'pending' | 'approved' | 'rejected' | 'returned' | 'cancelled';
+  ownerRemarks?: string;
   createdAt: string;
 }
 
