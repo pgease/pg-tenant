@@ -15,6 +15,7 @@ import { tenantService, type Complaint } from '../services/tenantService';
 import { ListSkeleton } from '../components/ui/ListSkeleton';
 import { InlineError } from '../components/ui/InlineError';
 import { useAuth } from '../context/AuthContext';
+import { toast, toastError } from '../components/ui/use-toast';
 
 const CATEGORIES = [
   'All',
@@ -71,7 +72,11 @@ export const ComplaintsPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!subject.trim() || !description.trim()) {
-      alert('Please enter both subject and description.');
+      toast({
+        title: 'Missing Information',
+        description: 'Please enter both subject and description.',
+        variant: 'warning',
+      });
       return;
     }
 
@@ -98,9 +103,14 @@ export const ComplaintsPage: React.FC = () => {
       setSelectedFile(null);
       setShowRaiseForm(false);
       loadComplaints();
+      toast({
+        title: 'Complaint Registered',
+        description: 'The property manager has been notified.',
+        variant: 'success',
+      });
       setTimeout(() => setSuccessMsg(''), 5000);
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to submit complaint. Please try again.');
+      toastError(err, 'Failed to submit complaint. Please try again.');
     } finally {
       setSubmitting(false);
       setUploadingPhoto(false);

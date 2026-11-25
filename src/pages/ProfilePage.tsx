@@ -40,6 +40,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { StaffModal } from '../components/my-pg/StaffModal';
 import { AmenitiesModal } from '../components/my-pg/AmenitiesModal';
+import { toast, toastError } from '../components/ui/use-toast';
 
 export const ProfilePage: React.FC = () => {
   const { isAuthenticated, isLinkedTenant, tenant, propertyDetails, logout, checkTenancy } = useAuth();
@@ -90,7 +91,11 @@ export const ProfilePage: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file (JPG, PNG, WebP).');
+      toast({
+        title: 'Invalid File',
+        description: 'Please select an image file (JPG, PNG, WebP).',
+        variant: 'warning',
+      });
       return;
     }
     setIsUploadingPhoto(true);
@@ -98,9 +103,14 @@ export const ProfilePage: React.FC = () => {
       await authService.uploadProfilePhoto(file);
       setImgError(false);
       await checkTenancy();
+      toast({
+        title: 'Photo Updated',
+        description: 'Your profile photo has been updated successfully.',
+        variant: 'success',
+      });
     } catch (err: any) {
       console.error('Failed to upload photo:', err);
-      alert(err?.response?.data?.message || 'Failed to upload photo. Please try again.');
+      toastError(err, 'Failed to upload photo. Please try again.');
     } finally {
       setIsUploadingPhoto(false);
       if (e.target) e.target.value = '';

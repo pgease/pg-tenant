@@ -13,6 +13,7 @@ import {
 import { PropertyCard } from './PropertyCard';
 import { FilterDrawer } from './FilterDrawer';
 import { ListSkeleton } from '../ui/ListSkeleton';
+import { toast } from '../ui/use-toast';
 
 const CITIES = ['All', 'Delhi NCR', 'Noida', 'Bangalore', 'Kolkata', 'Lucknow', 'Kota'];
 
@@ -78,7 +79,11 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
   // Handle Geolocation Near Me
   const handleNearMeToggle = () => {
     if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser.');
+      toast({
+        title: 'Geolocation Unavailable',
+        description: 'Geolocation is not supported by your browser.',
+        variant: 'warning',
+      });
       return;
     }
 
@@ -93,7 +98,11 @@ export const PgExplorerSection: React.FC<PgExplorerSectionProps> = ({
           }));
         },
         () => {
-          alert('Could not access current location.');
+          toast({
+            title: 'Location Access',
+            description: 'Could not access current location. Please check browser permissions.',
+            variant: 'warning',
+          });
         }
       );
     } else {

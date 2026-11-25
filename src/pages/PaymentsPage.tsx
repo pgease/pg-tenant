@@ -16,6 +16,7 @@ import { useAuth } from '../context/AuthContext';
 import { tenantService, type RentCollectionDetails, type OtherDueItem } from '../services/tenantService';
 import { RentPaymentModal } from '../components/my-pg/RentPaymentModal';
 import { formatDateToDDMMYYYY } from '../utils/dateUtils';
+import { toast, toastError } from '../components/ui/use-toast';
 
 type CategoryTab = 'all' | 'rent' | 'deposit' | 'utilities' | 'other';
 
@@ -130,10 +131,14 @@ export const PaymentsPage: React.FC = () => {
       if (receipt?.receiptUrl || receipt?.url) {
         window.open(receipt.receiptUrl || receipt.url, '_blank', 'noopener');
       } else {
-        alert(`Receipt #${receipt?.receiptNumber || tx.receiptNumber || id.slice(0, 8)} is verified.`);
+        toast({
+          title: 'Receipt Verified',
+          description: `Receipt #${receipt?.receiptNumber || tx.receiptNumber || id.slice(0, 8)} is verified.`,
+          variant: 'success',
+        });
       }
-    } catch {
-      alert('Could not download receipt at this time.');
+    } catch (err: any) {
+      toastError(err, 'Could not download receipt at this time.');
     } finally {
       setDownloadingReceiptId(null);
     }

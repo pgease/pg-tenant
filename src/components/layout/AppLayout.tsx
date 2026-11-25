@@ -11,6 +11,8 @@ import { useAuth } from '../../context/AuthContext';
 import { tenantService } from '../../services/tenantService';
 import { desktopNavItems, rootTabPaths } from '../../navigation/appMenu';
 import { ArrowLeft, Bell, LogOut, Menu } from 'lucide-react';
+import { Toaster } from '../ui/toaster';
+import { setAppStatusBar } from '../../utils/statusBar';
 
 export const AppLayout: React.FC = () => {
   const { isOnline, checkConnection } = useNetworkStatus();
@@ -30,6 +32,10 @@ export const AppLayout: React.FC = () => {
   const [hasUnread, setHasUnread] = useState<boolean>(false);
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
   const mainRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    setAppStatusBar(false);
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -101,26 +107,23 @@ export const AppLayout: React.FC = () => {
     : desktopNavItems.filter((item) => item.group === 'home' || item.group === 'explore');
 
   return (
-    <div className="min-h-dvh w-full bg-slate-100 flex justify-center selection:bg-[#008080] selection:text-white">
-      {/* Responsive Container: Max 430px on Mobile, Max 6xl (1152px) with 2-column sidebar on Desktop */}
-      <div className="relative flex flex-col lg:flex-row w-full max-w-md lg:max-w-6xl min-h-dvh bg-white shadow-2xl overflow-x-hidden">
-        
-        {/* Offline Screen Overlay */}
-        {!isOnline && <OfflineScreen onRetry={checkConnection} />}
+    <div className="min-h-dvh w-full bg-[#F8FAFC] flex flex-col lg:flex-row selection:bg-[#008080] selection:text-white">
+      {/* Offline Screen Overlay */}
+      {!isOnline && <OfflineScreen onRetry={checkConnection} />}
 
-        {/* Splash Screen */}
-        {showSplash && (
-          <SplashScreen onComplete={() => setShowSplash(false)} durationMs={1500} />
-        )}
+      {/* Splash Screen */}
+      {showSplash && (
+        <SplashScreen onComplete={() => setShowSplash(false)} durationMs={1500} />
+      )}
 
-        {/* App Mode Onboarding Carousel */}
-        {showOnboarding && (
-          <OnboardingCarousel onComplete={() => setShowOnboarding(false)} />
-        )}
+      {/* App Mode Onboarding Carousel */}
+      {showOnboarding && (
+        <OnboardingCarousel onComplete={() => setShowOnboarding(false)} />
+      )}
 
-        {/* Desktop Left Sidebar Navigation */}
-        {!hideTabBar && (
-          <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:shrink-0 lg:border-r lg:border-gray-100 lg:bg-slate-50/70 p-5 min-h-dvh justify-between overflow-hidden">
+      {/* Desktop Left Sidebar Navigation */}
+      {!hideTabBar && (
+        <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:shrink-0 lg:border-r lg:border-gray-100 lg:bg-white p-5 min-h-dvh justify-between overflow-hidden">
             <div className="space-y-6 flex-1 min-h-0 overflow-y-auto">
               {/* Brand Logo */}
               <div
@@ -317,7 +320,7 @@ export const AppLayout: React.FC = () => {
 
           <main
             ref={mainRef}
-            className={`flex-1 overflow-x-hidden overflow-y-auto ${
+            className={`flex-1 overflow-x-hidden overflow-y-auto max-w-6xl w-full mx-auto ${
               !location.pathname.startsWith('/login') ? 'px-4 py-4 sm:px-6' : ''
             } ${!hideTabBar ? 'pb-tabbar lg:pb-8' : 'pb-safe'}`}
           >
@@ -326,7 +329,7 @@ export const AppLayout: React.FC = () => {
         </div>
 
         {!hideTabBar && <BottomTabBar />}
+        <Toaster />
       </div>
-    </div>
   );
 };

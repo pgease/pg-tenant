@@ -1,12 +1,24 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { tabItems } from '../../navigation/appMenu';
+import { useAuth } from '../../context/AuthContext';
+import { LayoutGrid, Search, Bookmark, User } from 'lucide-react';
+
+const guestTabs = [
+  { to: '/', label: 'Explore', icon: LayoutGrid, end: true },
+  { to: '/search', label: 'PG Search', icon: Search },
+  { to: '/saved', label: 'Saved', icon: Bookmark },
+  { to: '/login', label: 'Sign In', icon: User },
+];
 
 export const BottomTabBar: React.FC = () => {
+  const { isAuthenticated } = useAuth();
+  const tabs = isAuthenticated ? tabItems : guestTabs;
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 mx-auto max-w-md border-t border-gray-100 bg-white/95 backdrop-blur-md pb-safe shadow-tab-bar lg:hidden">
-      <div className="flex items-stretch justify-around px-1 pt-1">
-        {tabItems.map((tab) => {
+    <nav className="fixed bottom-0 left-0 right-0 z-30 mx-auto w-full border-t border-gray-100 bg-white/95 backdrop-blur-md pb-safe shadow-tab-bar lg:hidden">
+      <div className="flex items-stretch justify-around px-1 pt-1 max-w-lg mx-auto">
+        {tabs.map((tab) => {
           const Icon = tab.icon;
           return (
             <NavLink

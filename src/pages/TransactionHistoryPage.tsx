@@ -17,6 +17,7 @@ import { useAuth } from '../context/AuthContext';
 import { ListSkeleton } from '../components/ui/ListSkeleton';
 import { InlineError } from '../components/ui/InlineError';
 import { formatDateToDDMMYYYY } from '../utils/dateUtils';
+import { toast, toastError } from '../components/ui/use-toast';
 
 interface TransactionItem {
   id: string;
@@ -415,10 +416,14 @@ export const TransactionHistoryPage: React.FC = () => {
                               if (receipt?.receiptUrl || receipt?.url) {
                                 window.open(receipt.receiptUrl || receipt.url, '_blank', 'noopener');
                               } else {
-                                alert(`Receipt #${receipt?.receiptNumber || tx.receiptNumber || tx.id.slice(0, 8)} is generated.`);
+                                toast({
+                                  title: 'Receipt Generated',
+                                  description: `Receipt #${receipt?.receiptNumber || tx.receiptNumber || tx.id.slice(0, 8)} is generated.`,
+                                  variant: 'success',
+                                });
                               }
-                            } catch {
-                              alert('Could not download receipt at this time.');
+                            } catch (err: any) {
+                              toastError(err, 'Could not download receipt at this time.');
                             }
                           }
                         }}

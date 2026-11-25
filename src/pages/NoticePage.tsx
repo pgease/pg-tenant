@@ -18,6 +18,7 @@ import { inventoryService, type TenantCheckoutSummary } from '../services/invent
 import { useAuth } from '../context/AuthContext';
 import { NativeDatePicker } from '../components/common/NativeDatePicker';
 import { formatDateToDDMMYYYY, getKolkataTodayYYYYMMDD } from '../utils/dateUtils';
+import { toast, toastError } from '../components/ui/use-toast';
 
 export const NoticePage: React.FC = () => {
   const navigate = useNavigate();
@@ -63,8 +64,13 @@ export const NoticePage: React.FC = () => {
       const updated = await inventoryService.getCheckoutSummary(tenantId);
       setCheckoutSummary(updated);
       setMsg('You have successfully agreed to the checkout inventory inspection & deposit settlement.');
-    } catch {
-      alert('Failed to submit agreement.');
+      toast({
+        title: 'Agreement Submitted',
+        description: 'You agreed to the checkout inspection & deposit settlement.',
+        variant: 'success',
+      });
+    } catch (err: any) {
+      toastError(err, 'Failed to submit agreement.');
     } finally {
       setAcknowledging(false);
     }
@@ -86,8 +92,13 @@ export const NoticePage: React.FC = () => {
       setDisputeModalOpen(false);
       setDisputeText('');
       setMsg('Dispute note submitted. The owner has been notified in-app.');
-    } catch {
-      alert('Failed to submit dispute.');
+      toast({
+        title: 'Dispute Submitted',
+        description: 'Dispute note submitted. The owner has been notified.',
+        variant: 'info',
+      });
+    } catch (err: any) {
+      toastError(err, 'Failed to submit dispute.');
     } finally {
       setAcknowledging(false);
     }
@@ -103,11 +114,19 @@ export const NoticePage: React.FC = () => {
   const handleRaiseNotice = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!vacateDate) {
-      alert('Please select expected vacate date.');
+      toast({
+        title: 'Vacate Date Required',
+        description: 'Please select expected vacate date.',
+        variant: 'warning',
+      });
       return;
     }
     if (vacateDate < minVacateDate) {
-      alert(`Expected vacate date must be at least ${noticeDays} days in advance (${formatDateToDDMMYYYY(minVacateDate)}).`);
+      toast({
+        title: 'Invalid Vacate Date',
+        description: `Expected vacate date must be at least ${noticeDays} days in advance (${formatDateToDDMMYYYY(minVacateDate)}).`,
+        variant: 'warning',
+      });
       return;
     }
 
@@ -119,10 +138,15 @@ export const NoticePage: React.FC = () => {
         remarks,
       });
       setMsg('Notice request submitted successfully.');
+      toast({
+        title: 'Notice Submitted',
+        description: 'Notice request submitted successfully.',
+        variant: 'success',
+      });
       loadNotice();
       checkTenancy();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to submit notice.');
+      toastError(err, 'Failed to submit notice.');
     } finally {
       setSubmitting(false);
     }
@@ -133,11 +157,16 @@ export const NoticePage: React.FC = () => {
     try {
       await tenantService.cancelNotice();
       setMsg('Notice request cancelled successfully. Your stay is now active.');
+      toast({
+        title: 'Notice Cancelled',
+        description: 'Notice request cancelled successfully. Your stay is active.',
+        variant: 'success',
+      });
       setShowCancelConfirmModal(false);
       loadNotice();
       checkTenancy();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to cancel notice.');
+      toastError(err, 'Failed to cancel notice.');
     } finally {
       setSubmitting(false);
     }
