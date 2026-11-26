@@ -72,7 +72,7 @@ export const AnnouncementsPage: React.FC = () => {
           <span>Back</span>
         </button>
 
-        <span className="rounded-full bg-purple-50 px-3 py-1 text-xs font-bold text-purple-700">
+        <span className="rounded-full bg-[#E6F3F3] px-3 py-1 text-xs font-bold text-[#005F5F]">
           PG Notice Board
         </span>
       </div>
@@ -83,7 +83,7 @@ export const AnnouncementsPage: React.FC = () => {
           <Megaphone className="h-5 w-5 text-purple-300" />
           <h2 className="text-base font-bold tracking-tight">Property Announcements</h2>
         </div>
-        <p className="text-xs text-purple-200/90 leading-relaxed">
+        <p className="text-xs text-white/85 leading-relaxed">
           Official announcements, maintenance schedules, and security alerts from{' '}
           {propertyDetails?.property?.name || 'your PG management'}.
         </p>
@@ -111,7 +111,7 @@ export const AnnouncementsPage: React.FC = () => {
           <InlineError message="Could not load notices." onRetry={() => setRetryKey((key) => key + 1)} />
         ) : filtered.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-gray-200 bg-gray-50/50 p-10 text-center space-y-2">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-50 text-purple-600">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E6F3F3] text-[#005F5F]">
               <BellRing className="h-6 w-6" />
             </div>
             <h3 className="text-sm font-bold text-brandText">No Announcements</h3>
@@ -135,16 +135,16 @@ export const AnnouncementsPage: React.FC = () => {
                 key={item.id}
                 className={`rounded-2xl border p-4.5 transition-all space-y-2 shadow-xs ${
                   isUrgent
-                    ? 'border-amber-200 bg-amber-50/40 text-brandText'
+                    ? 'border-[#008080]/30 bg-[#E6F3F3] text-brandText'
                     : 'border-gray-100 bg-white text-gray-700'
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2">
                     {isUrgent ? (
-                      <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+                      <AlertTriangle className="h-4 w-4 text-[#005F5F] shrink-0" />
                     ) : (
-                      <Info className="h-4 w-4 text-purple-600 shrink-0" />
+                      <Info className="h-4 w-4 text-[#005F5F] shrink-0" />
                     )}
                     <h4 className="text-sm font-bold text-brandText leading-snug">{item.title}</h4>
                   </div>
@@ -153,8 +153,8 @@ export const AnnouncementsPage: React.FC = () => {
                       item.priority === 'urgent'
                         ? 'bg-red-100 text-red-700'
                         : item.priority === 'high'
-                        ? 'bg-amber-100 text-amber-800'
-                        : 'bg-purple-100 text-purple-800'
+                        ? 'bg-[#CCE6E6] text-[#005F5F]'
+                        : 'bg-[#CCE6E6] text-[#005F5F]'
                     }`}
                   >
                     {item.priority || 'Normal'}
@@ -170,7 +170,7 @@ export const AnnouncementsPage: React.FC = () => {
                     <Calendar className="h-3 w-3" /> {formattedDate}
                   </span>
                   {item.category && (
-                    <span className="font-semibold capitalize text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md">
+                    <span className="font-semibold capitalize text-[#005F5F] bg-[#E6F3F3] px-2 py-0.5 rounded-md">
                       {item.category}
                     </span>
                   )}

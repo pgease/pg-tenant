@@ -218,8 +218,8 @@ export const TransactionHistoryPage: React.FC = () => {
               onClick={() => setStatusFilter('verification')}
               className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
                 statusFilter === 'verification'
-                  ? 'bg-amber-600 text-white shadow-xs'
-                  : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+                  ? 'bg-[#008080] text-white shadow-xs'
+                  : 'bg-[#E6F3F3] text-[#005F5F] hover:bg-[#CCE6E6]'
               }`}
             >
               Under Review ({statusCounts.verification})
@@ -304,7 +304,7 @@ export const TransactionHistoryPage: React.FC = () => {
             const statusBadgeConfig = isSuccess
               ? { label: 'Paid', badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
               : isUnderReview
-              ? { label: 'Under Verification', badgeClass: 'bg-amber-50 text-amber-700 border-amber-200' }
+              ? { label: 'Under Verification', badgeClass: 'bg-[#E6F3F3] text-[#005F5F] border-[#008080]/30' }
               : isRejected
               ? { label: 'Rejected', badgeClass: 'bg-rose-50 text-rose-700 border-rose-200' }
               : { label: st || 'Pending', badgeClass: 'bg-gray-100 text-gray-700 border-gray-200' };
@@ -323,7 +323,7 @@ export const TransactionHistoryPage: React.FC = () => {
                         isSuccess
                           ? 'bg-emerald-50 text-emerald-600'
                           : isUnderReview
-                          ? 'bg-amber-50 text-amber-600'
+                          ? 'bg-[#E6F3F3] text-[#005F5F]'
                           : isRejected
                           ? 'bg-rose-50 text-rose-600'
                           : 'bg-gray-100 text-gray-500'

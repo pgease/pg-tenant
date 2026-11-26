@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { sanitizeDisplayName } from '../utils/formatters';
 import {
   Pencil,
   X,
@@ -121,7 +122,7 @@ export const HomePage: React.FC = () => {
     }
   };
 
-  const displayName = tenant?.name || (isAuthenticated ? 'Resident' : 'Explore PGs');
+  const displayName = sanitizeDisplayName(tenant?.name) || (isAuthenticated ? 'Resident' : 'Explore PGs');
   const greeting = getTimeGreeting();
 
   const rawPhoto =
@@ -369,7 +370,7 @@ export const HomePage: React.FC = () => {
               </span>
 
               {duesStatus === 'OVERDUE' || (balanceDue > 0 && duesStatus !== 'ADVANCE') ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-amber-400/20 border border-amber-300/30 px-2 py-0.5 text-[10px] font-bold text-amber-200">
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-400/20 border border-[#008080]/30 px-2 py-0.5 text-[10px] font-bold text-white/85">
                   <AlertCircle className="h-3 w-3" />
                   <span>₹{balanceDue.toLocaleString('en-IN')} {duesStatus === 'OVERDUE' ? 'Overdue' : nextDueText ? `Due ${nextDueText}` : 'Due'}</span>
                 </span>
@@ -498,7 +499,7 @@ export const HomePage: React.FC = () => {
                     <span className="font-semibold text-gray-800">Monthly Rent</span>
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-gray-900 tabular-nums">₹{monthlyRent.toLocaleString('en-IN')}</span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isRentPaid ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-800'}`}>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isRentPaid ? 'bg-emerald-50 text-emerald-700' : 'bg-[#E6F3F3] text-[#005F5F]'}`}>
                         {isRentPaid ? 'Paid' : 'Pending'}
                       </span>
                     </div>
@@ -510,7 +511,7 @@ export const HomePage: React.FC = () => {
                     <span className="font-semibold text-gray-800">Security Deposit</span>
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-gray-900 tabular-nums">₹{securityDepositAmount.toLocaleString('en-IN')}</span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E6F3F3] text-[#005F5F]">
                         Pending
                       </span>
                     </div>
@@ -590,9 +591,9 @@ export const HomePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/complaints')}
-                className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-3 text-center shadow-xs hover:border-amber-200 hover:bg-amber-50/20 active:scale-95 transition-all group"
+                className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-3 text-center shadow-xs hover:border-[#008080]/30 hover:bg-[#E6F3F3] active:scale-95 transition-all group"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600 group-hover:scale-105 transition-transform">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#005F5F] group-hover:scale-105 transition-transform">
                   <Wrench className="h-5 w-5" />
                 </div>
                 <span className="mt-1.5 text-xs font-bold text-gray-800 leading-tight">Complaint</span>
@@ -602,9 +603,9 @@ export const HomePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/food')}
-                className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-3 text-center shadow-xs hover:border-orange-200 hover:bg-orange-50/20 active:scale-95 transition-all group"
+                className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-3 text-center shadow-xs hover:border-[#008080]/30 hover:bg-[#E6F3F3] active:scale-95 transition-all group"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600 group-hover:scale-105 transition-transform">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#005F5F] group-hover:scale-105 transition-transform">
                   <UtensilsCrossed className="h-5 w-5" />
                 </div>
                 <span className="mt-1.5 text-xs font-bold text-gray-800 leading-tight">Food Menu</span>
@@ -683,7 +684,7 @@ export const HomePage: React.FC = () => {
                           className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${
                             isKycVerified
                               ? 'bg-emerald-100 text-emerald-800'
-                              : 'bg-amber-100 text-amber-800'
+                              : 'bg-[#CCE6E6] text-[#005F5F]'
                           }`}
                         >
                           {isKycVerified ? 'Verified' : 'Pending'}
@@ -723,7 +724,7 @@ export const HomePage: React.FC = () => {
                           className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${
                             isAgreementSigned
                               ? 'bg-emerald-100 text-emerald-800'
-                              : 'bg-amber-100 text-amber-800'
+                              : 'bg-[#CCE6E6] text-[#005F5F]'
                           }`}
                         >
                           {isAgreementSigned ? 'Signed' : 'Pending'}
@@ -744,10 +745,10 @@ export const HomePage: React.FC = () => {
 
           {/* Today's Mess Highlights Widget (if available) */}
           {todayDining && (todayDining.lunch?.menu || todayDining.dinner?.menu) ? (
-            <div className="rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-500/5 via-white to-white p-3.5 shadow-xs space-y-2">
+            <div className="rounded-2xl border border-[#008080]/30 bg-gradient-to-br from-amber-500/5 via-white to-white p-3.5 shadow-xs space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <UtensilsCrossed className="h-4 w-4 text-amber-600" />
+                  <UtensilsCrossed className="h-4 w-4 text-[#005F5F]" />
                   <h4 className="text-xs font-bold text-gray-900">Today's Mess Highlights</h4>
                 </div>
                 <button
@@ -762,7 +763,7 @@ export const HomePage: React.FC = () => {
               <div className="grid grid-cols-2 gap-2 text-xs">
                 {todayDining.lunch?.menu ? (
                   <div className="rounded-xl bg-white p-2 border border-gray-100 space-y-0.5 shadow-2xs">
-                    <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider block">
+                    <span className="text-[10px] font-bold text-[#005F5F] uppercase tracking-wider block">
                       Lunch
                     </span>
                     <p className="text-xs font-semibold text-gray-800 truncate">

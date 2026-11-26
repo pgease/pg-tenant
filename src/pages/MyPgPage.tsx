@@ -365,8 +365,8 @@ export const MyPgPage: React.FC = () => {
                   </div>
                   <div className="mt-1">
                     {balanceDue > 0 ? (
-                      <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 border border-amber-200/80 px-2 py-0.5 text-[10px] font-bold text-amber-800">
-                        <Clock className="h-3 w-3 text-amber-600" />
+                      <span className="inline-flex items-center gap-1 rounded-md bg-[#E6F3F3] border border-[#008080]/30 px-2 py-0.5 text-[10px] font-bold text-[#005F5F]">
+                        <Clock className="h-3 w-3 text-[#005F5F]" />
                         <span>Action Required</span>
                       </span>
                     ) : (
@@ -406,7 +406,7 @@ export const MyPgPage: React.FC = () => {
                   <span className="font-semibold text-gray-700">Deposit:</span>
                   <span className="font-bold text-gray-900">₹{securityDeposit.toLocaleString('en-IN')}</span>
                   {securityDeposit > 0 && (
-                    <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded ${isSecurityPaid ? 'text-emerald-700 bg-emerald-50' : 'text-amber-700 bg-amber-50'}`}>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded ${isSecurityPaid ? 'text-emerald-700 bg-emerald-50' : 'text-[#005F5F] bg-[#E6F3F3]'}`}>
                       {isSecurityPaid ? '(Settled ✓)' : '(Pending)'}
                     </span>
                   )}
@@ -501,9 +501,9 @@ export const MyPgPage: React.FC = () => {
 
               <button
                 onClick={() => navigate('/food')}
-                className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-3 shadow-sm hover:border-orange-200 active:scale-95 transition-all"
+                className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-3 shadow-sm hover:border-[#008080]/30 active:scale-95 transition-all"
               >
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-50 text-orange-500 mb-1.5">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#E6F3F3] text-[#005F5F] mb-1.5">
                   <Utensils className="h-5 w-5" />
                 </div>
                 <span className="text-[11px] font-bold text-gray-900 text-center">Meals</span>
@@ -551,9 +551,9 @@ export const MyPgPage: React.FC = () => {
 
               <button
                 onClick={() => navigate('/announcements')}
-                className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-3 shadow-sm hover:border-amber-200 active:scale-95 transition-all"
+                className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-3 shadow-sm hover:border-[#008080]/30 active:scale-95 transition-all"
               >
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 mb-1.5">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#E6F3F3] text-[#005F5F] mb-1.5">
                   <BellRing className="h-5 w-5" />
                 </div>
                 <span className="text-[11px] font-bold text-gray-900 text-center leading-tight">Notice Board</span>
@@ -561,9 +561,9 @@ export const MyPgPage: React.FC = () => {
 
               <button
                 onClick={() => navigate('/notice')}
-                className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-3 shadow-sm hover:border-purple-200 active:scale-95 transition-all"
+                className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-3 shadow-sm hover:border-[#008080]/30 active:scale-95 transition-all"
               >
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-50 text-purple-600 mb-1.5">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#E6F3F3] text-[#005F5F] mb-1.5">
                   <Calendar className="h-5 w-5" />
                 </div>
                 <span className="text-[11px] font-bold text-gray-900 text-center">Notice</span>
@@ -842,7 +842,7 @@ export const MyPgPage: React.FC = () => {
           {/* "What you get in My PG" Section */}
           <div className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-50 text-amber-500">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#E6F3F3] text-[#005F5F]">
                 <Star className="h-4 w-4 fill-amber-400 stroke-amber-500" />
               </span>
               <h3 className="text-sm font-bold text-gray-900">What you get in My PG</h3>

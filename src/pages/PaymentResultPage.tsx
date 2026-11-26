@@ -132,10 +132,10 @@ export const PaymentResultPage: React.FC = () => {
           </div>
         ) : (
           <div className="flex flex-col items-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-amber-100 text-amber-600 shadow-sm">
+            <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-[#CCE6E6] text-[#005F5F] shadow-sm">
               <Clock className="h-9 w-9 animate-spin" />
             </div>
-            <span className="mt-3 inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 border border-amber-200">
+            <span className="mt-3 inline-flex items-center gap-1 rounded-full bg-[#E6F3F3] px-3 py-1 text-xs font-bold text-[#005F5F] border border-[#008080]/30">
               Confirming with UPI Network
             </span>
             <h1 className="text-xl font-black text-brandText mt-2">Verifying Payment...</h1>
@@ -206,7 +206,7 @@ export const PaymentResultPage: React.FC = () => {
                   ? 'text-emerald-600'
                   : isFailed
                   ? 'text-red-600'
-                  : 'text-amber-600'
+                  : 'text-[#005F5F]'
               }`}
             >
               {currentStatus}
@@ -217,7 +217,7 @@ export const PaymentResultPage: React.FC = () => {
         {isPending && (
           <div className="pt-2 space-y-2">
             {pollingStatus === 'timeout' && (
-              <p className="text-[11px] text-amber-700 bg-amber-50 p-2 rounded-xl text-center border border-amber-200">
+              <p className="text-[11px] text-[#005F5F] bg-[#E6F3F3] p-2 rounded-xl text-center border border-[#008080]/30">
                 Transaction is taking a little longer than usual to confirm. Tap below to refresh or check your UPI app.
               </p>
             )}

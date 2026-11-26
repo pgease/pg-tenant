@@ -1,0 +1,18 @@
+[
+  { "id": "T-01", "type": "route", "currentLocation": "/", "label": "Dashboard", "registryId": "home.dashboard", "newLocation": "BottomNav -> Dashboard" },
+  { "id": "T-02", "type": "route", "currentLocation": "/search", "label": "PG Search", "registryId": "home.search", "newLocation": "BottomNav -> PG Search" },
+  { "id": "T-03", "type": "route", "currentLocation": "/saved", "label": "Saved Properties", "registryId": "home.saved", "newLocation": "PG Search Bookmark & Menu -> Saved PGs" },
+  { "id": "T-04", "type": "route", "currentLocation": "/my-pg", "label": "My PG Stay", "registryId": "stay.mypg", "newLocation": "BottomNav -> My PG" },
+  { "id": "T-05", "type": "route", "currentLocation": "/food", "label": "Meal Menu & Dining Schedule", "registryId": "stay.dining", "newLocation": "My PG -> Meals & House Rules -> Meal Menu" },
+  { "id": "T-06", "type": "route", "currentLocation": "/wifi", "label": "Wi-Fi Details", "registryId": "stay.wifi", "newLocation": "My PG -> PG Services & Documents -> Wi-Fi Details" },
+  { "id": "T-07", "type": "route", "currentLocation": "/announcements", "label": "Announcements", "registryId": "stay.announcements", "newLocation": "Dashboard Highlights & My PG -> Announcements" },
+  { "id": "T-08", "type": "route", "currentLocation": "/payments", "label": "Rent & Payment Details", "registryId": "pay.payments", "newLocation": "Dashboard Due Card & My PG -> Rent & Payment Details" },
+  { "id": "T-09", "type": "route", "currentLocation": "/transactions", "label": "Transactions & Receipts", "registryId": "pay.transactions", "newLocation": "Dashboard Quick Actions -> Rent Receipts & Payments" },
+  { "id": "T-10", "type": "route", "currentLocation": "/complaints", "label": "Maintenance & Complaints", "registryId": "req.complaints", "newLocation": "Dashboard Quick Actions -> Raise Issue & My PG" },
+  { "id": "T-11", "type": "route", "currentLocation": "/guests", "label": "Guest Pass", "registryId": "req.guests", "newLocation": "Dashboard Quick Actions & My PG -> Guest & Leave Passes" },
+  { "id": "T-12", "type": "route", "currentLocation": "/night-out", "label": "Night Out Pass", "registryId": "req.nightout", "newLocation": "Dashboard Quick Actions & My PG -> Night Out Pass" },
+  { "id": "T-13", "type": "route", "currentLocation": "/notice", "label": "Notice Period", "registryId": "req.notice", "newLocation": "Dashboard Quick Actions & My PG -> More for my stay" },
+  { "id": "T-14", "type": "route", "currentLocation": "/documents", "label": "Documents & KYC", "registryId": "doc.documents", "newLocation": "Dashboard Profile & Verification & Menu -> Aadhaar KYC" },
+  { "id": "T-15", "type": "route", "currentLocation": "/notifications", "label": "Notifications", "registryId": "acc.notifications", "newLocation": "AppHeader Bell -> Notifications" },
+  { "id": "T-16", "type": "route", "currentLocation": "/profile", "label": "Account & Menu", "registryId": "acc.profile", "newLocation": "BottomNav -> Menu" }
+]

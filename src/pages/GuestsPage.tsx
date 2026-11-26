@@ -454,8 +454,8 @@ export const GuestsPage: React.FC = () => {
           onClick={() => setStatusFilter('pending')}
           className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
             statusFilter === 'pending'
-              ? 'bg-amber-600 text-white shadow-xs'
-              : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+              ? 'bg-[#008080] text-white shadow-xs'
+              : 'bg-[#E6F3F3] text-[#005F5F] hover:bg-[#CCE6E6]'
           }`}
         >
           Under Review ({counts.pending})
@@ -535,7 +535,7 @@ export const GuestsPage: React.FC = () => {
             const badgeConfig = isApproved
               ? { label: 'Approved', badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
               : isPending
-              ? { label: 'Under Review', badgeClass: 'bg-amber-50 text-amber-700 border-amber-200' }
+              ? { label: 'Under Review', badgeClass: 'bg-[#E6F3F3] text-[#005F5F] border-[#008080]/30' }
               : isRejected
               ? { label: 'Rejected', badgeClass: 'bg-rose-50 text-rose-700 border-rose-200' }
               : { label: st, badgeClass: 'bg-gray-100 text-gray-700 border-gray-200' };
@@ -556,7 +556,7 @@ export const GuestsPage: React.FC = () => {
                         isApproved
                           ? 'bg-emerald-50 text-emerald-600'
                           : isPending
-                          ? 'bg-amber-50 text-amber-600'
+                          ? 'bg-[#E6F3F3] text-[#005F5F]'
                           : isRejected
                           ? 'bg-rose-50 text-rose-600'
                           : 'bg-gray-100 text-gray-500'
@@ -624,7 +624,7 @@ export const GuestsPage: React.FC = () => {
 
                 {/* Owner remarks if rejected or commented */}
                 {req.ownerRemarks && (
-                  <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-2.5 text-xs text-amber-900">
+                  <div className="rounded-xl border border-[#008080]/30 bg-[#E6F3F3] p-2.5 text-xs text-[#005F5F]">
                     <span className="font-bold">Manager Remarks: </span>
                     <span>{req.ownerRemarks}</span>
                   </div>

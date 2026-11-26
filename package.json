@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "test": "node scripts/check-nav.mjs",
+    "verify:inventory": "node scripts/verify-inventory.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

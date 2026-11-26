@@ -101,7 +101,7 @@ export const DocumentsPage: React.FC = () => {
                     : isFailed
                     ? 'bg-rose-50 text-rose-600'
                     : isRequested
-                    ? 'bg-amber-50 text-amber-600'
+                    ? 'bg-[#E6F3F3] text-[#005F5F]'
                     : 'bg-teal-50 text-primary'
                 }`}
               >
@@ -119,7 +119,7 @@ export const DocumentsPage: React.FC = () => {
                 Verified
               </span>
             ) : isRequested ? (
-              <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-700 flex items-center gap-1">
+              <span className="rounded-full bg-[#E6F3F3] px-2.5 py-0.5 text-[10px] font-bold text-[#005F5F] flex items-center gap-1">
                 <Clock className="h-3 w-3" />
                 Action Required
               </span>
@@ -160,14 +160,14 @@ export const DocumentsPage: React.FC = () => {
             </div>
           ) : isRequested && kycData?.directLink ? (
             <div className="border-t border-gray-50 pt-3 space-y-2">
-              <p className="text-xs text-amber-800">
+              <p className="text-xs text-[#005F5F]">
                 Your PG owner has requested digital Aadhaar verification. Complete it securely via DigiLocker.
               </p>
               <a
                 href={kycData.directLink}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center gap-1.5 w-full rounded-xl bg-amber-600 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-amber-700 transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 w-full rounded-xl bg-[#008080] py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#008080] transition-colors"
               >
                 <span>Complete DigiLocker KYC</span>
                 <ExternalLink className="h-3.5 w-3.5" />
@@ -255,7 +255,7 @@ export const DocumentsPage: React.FC = () => {
                       Signed
                     </span>
                   ) : isReadyToSign ? (
-                    <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-700">
+                    <span className="rounded-full bg-[#E6F3F3] px-2.5 py-0.5 text-[10px] font-bold text-[#005F5F]">
                       Ready to Sign
                     </span>
                   ) : (

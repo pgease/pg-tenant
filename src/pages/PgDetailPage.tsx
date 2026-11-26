@@ -101,7 +101,7 @@ export const PgDetailPage: React.FC = () => {
   if (error || !property) {
     return (
       <div className="rounded-3xl border border-dashed border-gray-200 bg-white p-8 text-center space-y-4 pt-16">
-        <AlertCircle className="h-12 w-12 text-amber-500 mx-auto" />
+        <AlertCircle className="h-12 w-12 text-[#005F5F] mx-auto" />
         <h2 className="text-base font-bold text-brandText">Property Not Available</h2>
         <p className="text-xs text-brandText-muted max-w-xs mx-auto">
           {error || 'This property may have been unpublished by the owner or removed from public listing.'}
@@ -226,8 +226,8 @@ export const PgDetailPage: React.FC = () => {
           )}
 
           {property.averageRating ? (
-            <div className="ml-auto flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-lg">
-              <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+            <div className="ml-auto flex items-center gap-1 text-xs font-bold text-[#005F5F] bg-[#E6F3F3] px-2 py-0.5 rounded-lg">
+              <Star className="h-3.5 w-3.5 text-[#005F5F] fill-amber-500" />
               <span>{property.averageRating.toFixed(1)}</span>
               {property.noOfRatings ? (
                 <span className="text-[10px] text-brandText-muted">
@@ -285,8 +285,8 @@ export const PgDetailPage: React.FC = () => {
             ) : null}
 
             {doublePrice ? (
-              <div className="rounded-2xl bg-amber-50/60 p-3 border border-amber-100/60">
-                <span className="text-[11px] font-bold text-amber-700 block">2 Sharing</span>
+              <div className="rounded-2xl bg-[#E6F3F3] p-3 border border-[#008080]/30">
+                <span className="text-[11px] font-bold text-[#005F5F] block">2 Sharing</span>
                 <p className="text-base font-black text-brandText mt-1">
                   ₹{Number(doublePrice).toLocaleString('en-IN')}
                 </p>
@@ -347,8 +347,8 @@ export const PgDetailPage: React.FC = () => {
           </h3>
           <div className="space-y-1.5 text-xs text-brandText-muted">
             {property.gateClosingTime && (
-              <div className="flex items-center gap-2 text-amber-800 font-semibold bg-amber-50 p-2.5 rounded-xl">
-                <Clock className="h-4 w-4 flex-shrink-0 text-amber-700" />
+              <div className="flex items-center gap-2 text-[#005F5F] font-semibold bg-[#E6F3F3] p-2.5 rounded-xl">
+                <Clock className="h-4 w-4 flex-shrink-0 text-[#005F5F]" />
                 <span>Curfew: Gate closes at {property.gateClosingTime}</span>
               </div>
             )}

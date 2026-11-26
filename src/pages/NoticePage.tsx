@@ -221,18 +221,18 @@ export const NoticePage: React.FC = () => {
       {isUnderNotice ? (
         <>
           {/* Active Notice Status Card */}
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-5 shadow-sm space-y-4">
+          <div className="rounded-2xl border border-[#008080]/30 bg-[#E6F3F3] p-5 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-amber-900 font-bold text-sm">
-              <Clock className="h-5 w-5 text-amber-600" />
+            <div className="flex items-center gap-2 text-[#005F5F] font-bold text-sm">
+              <Clock className="h-5 w-5 text-[#005F5F]" />
               <span>Active Move-Out Notice</span>
             </div>
-            <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-bold text-amber-800">
+            <span className="rounded-full bg-[#CCE6E6] px-2.5 py-0.5 text-[11px] font-bold text-[#005F5F]">
               Under Notice
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 text-xs bg-white/90 p-3 rounded-xl border border-amber-200/60">
+          <div className="grid grid-cols-2 gap-2 text-xs bg-white/90 p-3 rounded-xl border border-[#008080]/30">
             <div>
               <span className="text-[10px] text-gray-500 block font-semibold">NOTICE SERVED</span>
               <span className="font-bold text-gray-900">
@@ -241,19 +241,19 @@ export const NoticePage: React.FC = () => {
             </div>
             <div>
               <span className="text-[10px] text-gray-500 block font-semibold">SCHEDULED VACATE</span>
-              <span className="font-bold text-amber-900 underline">
+              <span className="font-bold text-[#005F5F] underline">
                 {vacateDateVal ? formatDateToDDMMYYYY(vacateDateVal) : 'Scheduled'}
               </span>
             </div>
           </div>
 
           {daysLeft != null && (
-            <p className="text-xs font-semibold text-amber-800">
+            <p className="text-xs font-semibold text-[#005F5F]">
               ⏳ {daysLeft > 0 ? `${daysLeft} days remaining until move-out` : daysLeft === 0 ? 'Vacating today' : 'Notice period completed'}
             </p>
           )}
 
-          <p className="text-xs text-amber-900/90 leading-relaxed">
+          <p className="text-xs text-[#005F5F]/90 leading-relaxed">
             Your checkout notice has been registered with the property manager. Please coordinate with the owner for room inspection, key handover, and security deposit settlement.
           </p>
 
@@ -264,7 +264,7 @@ export const NoticePage: React.FC = () => {
               setShowCancelConfirmModal(true);
             }}
             disabled={submitting}
-            className="w-full flex items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-white py-2.5 text-xs font-bold text-amber-800 hover:bg-amber-100/50 disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-1.5 rounded-xl border border-[#008080]/30 bg-white py-2.5 text-xs font-bold text-[#005F5F] hover:bg-[#CCE6E6] disabled:opacity-50"
           >
             {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
             <span>Cancel Notice Request</span>
@@ -292,7 +292,7 @@ export const NoticePage: React.FC = () => {
                   <CheckCircle2 className="h-3.5 w-3.5" /> Agreed
                 </span>
               ) : checkoutSummary.status === 'disputed' ? (
-                <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-bold text-amber-800 flex items-center gap-1">
+                <span className="rounded-full bg-[#CCE6E6] px-2.5 py-1 text-[11px] font-bold text-[#005F5F] flex items-center gap-1">
                   <ShieldAlert className="h-3.5 w-3.5" /> Disputed
                 </span>
               ) : (
@@ -321,7 +321,7 @@ export const NoticePage: React.FC = () => {
                           item.status === 'ok'
                             ? 'bg-emerald-100 text-emerald-800'
                             : item.status === 'damaged'
-                            ? 'bg-amber-100 text-amber-800'
+                            ? 'bg-[#CCE6E6] text-[#005F5F]'
                             : item.status === 'missing'
                             ? 'bg-rose-100 text-rose-800'
                             : 'bg-gray-100 text-gray-600'
@@ -389,12 +389,12 @@ export const NoticePage: React.FC = () => {
                 <span>You have accepted the inventory inspection and final refund settlement.</span>
               </div>
             ) : checkoutSummary.status === 'disputed' ? (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 space-y-1">
+              <div className="rounded-xl border border-[#008080]/30 bg-[#E6F3F3] p-3 text-xs text-[#005F5F] space-y-1">
                 <div className="flex items-center gap-2 font-bold">
-                  <ShieldAlert className="h-4 w-4 text-amber-600 flex-shrink-0" />
+                  <ShieldAlert className="h-4 w-4 text-[#005F5F] flex-shrink-0" />
                   <span>Dispute Recorded</span>
                 </div>
-                <p className="text-[11px] text-amber-900/80">
+                <p className="text-[11px] text-[#005F5F]/80">
                   Note: "{checkoutSummary.disputeNote}". The owner has received your dispute note for resolution.
                 </p>
               </div>
@@ -414,9 +414,9 @@ export const NoticePage: React.FC = () => {
                   type="button"
                   onClick={() => setDisputeModalOpen(true)}
                   disabled={acknowledging}
-                  className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 py-3 text-xs font-bold text-amber-900 hover:bg-amber-100 active:scale-95 transition-all disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-[#008080]/30 bg-[#E6F3F3] py-3 text-xs font-bold text-[#005F5F] hover:bg-[#CCE6E6] active:scale-95 transition-all disabled:opacity-50"
                 >
-                  <MessageSquare className="h-3.5 w-3.5 text-amber-700" />
+                  <MessageSquare className="h-3.5 w-3.5 text-[#005F5F]" />
                   <span>Raise Dispute</span>
                 </button>
               </div>
@@ -511,7 +511,7 @@ export const NoticePage: React.FC = () => {
           <div className="w-full max-w-sm rounded-3xl bg-white p-5 shadow-2xl space-y-4 animate-scale-up">
             <div className="flex items-center justify-between border-b border-gray-100 pb-2.5">
               <div className="flex items-center gap-2">
-                <ShieldAlert className="h-5 w-5 text-amber-600" />
+                <ShieldAlert className="h-5 w-5 text-[#005F5F]" />
                 <h3 className="text-sm font-bold text-gray-900">Dispute Inspection Item</h3>
               </div>
               <button
@@ -557,7 +557,7 @@ export const NoticePage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={acknowledging || !disputeText.trim()}
-                  className="flex-1 rounded-xl bg-amber-600 py-2.5 text-xs font-bold text-white hover:bg-amber-700 disabled:opacity-50"
+                  className="flex-1 rounded-xl bg-[#008080] py-2.5 text-xs font-bold text-white hover:bg-[#008080] disabled:opacity-50"
                 >
                   {acknowledging ? 'Submitting...' : 'Submit Note'}
                 </button>
@@ -580,7 +580,7 @@ export const NoticePage: React.FC = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-700 font-bold shrink-0">
+              <div className="h-10 w-10 rounded-2xl bg-[#CCE6E6] flex items-center justify-center text-[#005F5F] font-bold shrink-0">
                 <AlertCircle className="h-5 w-5" />
               </div>
               <div>
@@ -604,7 +604,7 @@ export const NoticePage: React.FC = () => {
                 type="button"
                 onClick={handleCancelNotice}
                 disabled={submitting}
-                className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-amber-600 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-amber-700 disabled:opacity-50"
+                className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[#008080] py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#008080] disabled:opacity-50"
               >
                 {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
                 <span>Yes, Cancel</span>

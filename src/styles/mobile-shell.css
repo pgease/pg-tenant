@@ -1,0 +1,112 @@
+/* PG Ease Tenant Mobile Shell Design System (synchronized with Owner App tokens) */
+
+:root {
+  --ms-brand: #008080;
+  --ms-brand-600: #008080;
+  --ms-brand-700: #006B6B;
+  --ms-brand-800: #005F5F;
+  --ms-brand-text: #006B6B;
+  --ms-brand-50: #E6F3F3;
+  --ms-brand-100: #CCE6E6;
+
+  --ms-ink: #1F2937;
+  --ms-ink-2: rgba(31, 41, 55, 0.72);
+  --ms-ink-3: #6B7280;
+  --ms-placeholder: #9CA3AF;
+
+  --ms-page: #F8FAFA;
+  --ms-card: #FFFFFF;
+  --ms-raised: #FFFFFF;
+  --ms-border: #E5ECEC;
+  --ms-divider: #EEF2F2;
+
+  /* Pending uses dark-teal outline (no amber/yellow/orange/purple) */
+  --ms-pending-bg: #E6F3F3;
+  --ms-pending-fg: #005F5F;
+  --ms-pending-border: #008080;
+
+  --ms-error-bg: #FEF2F2;
+  --ms-error: #DC2626;
+  --ms-error-border: #FECACA;
+
+  --ms-success-bg: #F0FDF4;
+  --ms-success: #16A34A;
+  --ms-success-border: #BBF7D0;
+
+  --ms-mascot-circle: #E6F3F3;
+  --ms-header-start: #008080;
+  --ms-header-end: #005F5F;
+
+  --ms-shadow-card: 0 4px 14px rgba(0, 0, 0, 0.06);
+  --ms-shadow-float: 0 8px 24px rgba(0, 0, 0, 0.14);
+}
+
+.dark,
+[data-theme="dark"] {
+  --ms-brand-text: #2DD4D4;
+  --ms-brand-50: rgba(20, 163, 163, 0.18);
+  --ms-brand-100: rgba(20, 163, 163, 0.30);
+
+  --ms-ink: #F3F4F6;
+  --ms-ink-2: #D1D5DB;
+  --ms-ink-3: #9CA3AF;
+  --ms-placeholder: #6B7280;
+
+  --ms-page: #0F1720;
+  --ms-card: #1F2937;
+  --ms-raised: #273241;
+  --ms-border: #374151;
+  --ms-divider: #2D3748;
+
+  --ms-pending-bg: rgba(20, 163, 163, 0.18);
+  --ms-pending-fg: #2DD4D4;
+  --ms-pending-border: rgba(45, 212, 212, 0.45);
+
+  --ms-error-bg: rgba(239, 68, 68, 0.18);
+  --ms-error: #F87171;
+  --ms-error-border: rgba(239, 68, 68, 0.35);
+
+  --ms-success-bg: rgba(34, 197, 94, 0.18);
+  --ms-success: #4ADE80;
+  --ms-success-border: rgba(34, 197, 94, 0.35);
+
+  --ms-mascot-circle: #12302F;
+  --ms-header-start: #006B6B;
+  --ms-header-end: #004747;
+
+  --ms-shadow-card: 0 4px 14px rgba(0, 0, 0, 0.30);
+  --ms-shadow-float: 0 8px 24px rgba(0, 0, 0, 0.48);
+}
+
+.ms-shell {
+  font-family: 'Poppins', 'Outfit', system-ui, -apple-system, sans-serif;
+  background-color: var(--ms-page);
+  color: var(--ms-ink);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ms-header-gradient {
+  background: linear-gradient(135deg, var(--ms-header-start) 0%, var(--ms-header-end) 100%);
+}
+
+.ms-card {
+  background-color: var(--ms-card);
+  border: 1px solid var(--ms-border);
+  border-radius: 20px;
+  box-shadow: var(--ms-shadow-card);
+}
+
+.ms-tile {
+  background-color: var(--ms-card);
+  border: 1px solid var(--ms-border);
+  border-radius: 16px;
+}
+
+.ms-no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.ms-no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

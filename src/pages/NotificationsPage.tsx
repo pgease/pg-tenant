@@ -123,9 +123,9 @@ export const NotificationsPage: React.FC = () => {
   const getTypeIcon = (type: NotificationItem['type']) => {
     switch (type) {
       case 'notice':
-        return <Megaphone className="h-4.5 w-4.5 text-purple-600" />;
+        return <Megaphone className="h-4.5 w-4.5 text-[#005F5F]" />;
       case 'complaint':
-        return <Wrench className="h-4.5 w-4.5 text-amber-600" />;
+        return <Wrench className="h-4.5 w-4.5 text-[#005F5F]" />;
       case 'payment':
         return <IndianRupee className="h-4.5 w-4.5 text-emerald-600" />;
       default:
@@ -136,9 +136,9 @@ export const NotificationsPage: React.FC = () => {
   const getTypeBg = (type: NotificationItem['type']) => {
     switch (type) {
       case 'notice':
-        return 'bg-purple-50';
+        return 'bg-[#E6F3F3]';
       case 'complaint':
-        return 'bg-amber-50';
+        return 'bg-[#E6F3F3]';
       case 'payment':
         return 'bg-emerald-50';
       default:

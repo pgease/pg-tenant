@@ -1,33 +1,38 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { tabItems } from '../../navigation/appMenu';
-import { useAuth } from '../../context/AuthContext';
-import { LayoutGrid, Search, Bookmark, User } from 'lucide-react';
+import { Building2, LayoutGrid, Menu, Search } from 'lucide-react';
 
-const guestTabs = [
-  { to: '/', label: 'Explore', icon: LayoutGrid, end: true },
+const FIGMA_TABS = [
+  { to: '/', label: 'Dashboard', icon: LayoutGrid, end: true },
   { to: '/search', label: 'PG Search', icon: Search },
-  { to: '/saved', label: 'Saved', icon: Bookmark },
-  { to: '/login', label: 'Sign In', icon: User },
+  { to: '/my-pg', label: 'My PG', icon: Building2 },
+  { to: '/profile', label: 'Menu', icon: Menu },
 ];
 
-export const BottomTabBar: React.FC = () => {
-  const { isAuthenticated } = useAuth();
-  const tabs = isAuthenticated ? tabItems : guestTabs;
+function triggerLightHaptic() {
+  try {
+    const haptics = (window as any).Capacitor?.Plugins?.Haptics;
+    if (haptics?.impact) void haptics.impact({ style: 'LIGHT' });
+  } catch {
+    // ignore
+  }
+}
 
+export const BottomTabBar: React.FC = () => {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 mx-auto w-full border-t border-gray-100 bg-white/95 backdrop-blur-md pb-safe shadow-tab-bar lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-30 mx-auto w-full border-t border-[var(--ms-border)] bg-[var(--ms-card)]/95 backdrop-blur-md pb-safe shadow-tab-bar lg:hidden">
       <div className="flex items-stretch justify-around px-1 pt-1 max-w-lg mx-auto">
-        {tabs.map((tab) => {
+        {FIGMA_TABS.map((tab) => {
           const Icon = tab.icon;
           return (
             <NavLink
               key={tab.to}
               to={tab.to}
               end={tab.end}
+              onClick={triggerLightHaptic}
               className={({ isActive }) =>
-                `flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center px-0.5 py-1 ${
-                  isActive ? 'text-[#008080] font-bold' : 'text-gray-400 font-medium'
+                `flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center px-0.5 py-1 transition-colors ${
+                  isActive ? 'text-[var(--ms-brand)] font-semibold' : 'text-[var(--ms-ink-3)] font-medium'
                 }`
               }
             >
@@ -35,7 +40,7 @@ export const BottomTabBar: React.FC = () => {
                 <>
                   <span
                     className={`flex h-7 w-10 items-center justify-center rounded-full transition-colors ${
-                      isActive ? 'bg-[#E6F3F3]' : ''
+                      isActive ? 'bg-[var(--ms-brand-50)]' : ''
                     }`}
                   >
                     <Icon className="h-5 w-5" strokeWidth={isActive ? 2.4 : 1.8} />

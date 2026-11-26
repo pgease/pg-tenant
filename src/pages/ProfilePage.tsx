@@ -700,12 +700,12 @@ export const ProfilePage: React.FC = () => {
               <div className="min-w-0">
                 <span className="block text-sm font-semibold text-brandText">App Version</span>
                 <span className="block text-xs text-gray-500 truncate">
-                  v1.0.5 (Build 6) • Latest release
+                  PG Ease Tenant App • v1.0.10
                 </span>
               </div>
             </div>
             <span className="rounded-full bg-teal-50 px-2.5 py-0.5 text-[10px] font-bold text-[#008080]">
-              v1.0.5
+              v1.0.10
             </span>
           </button>
         </div>
@@ -1012,7 +1012,7 @@ export const ProfilePage: React.FC = () => {
           <div className="w-full max-w-sm rounded-3xl bg-white p-5 shadow-xl space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
+                <Star className="h-5 w-5 text-[#005F5F] fill-amber-500" />
                 <h3 className="text-base font-bold text-brandText">Rate Your PG</h3>
               </div>
               <button onClick={() => setShowRateModal(false)} className="rounded-full p-1 text-gray-400 hover:bg-gray-100">

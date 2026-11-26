@@ -32,9 +32,19 @@ export interface PropertyListItem {
   acAvailable?: boolean;
 }
 
+export const SEARCH_MIN_DISTANCE_KM = 1;
+export const SEARCH_MAX_DISTANCE_KM = 10;
+
+export function clampSearchDistanceKm(val?: number): number {
+  const n = Number(val ?? SEARCH_MAX_DISTANCE_KM);
+  if (!Number.isFinite(n)) return SEARCH_MAX_DISTANCE_KM;
+  return Math.max(SEARCH_MIN_DISTANCE_KM, Math.min(SEARCH_MAX_DISTANCE_KM, Math.round(n)));
+}
+
 export interface SearchFilters {
   latitude?: number;
   longitude?: number;
+  distanceKm?: number;
   search?: string;
   city?: string;
   locality?: string;
@@ -102,7 +112,7 @@ export const searchService = {
       if (filters.latitude && filters.longitude) {
         params.append('latitude', String(filters.latitude));
         params.append('longitude', String(filters.longitude));
-        params.append('distance', '50');
+        params.append('distance', String(clampSearchDistanceKm(filters.distanceKm)));
       }
       params.append('limit', String(filters.limit || 50));
 

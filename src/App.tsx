@@ -51,6 +51,22 @@ const RootRoute: React.FC = () => {
   return <HomePage />;
 };
 
+function RequireAuth({ children }: { children: React.ReactElement }) {
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-32 text-gray-400">
+        <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+        <span className="text-xs font-semibold">Loading PG Ease...</span>
+      </div>
+    );
+  }
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+}
+
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -139,24 +155,24 @@ function App() {
           <Route path="/" element={<AppLayout />}>
             <Route index element={<RootRoute />} />
             <Route path="search" element={<SearchPage />} />
-            <Route path="payments" element={<PaymentsPage />} />
-            <Route path="payments/result" element={<PaymentResultPage />} />
-            <Route path="payments/history" element={<TransactionHistoryPage />} />
-            <Route path="transactions" element={<TransactionHistoryPage />} />
-            <Route path="complaints" element={<ComplaintsPage />} />
-            <Route path="guests" element={<GuestsPage />} />
-            <Route path="guest-entry" element={<GuestsPage />} />
-            <Route path="night-out" element={<NightOutPage />} />
-            <Route path="food" element={<DiningPage />} />
-            <Route path="dining" element={<DiningPage />} />
-            <Route path="wifi" element={<WifiPage />} />
-            <Route path="notice" element={<NoticePage />} />
-            <Route path="notice-period" element={<NoticePage />} />
-            <Route path="announcements" element={<AnnouncementsPage />} />
-            <Route path="notices" element={<AnnouncementsPage />} />
-            <Route path="documents" element={<DocumentsPage />} />
-            <Route path="notifications" element={<NotificationsPage />} />
-            <Route path="saved" element={<SavedPage />} />
+            <Route path="payments" element={<RequireAuth><PaymentsPage /></RequireAuth>} />
+            <Route path="payments/result" element={<RequireAuth><PaymentResultPage /></RequireAuth>} />
+            <Route path="payments/history" element={<RequireAuth><TransactionHistoryPage /></RequireAuth>} />
+            <Route path="transactions" element={<RequireAuth><TransactionHistoryPage /></RequireAuth>} />
+            <Route path="complaints" element={<RequireAuth><ComplaintsPage /></RequireAuth>} />
+            <Route path="guests" element={<RequireAuth><GuestsPage /></RequireAuth>} />
+            <Route path="guest-entry" element={<RequireAuth><GuestsPage /></RequireAuth>} />
+            <Route path="night-out" element={<RequireAuth><NightOutPage /></RequireAuth>} />
+            <Route path="food" element={<RequireAuth><DiningPage /></RequireAuth>} />
+            <Route path="dining" element={<RequireAuth><DiningPage /></RequireAuth>} />
+            <Route path="wifi" element={<RequireAuth><WifiPage /></RequireAuth>} />
+            <Route path="notice" element={<RequireAuth><NoticePage /></RequireAuth>} />
+            <Route path="notice-period" element={<RequireAuth><NoticePage /></RequireAuth>} />
+            <Route path="announcements" element={<RequireAuth><AnnouncementsPage /></RequireAuth>} />
+            <Route path="notices" element={<RequireAuth><AnnouncementsPage /></RequireAuth>} />
+            <Route path="documents" element={<RequireAuth><DocumentsPage /></RequireAuth>} />
+            <Route path="notifications" element={<RequireAuth><NotificationsPage /></RequireAuth>} />
+            <Route path="saved" element={<RequireAuth><SavedPage /></RequireAuth>} />
             <Route path="my-pg" element={<MyPgPage />} />
             <Route path="menu" element={<ProfilePage />} />
             <Route path="profile" element={<ProfilePage />} />

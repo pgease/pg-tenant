@@ -340,7 +340,7 @@ export const ComplaintsPage: React.FC = () => {
                           ? 'bg-emerald-50 text-emerald-700'
                           : item.status === 'in_progress'
                           ? 'bg-blue-50 text-blue-700'
-                          : 'bg-amber-50 text-amber-700'
+                          : 'bg-[#E6F3F3] text-[#005F5F]'
                       }`}
                     >
                       {item.status === 'resolved' || item.status === 'closed'
