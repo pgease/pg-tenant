@@ -33,11 +33,12 @@
           document.documentElement.classList.toggle('dark', isDark);
           document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
           document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+          document.documentElement.style.backgroundColor = isDark ? '#0F1720' : '#F8FAFC';
         } catch (e) {}
       })();
     </script>
   </head>
-  <body class="bg-[#F8FAFC] font-outfit text-brandText antialiased selection:bg-primary selection:text-white">
+  <body class="bg-[#F8FAFC] dark:bg-[#0F1720] font-outfit text-brandText dark:text-slate-100 antialiased selection:bg-primary selection:text-white">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

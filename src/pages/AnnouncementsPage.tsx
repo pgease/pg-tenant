@@ -8,6 +8,7 @@ import {
   Megaphone,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { SwipeTabs } from '../components/common/SwipeTabs';
 import { tenantService } from '../services/tenantService';
 import { ListSkeleton } from '../components/ui/ListSkeleton';
 import { InlineError } from '../components/ui/InlineError';
@@ -88,29 +89,16 @@ export const AnnouncementsPage: React.FC = () => {
         </p>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex gap-2">
-        {(
-          [
-            ['all', `All (${notices.length})`],
-            ['urgent', `Urgent (${notices.filter((n) => n.priority === 'urgent' || n.priority === 'high').length})`],
-            ['general', `General (${notices.filter((n) => n.priority === 'normal' || !n.priority).length})`],
-          ] as const
-        ).map(([key, label]) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setFilter(key)}
-            className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
-              filter === key
-                ? 'bg-purple-600 text-white shadow-xs'
-                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      {/* R5: SwipeTabs */}
+      <SwipeTabs
+        tabs={[
+          { id: 'all', label: 'All', badge: notices.length },
+          { id: 'urgent', label: 'Urgent', badge: notices.filter((n) => n.priority === 'urgent' || n.priority === 'high').length },
+          { id: 'general', label: 'General', badge: notices.filter((n) => n.priority === 'normal' || !n.priority).length },
+        ]}
+        value={filter}
+        onChange={setFilter}
+      >
 
       {/* Notices List */}
       <div className="space-y-3">
@@ -192,6 +180,7 @@ export const AnnouncementsPage: React.FC = () => {
           })
         )}
       </div>
+      </SwipeTabs>
     </div>
   );
 };

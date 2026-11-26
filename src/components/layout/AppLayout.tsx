@@ -13,6 +13,7 @@ import { desktopNavItems, rootTabPaths } from '../../navigation/appMenu';
 import { ArrowLeft, Bell, LogOut, Menu } from 'lucide-react';
 import { Toaster } from '../ui/toaster';
 import { setAppStatusBar } from '../../utils/statusBar';
+import { hydrateTheme } from '../../utils/theme';
 
 export const AppLayout: React.FC = () => {
   const { isOnline, checkConnection } = useNetworkStatus();
@@ -34,7 +35,8 @@ export const AppLayout: React.FC = () => {
   const mainRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    setAppStatusBar(false);
+    setAppStatusBar(true);
+    void hydrateTheme();
   }, []);
 
   useEffect(() => {
@@ -240,7 +242,7 @@ export const AppLayout: React.FC = () => {
         <div className="flex-1 min-w-0 flex flex-col min-h-dvh">
           {showAppBar && (
             <header
-              className={`sticky top-0 z-20 items-center gap-1 border-b border-gray-100/80 bg-white/95 px-3 backdrop-blur-md pt-safe min-h-14 ${
+              className={`sticky top-0 z-20 items-center gap-1 border-b border-gray-100/80 dark:border-slate-800 bg-white/95 dark:bg-[#1F2937]/95 px-3 backdrop-blur-md pt-safe min-h-14 ${
                 isHome ? 'flex lg:hidden' : 'flex'
               }`}
             >
@@ -273,14 +275,19 @@ export const AppLayout: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => navigate('/')}
-                    className="flex h-11 shrink-0 items-center"
+                    className="flex h-11 min-w-0 items-center gap-2"
                     aria-label="PG Ease"
                   >
                     <img
                       src="/assets/pgease-full-brand-logo.png"
                       alt="PG Ease"
-                      className="h-6 w-auto object-contain"
+                      className="h-6 w-auto shrink-0 object-contain"
                     />
+                    {isAuthenticated && propertyDetails?.property?.name && (
+                      <span className="truncate text-xs font-semibold text-gray-600 dark:text-slate-300 border-l border-gray-200 dark:border-slate-700 pl-2">
+                        {propertyDetails.property.name}
+                      </span>
+                    )}
                   </button>
                 ) : (
                   <div className="flex min-w-0 items-center gap-2">
