@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { authService, type TenancyDetailsResponse } from '../services/authService';
-import { handleUnauthorizedRedirect } from '../services/apiClient';
+import { handleUnauthorizedRedirect, hydrateTenantAuthFromNative, initTenantAuthLifecycle } from '../services/apiClient';
 
 interface AuthState {
   token: string | null;
@@ -94,8 +94,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [logout]);
 
   useEffect(() => {
+    initTenantAuthLifecycle();
     const initAuth = async () => {
-      const currentToken = localStorage.getItem(TOKEN_KEY);
+      await hydrateTenantAuthFromNative();
+      const currentToken = localStorage.getItem(TOKEN_KEY) || localStorage.getItem('pgease_tenant_refresh_token');
       if (currentToken) {
         await checkTenancy();
       }
