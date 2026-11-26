@@ -27,6 +27,7 @@ import { NotificationsPage } from './pages/NotificationsPage';
 import { WhatsAppRedirectPage } from './pages/WhatsAppRedirectPage';
 import { useAuth } from './context/AuthContext';
 import { Loader2 } from 'lucide-react';
+import { TenantOfflineBanner } from './components/common/MascotEmptyState';
 
 const RootRoute: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -63,6 +64,7 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <ScrollToTop />
+        <TenantOfflineBanner />
         <Routes>
           <Route path="/" element={<AppLayout />}>
             <Route index element={<RootRoute />} />
