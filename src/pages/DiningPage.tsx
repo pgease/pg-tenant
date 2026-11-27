@@ -211,8 +211,8 @@ export const DiningPage: React.FC = () => {
       type: 'Breakfast',
       icon: Coffee,
       slot: currentDayMenu.breakfast,
-      color: 'border-[#008080]/30 bg-[#E6F3F3] text-[#005F5F]',
-      badgeBg: 'bg-[#E6F3F3] text-[#005F5F] border-[#008080]/30',
+      color: 'border-amber-200 bg-amber-50 text-amber-800',
+      badgeBg: 'bg-amber-50 text-amber-900 border-amber-200',
     },
     {
       type: 'Lunch',

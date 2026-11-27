@@ -299,7 +299,7 @@ export const PaymentsPage: React.FC = () => {
                       ? 'bg-emerald-100 text-emerald-800'
                       : balanceDue > 0 && duesStatus === 'OVERDUE'
                       ? 'bg-red-100 text-red-800'
-                      : 'bg-[#CCE6E6] text-[#005F5F]'
+                      : 'bg-amber-100 text-amber-800'
                   }`}
                 >
                   {isRentPaid ? 'Paid' : balanceDue > 0 && duesStatus === 'OVERDUE' ? 'Overdue' : 'Pending'}
@@ -337,7 +337,7 @@ export const PaymentsPage: React.FC = () => {
                 </span>
                 <span
                   className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-bold ${
-                    isSecurityPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-[#CCE6E6] text-[#005F5F]'
+                    isSecurityPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
                   }`}
                 >
                   {isSecurityPaid ? 'Paid' : 'Pending'}
@@ -360,7 +360,7 @@ export const PaymentsPage: React.FC = () => {
           {otherDuesList.map((due) => (
             <div key={due.id} className="flex items-center justify-between p-4 hover:bg-slate-50/50 transition-colors">
               <div className="flex items-center gap-3 min-w-0 pr-2">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E6F3F3] text-[#005F5F]">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
                   <Zap className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">
@@ -380,7 +380,7 @@ export const PaymentsPage: React.FC = () => {
                   </span>
                   <span
                     className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-bold ${
-                      due.isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-[#CCE6E6] text-[#005F5F]'
+                      due.isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
                     }`}
                   >
                     {due.isPaid ? 'Paid' : 'Pending'}
@@ -497,7 +497,7 @@ export const PaymentsPage: React.FC = () => {
                     <span className="font-black text-gray-900 text-sm tabular-nums">
                       ₹{Number(d.amount).toLocaleString('en-IN')}
                     </span>
-                    <p className="text-[10px] font-bold text-[#005F5F]">{d.isPaid ? 'Paid' : 'Due'}</p>
+                    <p className="text-[10px] font-bold text-amber-600">{d.isPaid ? 'Paid' : 'Due'}</p>
                   </div>
                 </div>
               ))

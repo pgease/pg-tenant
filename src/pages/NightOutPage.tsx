@@ -424,7 +424,7 @@ export const NightOutPage: React.FC = () => {
               onClick={() => setStatusFilter('pending')}
               className={`rounded-xl px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-colors ${
                 statusFilter === 'pending'
-                  ? 'bg-[#008080] text-white shadow-xs'
+                  ? 'bg-amber-500 text-white shadow-xs'
                   : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
               }`}
             >
@@ -513,7 +513,7 @@ export const NightOutPage: React.FC = () => {
                           ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
                           : isRejected
                           ? 'bg-rose-50 text-rose-700 border border-rose-200/60'
-                          : 'bg-[#E6F3F3] text-[#005F5F] border border-[#008080]/30'
+                          : 'bg-amber-50 text-amber-700 border border-amber-200/60'
                       }`}
                     >
                       {item.status || 'Pending'}
@@ -569,7 +569,7 @@ export const NightOutPage: React.FC = () => {
 
                   {/* Owner Remarks if rejected or approved with instructions */}
                   {item.ownerRemarks && (
-                    <div className="rounded-xl border border-[#008080]/30 bg-[#E6F3F3] p-2.5 text-xs text-[#005F5F]">
+                    <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-2.5 text-xs text-amber-900">
                       <span className="font-bold">Manager Remarks: </span>
                       <span>{item.ownerRemarks}</span>
                     </div>

@@ -700,12 +700,12 @@ export const ProfilePage: React.FC = () => {
               <div className="min-w-0">
                 <span className="block text-sm font-semibold text-brandText">App Version</span>
                 <span className="block text-xs text-gray-500 truncate">
-                  PG Ease Tenant App • v1.0.10
+                  PG Ease Tenant App • v1.0.11
                 </span>
               </div>
             </div>
             <span className="rounded-full bg-teal-50 px-2.5 py-0.5 text-[10px] font-bold text-[#008080]">
-              v1.0.10
+              v1.0.11
             </span>
           </button>
         </div>

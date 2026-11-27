@@ -1,0 +1,122 @@
+[
+  {
+    "route": "/",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/announcements",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/complaints",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/dining",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/documents",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/food",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/guest-entry",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/guests",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/login",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/menu",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/my-pg",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/night-out",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/notice",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/notice-period",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/notices",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/notifications",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/payments",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/payments/history",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/payments/result",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/profile",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/saved",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/search",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/transactions",
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "route": "/wifi",
+    "status": "PASS",
+    "errors": []
+  }
+]

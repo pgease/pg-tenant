@@ -126,7 +126,7 @@ export function SwipeTabs<T extends string>({
 
       {children !== undefined && (
         <div
-          className="transition-transform duration-150 ease-out"
+          className="transition-transform duration-150 ease-out touch-pan-y overscroll-x-contain"
           style={dragOffset ? { transform: `translateX(${dragOffset}px)` } : undefined}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}

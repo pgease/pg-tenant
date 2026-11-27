@@ -18,6 +18,7 @@ import { ListSkeleton } from '../components/ui/ListSkeleton';
 import { InlineError } from '../components/ui/InlineError';
 import { formatDateToDDMMYYYY } from '../utils/dateUtils';
 import { toast, toastError } from '../components/ui/use-toast';
+import { SwipeTabs } from '../components/common/SwipeTabs';
 
 interface TransactionItem {
   id: string;
@@ -186,81 +187,36 @@ export const TransactionHistoryPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Filter Tabs & Month Selection */}
-      <div className="space-y-2.5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          {/* Status Chips */}
-          <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto no-scrollbar">
-            <button
-              type="button"
-              onClick={() => setStatusFilter('all')}
-              className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
-                statusFilter === 'all'
-                  ? 'bg-primary text-white shadow-xs'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              All ({statusCounts.all})
-            </button>
-            <button
-              type="button"
-              onClick={() => setStatusFilter('success')}
-              className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
-                statusFilter === 'success'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-              }`}
-            >
-              Paid ({statusCounts.success})
-            </button>
-            <button
-              type="button"
-              onClick={() => setStatusFilter('verification')}
-              className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
-                statusFilter === 'verification'
-                  ? 'bg-[#008080] text-white shadow-xs'
-                  : 'bg-[#E6F3F3] text-[#005F5F] hover:bg-[#CCE6E6]'
-              }`}
-            >
-              Under Review ({statusCounts.verification})
-            </button>
-            {statusCounts.rejected > 0 && (
-              <button
-                type="button"
-                onClick={() => setStatusFilter('rejected')}
-                className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
-                  statusFilter === 'rejected'
-                    ? 'bg-rose-600 text-white shadow-xs'
-                    : 'bg-rose-50 text-rose-700 hover:bg-rose-100'
-                }`}
-              >
-                Rejected ({statusCounts.rejected})
-              </button>
-            )}
-          </div>
-
-          {/* Month Filter Dropdown */}
-          {monthOptions.length > 0 && (
-            <div className="flex items-center gap-1.5 self-end sm:self-auto">
-              <Calendar className="h-3.5 w-3.5 text-gray-400 shrink-0" />
-              <select
-                value={monthFilter}
-                onChange={(e) => setMonthFilter(e.target.value)}
-                className="h-8 rounded-lg border border-gray-200 bg-white px-2 text-xs font-medium text-gray-700 shadow-xs focus:outline-none focus:ring-1 focus:ring-primary"
-              >
-                <option value="all">All Months</option>
-                {monthOptions.map((m) => (
-                  <option key={m} value={m}>
-                    {m}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+      {/* Month Filter Dropdown */}
+      {monthOptions.length > 0 && (
+        <div className="flex items-center justify-end gap-1.5">
+          <Calendar className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+          <select
+            value={monthFilter}
+            onChange={(e) => setMonthFilter(e.target.value)}
+            className="h-8 rounded-lg border border-gray-200 bg-white px-2 text-xs font-medium text-gray-700 shadow-xs focus:outline-none focus:ring-1 focus:ring-primary"
+          >
+            <option value="all">All Months</option>
+            {monthOptions.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+          </select>
         </div>
-      </div>
+      )}
 
-      {/* Transactions List */}
+      {/* Swipeable Status Tabs + Transactions List */}
+      <SwipeTabs
+        tabs={[
+          { id: 'all', label: 'All', badge: statusCounts.all },
+          { id: 'success', label: 'Paid', badge: statusCounts.success },
+          { id: 'verification', label: 'Review', badge: statusCounts.verification },
+          ...(statusCounts.rejected > 0 ? [{ id: 'rejected', label: 'Rejected', badge: statusCounts.rejected }] : []),
+        ]}
+        value={statusFilter}
+        onChange={(v) => setStatusFilter(v as typeof statusFilter)}
+      >
       <div className="space-y-3">
         {error ? (
           <InlineError message={error} onRetry={loadHistory} />
@@ -304,7 +260,7 @@ export const TransactionHistoryPage: React.FC = () => {
             const statusBadgeConfig = isSuccess
               ? { label: 'Paid', badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
               : isUnderReview
-              ? { label: 'Under Verification', badgeClass: 'bg-[#E6F3F3] text-[#005F5F] border-[#008080]/30' }
+              ? { label: 'Under Verification', badgeClass: 'bg-amber-50 text-amber-700 border-amber-200' }
               : isRejected
               ? { label: 'Rejected', badgeClass: 'bg-rose-50 text-rose-700 border-rose-200' }
               : { label: st || 'Pending', badgeClass: 'bg-gray-100 text-gray-700 border-gray-200' };
@@ -323,7 +279,7 @@ export const TransactionHistoryPage: React.FC = () => {
                         isSuccess
                           ? 'bg-emerald-50 text-emerald-600'
                           : isUnderReview
-                          ? 'bg-[#E6F3F3] text-[#005F5F]'
+                          ? 'bg-amber-50 text-amber-600'
                           : isRejected
                           ? 'bg-rose-50 text-rose-600'
                           : 'bg-gray-100 text-gray-500'
@@ -440,6 +396,7 @@ export const TransactionHistoryPage: React.FC = () => {
           })
         )}
       </div>
+      </SwipeTabs>
     </div>
   );
 };
