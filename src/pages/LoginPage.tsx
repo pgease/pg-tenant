@@ -545,8 +545,12 @@ export const LoginPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => handleRequestOtp('sms')}
-                    disabled={loading}
-                    className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-900 font-medium transition-colors"
+                    disabled={!canResend || loading}
+                    className={`inline-flex items-center gap-1.5 text-xs font-medium transition-colors ${
+                      canResend && !loading
+                        ? 'text-gray-500 hover:text-gray-900'
+                        : 'text-gray-400 cursor-not-allowed opacity-60'
+                    }`}
                   >
                     <span>Didn't receive code on WhatsApp?</span>
                     <span className="font-bold text-[#008080] underline flex items-center gap-1">
@@ -558,8 +562,12 @@ export const LoginPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => handleRequestOtp('whatsapp')}
-                    disabled={loading}
-                    className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-900 font-medium transition-colors"
+                    disabled={!canResend || loading}
+                    className={`inline-flex items-center gap-1.5 text-xs font-medium transition-colors ${
+                      canResend && !loading
+                        ? 'text-gray-500 hover:text-gray-900'
+                        : 'text-gray-400 cursor-not-allowed opacity-60'
+                    }`}
                   >
                     <span>Prefer WhatsApp instead?</span>
                     <span className="font-bold text-[#0E7A4A] underline flex items-center gap-1">

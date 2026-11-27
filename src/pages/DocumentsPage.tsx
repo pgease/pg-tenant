@@ -158,20 +158,26 @@ export const DocumentsPage: React.FC = () => {
                 </div>
               )}
             </div>
-          ) : isRequested && kycData?.directLink ? (
+          ) : isRequested ? (
             <div className="border-t border-gray-50 pt-3 space-y-2">
               <p className="text-xs text-amber-800">
                 Your PG owner has requested digital Aadhaar verification. Complete it securely via DigiLocker.
               </p>
-              <a
-                href={kycData.directLink}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center gap-1.5 w-full rounded-xl bg-amber-600 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-amber-700 transition-colors"
-              >
-                <span>Complete DigiLocker KYC</span>
-                <ExternalLink className="h-3.5 w-3.5" />
-              </a>
+              {kycData?.directLink ? (
+                <a
+                  href={kycData.directLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center gap-1.5 w-full rounded-xl bg-amber-600 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-amber-700 transition-colors"
+                >
+                  <span>Complete DigiLocker KYC</span>
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              ) : (
+                <p className="text-[11px] text-amber-700">
+                  Verification link is being synced. Pull to refresh or ask your PG owner to share the link.
+                </p>
+              )}
             </div>
           ) : isInProgress ? (
             <div className="border-t border-gray-50 pt-2.5 text-xs text-blue-700">
@@ -224,10 +230,17 @@ export const DocumentsPage: React.FC = () => {
         ) : (
           agreements.map((doc, idx) => {
             const rawAgrStatus = (doc.status || '').toUpperCase();
-            const isSigned = rawAgrStatus === 'SIGNED' || rawAgrStatus === 'COMPLETED' || doc.isSigned;
+            const isSigned = rawAgrStatus === 'SIGNED' || rawAgrStatus === 'COMPLETED' || Boolean(doc.isSigned);
+            const signUrl = doc.signUrl || doc.signingUrl || doc.signingLink || doc.esignUrl || doc.link;
             const isReadyToSign =
-              (rawAgrStatus === 'SENT' || rawAgrStatus === 'READY_TO_SIGN' || rawAgrStatus === 'PENDING') &&
-              Boolean(doc.signUrl || doc.signingUrl);
+              !isSigned &&
+              (rawAgrStatus === 'SENT' ||
+                rawAgrStatus === 'READY_TO_SIGN' ||
+                rawAgrStatus === 'PENDING' ||
+                rawAgrStatus === 'PENDING_SIGNATURE' ||
+                rawAgrStatus === 'ESIGN_SENT' ||
+                rawAgrStatus === 'INITIATED' ||
+                Boolean(signUrl));
             const downloadUrl = doc.signedPdfUrl || doc.pdfUrl || doc.url;
 
             return (
@@ -256,7 +269,7 @@ export const DocumentsPage: React.FC = () => {
                     </span>
                   ) : isReadyToSign ? (
                     <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-700">
-                      Ready to Sign
+                      Pending Signature
                     </span>
                   ) : (
                     <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[10px] font-bold text-gray-600">
@@ -281,17 +294,21 @@ export const DocumentsPage: React.FC = () => {
 
                 {/* Action Button */}
                 <div className="pt-1 flex items-center justify-end gap-2">
-                  {isReadyToSign && (doc.signUrl || doc.signingUrl) && (
+                  {isReadyToSign && signUrl && (
                     <a
-                      href={doc.signUrl || doc.signingUrl}
+                      href={signUrl}
                       target="_blank"
                       rel="noreferrer"
                       className="inline-flex items-center gap-1.5 rounded-xl bg-teal-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-teal-700 transition-colors"
                     >
-                      <FileSignature className="h-3.5 w-3.5" />
-                      <span>Review & e-Sign</span>
-                      <ExternalLink className="h-3 w-3" />
+                      <span>View & Sign Agreement</span>
+                      <ExternalLink className="h-3.5 w-3.5" />
                     </a>
+                  )}
+                  {isReadyToSign && !signUrl && (
+                    <span className="text-[11px] font-medium text-amber-700">
+                      Signing link is being prepared. Ask your owner to resend if needed.
+                    </span>
                   )}
 
                   {isSigned && downloadUrl && (

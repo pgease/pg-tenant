@@ -6,18 +6,32 @@ import { useAuth } from '../context/AuthContext';
 export const WifiPage: React.FC = () => {
   const navigate = useNavigate();
   const { propertyDetails } = useAuth();
-  const [copied, setCopied] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
 
-  const wifi = propertyDetails?.wifi || null;
-  const ssid = wifi?.ssid || null;
-  const password = wifi?.password || null;
+  const wifi = (propertyDetails?.wifi as any) || null;
+  const networks: Array<{
+    zoneName?: string;
+    ssid: string;
+    password?: string;
+    level?: string;
+    floorName?: string;
+    blockName?: string;
+  }> = Array.isArray(wifi?.networks) && wifi.networks.length > 0
+    ? wifi.networks.filter((n: any) => n?.ssid)
+    : wifi?.ssid
+      ? [{ zoneName: 'PG Wi-Fi', ssid: wifi.ssid, password: wifi.password || '', level: 'property' }]
+      : [];
 
-  const copyPassword = () => {
-    if (!password) return;
-    navigator.clipboard.writeText(password);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const copyPassword = (key: string, pwd: string) => {
+    if (!pwd) return;
+    navigator.clipboard.writeText(pwd);
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 2000);
+  };
+
+  const toggleShow = (key: string) => {
+    setVisiblePasswords((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   return (
@@ -36,48 +50,62 @@ export const WifiPage: React.FC = () => {
         </span>
       </div>
 
-      {/* Main WiFi Card */}
-      {ssid ? (
-        <div className="rounded-3xl border border-teal-100 bg-white p-6 shadow-sm space-y-4 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-teal-50 text-primary">
-            <Wifi className="h-8 w-8" />
-          </div>
+      {/* WiFi Networks */}
+      {networks.length > 0 ? (
+        <div className="space-y-3">
+          {networks.map((net, idx) => {
+            const key = `${net.ssid}-${idx}`;
+            const isShown = Boolean(visiblePasswords[key]);
+            const isCopied = copiedKey === key;
+            return (
+              <div key={key} className="rounded-3xl border border-teal-100 bg-white p-6 shadow-sm space-y-4 text-center">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-primary">
+                  <Wifi className="h-7 w-7" />
+                </div>
 
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Network Name (SSID)</span>
-            <h2 className="text-xl font-black text-brandText mt-0.5">{ssid}</h2>
-          </div>
+                <div>
+                  {(net.zoneName || net.floorName || net.blockName) && (
+                    <span className="inline-block mb-1 rounded-full bg-teal-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+                      {net.zoneName || net.floorName || net.blockName}
+                    </span>
+                  )}
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Network Name (SSID)</span>
+                  <h2 className="text-xl font-black text-brandText mt-0.5">{net.ssid}</h2>
+                </div>
 
-          {password ? (
-            <div className="rounded-2xl border border-dashed border-teal-200 bg-teal-50/40 p-4 space-y-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800">Password</span>
-              <div className="flex items-center justify-center gap-2">
-                <span className="font-mono text-base font-bold text-brandText">
-                  {showPassword ? password : '••••••••••••'}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-white transition-colors"
-                  title={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-                <button
-                  type="button"
-                  onClick={copyPassword}
-                  className="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-primary shadow-xs hover:bg-gray-50 active:scale-95 transition-all flex items-center gap-1"
-                >
-                  {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
-                  <span>{copied ? 'Copied' : 'Copy'}</span>
-                </button>
+                {net.password ? (
+                  <div className="rounded-2xl border border-dashed border-teal-200 bg-teal-50/40 p-4 space-y-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800">Password</span>
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="font-mono text-base font-bold text-brandText">
+                        {isShown ? net.password : '••••••••••••'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => toggleShow(key)}
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-white transition-colors"
+                        title={isShown ? 'Hide password' : 'Show password'}
+                      >
+                        {isShown ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => copyPassword(key, net.password!)}
+                        className="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-primary shadow-xs hover:bg-gray-50 active:scale-95 transition-all flex items-center gap-1"
+                      >
+                        {isCopied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                        <span>{isCopied ? 'Copied' : 'Copy'}</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-xl bg-teal-50/60 p-3 text-xs font-semibold text-teal-800">
+                    Open Network (No password required)
+                  </div>
+                )}
               </div>
-            </div>
-          ) : (
-            <div className="rounded-xl bg-teal-50/60 p-3 text-xs font-semibold text-teal-800">
-              Open Network (No password required)
-            </div>
-          )}
+            );
+          })}
         </div>
       ) : (
         <div className="rounded-3xl border border-dashed border-gray-200 bg-gray-50/50 p-8 text-center space-y-3">

@@ -98,13 +98,32 @@ export const PaymentsPage: React.FC = () => {
   // Miscellaneous and Other Dues
   const otherDuesList: OtherDueItem[] = dues?.lineItems?.miscellaneous?.otherDues || [];
 
-  const balanceDue = dues?.summary?.balanceDue !== undefined
+  const rawBalanceDue = dues?.summary?.balanceDue !== undefined
     ? Number(dues.summary.balanceDue)
     : dues?.summary?.totalPayable !== undefined
     ? Number(dues.summary.totalPayable)
     : dues?.payable !== undefined
     ? Number(dues.payable)
     : Number(dues?.totalPayable || 0);
+
+  const itemizedPendingTotal =
+    (!isRentPaid ? monthlyRent : 0) +
+    (!isSecurityPaid ? securityDepositAmount : 0) +
+    otherDuesList
+      .filter((d) => !d.isPaid)
+      .reduce((sum, d) => sum + Number(d.balance ?? d.amount ?? 0), 0);
+
+  const balanceDue = Math.max(rawBalanceDue, itemizedPendingTotal);
+
+  const modalDues = dues ?? ({
+    period: { label: 'Current Stay' },
+    lineItems: {
+      rent: { amount: monthlyRent, isPaid: isRentPaid },
+      securityDeposit: { amount: securityDepositAmount, isPaid: isSecurityPaid },
+      miscellaneous: { otherDues: otherDuesList, amount: 0 },
+    },
+    summary: { balanceDue },
+  } as any);
 
   const duesStatus = (dues?.status || (balanceDue > 0 ? 'DUE' : 'PAID')).toUpperCase();
   const nextDueDateVal = (dues as any)?.nextDueDate;
@@ -213,7 +232,7 @@ export const PaymentsPage: React.FC = () => {
       <RentPaymentModal
         isOpen={showPayModal}
         onClose={() => setShowPayModal(false)}
-        dues={dues}
+        dues={modalDues}
         initialItem={modalInitialItem}
         securityDepositAmount={securityDepositAmount}
         isSecurityPaid={isSecurityPaid}

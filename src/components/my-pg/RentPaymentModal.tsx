@@ -227,7 +227,7 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
     };
   }, [isOpen]);
 
-  if (!isOpen || !dues) return null;
+  if (!isOpen) return null;
 
   const getSelectedPurposeText = () => {
     if (isCustomAmount) {
@@ -250,7 +250,7 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
     try {
       const res = await tenantService.createEasebuzzPayment({
         checkoutMode: gatewayConfig.checkoutMode,
-        dueIds: dues.rentCollectionId ? [dues.rentCollectionId] : undefined,
+        dueIds: dues?.rentCollectionId ? [dues.rentCollectionId] : undefined,
         amount: payableAmount,
         includeRent,
         includeSecurityDeposit: includeSecurity,
@@ -310,9 +310,9 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
       await tenantService.submitManualPayment({
         amount: payableAmount,
         reference: cleanUtr || 'SCREENSHOT_UPLOADED',
-        notes: `Direct UPI transfer of ₹${payableAmount.toLocaleString('en-IN')} for ${getSelectedPurposeText()} (${dues.period.label}). UTR: ${cleanUtr || 'N/A'}.`,
+        notes: `Direct UPI transfer of ₹${payableAmount.toLocaleString('en-IN')} for ${getSelectedPurposeText()} (${dues?.period?.label || 'Current Month'}). UTR: ${cleanUtr || 'N/A'}.`,
         photoUrl: photoUrl || undefined,
-        rentCollectionId: dues.rentCollectionId || undefined,
+        rentCollectionId: dues?.rentCollectionId || undefined,
         paymentMethod: 'UPI_MANUAL',
       });
 
@@ -365,7 +365,7 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
         reference: 'CASH_HANDOVER',
         notes: finalNote,
         photoUrl: photoUrl || undefined,
-        rentCollectionId: dues.rentCollectionId || undefined,
+        rentCollectionId: dues?.rentCollectionId || undefined,
       });
 
       setSuccessType('cash');
@@ -382,13 +382,13 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
     }
   };
 
-  const settlement = dues.settlement || {};
+  const settlement = dues?.settlement || {};
   const upiId = settlement.upiId || settlement.settlementUpiId || null;
-  const payeeName = dues.owner?.name || settlement.accountHolderName || dues.property?.name || 'PG Stay';
+  const payeeName = dues?.owner?.name || settlement.accountHolderName || dues?.property?.name || 'PG Stay';
 
   // Format amount for standard NPCI UPI intent (must be positive number with 2 decimal places, e.g. 315.00)
   const formattedAmount = payableAmount > 0 ? payableAmount.toFixed(2) : '';
-  const note = `PG Stay ${dues.tenant?.name || ''} ${dues.period?.label || ''}`.trim() || `Rent ${payeeName}`;
+  const note = `PG Stay ${dues?.tenant?.name || ''} ${dues?.period?.label || ''}`.trim() || `Rent ${payeeName}`;
 
   // Always generate live UPI Intent URL with the actual selected payableAmount
   const upiIntentUrl = upiId
@@ -402,7 +402,7 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
     : qrImageUrl || (settlement.upiQrString ? `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(settlement.upiQrString)}` : null);
   const displayAccountNum = settlement.accountNumberMasked || settlement.accountNumber || settlement.settlementAccountNumber;
   const displayIfsc = settlement.ifscCode || settlement.settlementIfsc;
-  const displayHolder = settlement.accountHolderName || settlement.settlementAccountHolder || dues.owner?.name || 'PG Owner';
+  const displayHolder = settlement.accountHolderName || settlement.settlementAccountHolder || dues?.owner?.name || 'PG Owner';
   const displayBank = settlement.bankName || settlement.settlementBankName;
 
   return (
@@ -419,7 +419,7 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-bold text-brandText">Pay Rent & Dues</h2>
                 <span className="rounded-full bg-teal-100/70 px-2 py-0.5 text-[10px] font-bold text-teal-800">
-                  {dues.period.label}
+                  {dues?.period?.label || 'Current Stay'}
                 </span>
               </div>
               <p className="text-[11px] text-brandText-muted mt-0.5">Secure payment & rent receipt desk</p>
@@ -530,15 +530,15 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
                       <div>
                         <div className="flex items-center gap-1.5">
                           <Home className="h-3.5 w-3.5 text-primary" />
-                          <span className="font-bold text-brandText">{dues.lineItems?.rent?.title || 'Monthly Room Rent'}</span>
+                          <span className="font-bold text-brandText">{dues?.lineItems?.rent?.title || 'Monthly Room Rent'}</span>
                         </div>
-                        <span className="text-[10px] text-gray-400 block">{dues.period.label} cycle</span>
+                        <span className="text-[10px] text-gray-400 block">{dues?.period?.label || 'Current Month'} cycle</span>
                       </div>
                     </div>
                     <div className="text-right">
                       <span className="font-black text-brandText block">₹{effectiveRent.toLocaleString('en-IN')}</span>
-                      <span className={`text-[10px] font-bold ${dues.status === 'paid' ? 'text-emerald-600' : 'text-amber-600'}`}>
-                        {dues.status === 'paid' ? 'Paid ✓' : 'Due'}
+                      <span className={`text-[10px] font-bold ${dues?.status === 'paid' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                        {dues?.status === 'paid' ? 'Paid ✓' : 'Due'}
                       </span>
                     </div>
                   </div>
@@ -563,7 +563,7 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
                       <div>
                         <div className="flex items-center gap-1.5">
                           <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                          <span className="font-bold text-brandText">{dues.lineItems?.securityDeposit?.title || 'Security Deposit'}</span>
+                          <span className="font-bold text-brandText">{dues?.lineItems?.securityDeposit?.title || 'Security Deposit'}</span>
                         </div>
                         <span className="text-[10px] text-gray-400 block">Refundable caution deposit</span>
                       </div>
@@ -605,12 +605,12 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
                         <div>
                           <div className="flex items-center gap-1.5">
                             <Zap className="h-3.5 w-3.5 text-amber-500" />
-                            <span className="font-bold text-brandText">{dues.lineItems?.miscellaneous?.title || 'Utilities & Maintenance'}</span>
+                            <span className="font-bold text-brandText">{dues?.lineItems?.miscellaneous?.title || 'Utilities & Maintenance'}</span>
                           </div>
                           <span className="text-[10px] text-gray-400 block">
                             {individualDues.length > 0
                               ? `${selectedDueIds.length} of ${individualDues.length} item(s) selected`
-                              : (dues.lineItems?.miscellaneous?.description || 'Electricity & maintenance dues')}
+                              : (dues?.lineItems?.miscellaneous?.description || 'Electricity & maintenance dues')}
                           </span>
                         </div>
                       </div>
@@ -991,10 +991,10 @@ export const RentPaymentModal: React.FC<RentPaymentModalProps> = ({
                         </label>
                         <button
                           type="button"
-                          onClick={() => setCashAmount(dues.totalPayable)}
+                          onClick={() => setCashAmount(dues?.totalPayable ?? payableAmount)}
                           className="text-[10px] font-bold text-primary hover:underline"
                         >
-                          Fill Full Due (₹{dues.totalPayable.toLocaleString('en-IN')})
+                          Fill Full Due (₹{(dues?.totalPayable ?? payableAmount).toLocaleString('en-IN')})
                         </button>
                       </div>
                       <div className="relative">

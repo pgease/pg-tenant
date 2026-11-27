@@ -89,7 +89,7 @@ export const ComplaintsPage: React.FC = () => {
         setUploadingPhoto(false);
       }
 
-      await tenantService.raiseComplaint({
+      const created = await tenantService.raiseComplaint({
         subject: subject.trim(),
         description: description.trim(),
         category,
@@ -97,12 +97,28 @@ export const ComplaintsPage: React.FC = () => {
         photoUrl,
       });
 
+      if (created && (created.id || created.subject)) {
+        setComplaints((prev) => [
+          {
+            ...created,
+            id: created.id || `temp-${Date.now()}`,
+            subject: created.subject || subject.trim(),
+            description: created.description || description.trim(),
+            category: created.category || category,
+            priority: created.priority || priority,
+            status: created.status || 'pending',
+            createdAt: created.createdAt || new Date().toISOString(),
+          },
+          ...prev,
+        ]);
+      }
+
       setSuccessMsg('Complaint registered successfully! The property manager has been notified.');
       setSubject('');
       setDescription('');
       setSelectedFile(null);
       setShowRaiseForm(false);
-      loadComplaints();
+      await loadComplaints();
       toast({
         title: 'Complaint Registered',
         description: 'The property manager has been notified.',
